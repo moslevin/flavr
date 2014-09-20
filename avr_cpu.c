@@ -28,6 +28,7 @@
 
 #include "avr_cpu.h"
 #include "avr_peripheral.h"
+#include "avr_interrupt.h"
 #include "avr_io.h"
 #include "avr_op_decode.h"
 #include "avr_op_size.h"
@@ -168,14 +169,20 @@ void CPU_RunCycle( AVR_CPU *pstCPU_ )
         }
 
         // Increment the "total executed instruction counter"
-        pstCPU_->u64InstructionCount++;
+        pstCPU_->u64InstructionCount++;                
+
     }
     else
     {
         // CPU is asleep, just NOP and wait until we hit an interrupt.
         pstCPU_->u64CycleCount++;
-        CPU_PeripheralCycle( pstCPU_ );
+        CPU_PeripheralCycle( pstCPU_ );                
     }
+
+    // Check to see if there are any pending interrupts - if so, vector
+    // to the appropriate location.  This has no effect if no interrupts
+    // are pending
+    AVR_Interrupt( pstCPU_ );
 }
 
 
@@ -239,6 +246,9 @@ void CPU_Init( AVR_CPU *pstCPU_, AVR_CPU_Config_t *pstConfig_ )
     // Set the base stack pointer to top-of-ram.
     pstCPU_->pstRAM->stRegisters.SPH.r = 0x08;
     pstCPU_->pstRAM->stRegisters.SPL.r = 0xFF;
+
+    // Reset the interrupt priority register
+    pstCPU_->ucIntPriority = 255;
 
 #if FEATURE_USE_JUMPTABLES
     CPU_BuildCycleTable();

@@ -15,6 +15,7 @@ SRC_LIST_DISASM=\
 SRC_LIST_EMULATOR=\
 	avr_cpu.c \
 	avr_cpu_print.c \
+	avr_interrupt.c \
 	avr_io.c \
 	avr_loader.c \
 	avr_op_decode.c \

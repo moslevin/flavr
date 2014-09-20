@@ -36,6 +36,7 @@
 #include "avr_cpu.h"
 #include "avr_peripheral.h"
 #include "avr_periphregs.h"
+#include "avr_interrupt.h"
 
 #define DEBUG_PRINT(...)
 
@@ -90,6 +91,12 @@ static bool UART_IsTxIntEnabled( struct _AVR_CPU *pstCPU_)
 }
 
 //---------------------------------------------------------------------------
+static bool UART_IsDREIntEnabled( struct _AVR_CPU *pstCPU_)
+{
+    return (pstCPU_->pstRAM->stRegisters.UCSR0B.UDRIE0 == 1);
+}
+
+//---------------------------------------------------------------------------
 static bool UART_IsRxIntEnabled( struct _AVR_CPU *pstCPU_)
 {
     return (pstCPU_->pstRAM->stRegisters.UCSR0B.RXCIE0 == 1);
@@ -108,21 +115,39 @@ static void UART_SetDoubleSpeed( struct _AVR_CPU *pstCPU_ )
 }
 
 //---------------------------------------------------------------------------
-static void UART_TxSetEmpty( struct _AVR_CPU *pstCPU_)
+static void UART_SetEmpty( struct _AVR_CPU *pstCPU_)
 {
     pstCPU_->pstRAM->stRegisters.UCSR0A.UDRE0 = 1;
 }
 
 //---------------------------------------------------------------------------
-static void UART_TxClearEmpty( struct _AVR_CPU *pstCPU_)
+static void UART_ClearEmpty( struct _AVR_CPU *pstCPU_)
 {
-    pstCPU_->pstRAM->stRegisters.UCSR0A.UDRE0 = 1;
+    pstCPU_->pstRAM->stRegisters.UCSR0A.UDRE0 = 0;
+}
+
+//---------------------------------------------------------------------------
+static bool UART_IsEmpty( struct _AVR_CPU *pstCPU_)
+{
+    return (pstCPU_->pstRAM->stRegisters.UCSR0A.UDRE0 == 1);
+}
+
+//---------------------------------------------------------------------------
+static bool UART_IsTxComplete( struct _AVR_CPU *pstCPU_)
+{
+    return (pstCPU_->pstRAM->stRegisters.UCSR0A.TXC0 == 1);
 }
 
 //---------------------------------------------------------------------------
 static void UART_TxComplete( struct _AVR_CPU *pstCPU_)
 {
     pstCPU_->pstRAM->stRegisters.UCSR0A.TXC0 = 1;    
+}
+
+//---------------------------------------------------------------------------
+static bool UART_IsRxComplete( struct _AVR_CPU *pstCPU_)
+{
+    return (pstCPU_->pstRAM->stRegisters.UCSR0A.RXC0 == 1);
 }
 
 //---------------------------------------------------------------------------
@@ -177,7 +202,7 @@ static void UART_WriteDataReg(struct _AVR_CPU *pstCPU_)
             TXB = 0;
             bTSR_Empty = false;
             bUDR_Empty = true;
-            UART_TxSetEmpty(pstCPU_);
+            UART_SetEmpty(pstCPU_);
         }
         // Otherwise, just load the TXB register, and wait for the current
         // shift operation to end.
@@ -266,7 +291,7 @@ static void UART_TxClock(void *context_, struct _AVR_CPU *pstCPU_)
                 bUDR_Empty = true;
                 bTSR_Empty = false;
 
-                UART_TxSetEmpty(pstCPU_);
+                UART_SetEmpty(pstCPU_);
             }
             // Nothing pending in the UDR?  Flag the TSR as empty, and
             // set the "Transmit complete" flag in the register.
@@ -305,10 +330,26 @@ static void UART_RxClock(void *context_, struct _AVR_CPU *pstCPU_)
 //---------------------------------------------------------------------------
 void UART_Clock(void *context_, struct _AVR_CPU *pstCPU_)
 {    
+    // Handle Rx and TX clocks.
     UART_TxClock(context_, pstCPU_);
     UART_RxClock(context_, pstCPU_);
 
-    // Check for interrupt conditions, and trigger interrupts if necessary
+    // Check interrupts.
+    if (pstCPU_->pstRAM->stRegisters.SREG.I == 1)
+    {
+        if (UART_IsTxIntEnabled( pstCPU_ ) && UART_IsTxComplete( pstCPU_ ))
+        {
+            AVR_InterruptCandidate( pstCPU_, 0x14 );
+        }
+        if (UART_IsDREIntEnabled( pstCPU_ ) && UART_IsEmpty( pstCPU_ ))
+        {
+            AVR_InterruptCandidate( pstCPU_, 0x13 );
+        }
+        if (UART_IsRxIntEnabled( pstCPU_ ) && UART_IsRxComplete( pstCPU_ ))
+        {
+            AVR_InterruptCandidate( pstCPU_, 0x12 );
+        }
+    }
 }
 
 //---------------------------------------------------------------------------

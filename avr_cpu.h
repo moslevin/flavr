@@ -109,6 +109,9 @@ struct _AVR_CPU
     uint16_t     *pusROM;
     uint8_t      *pucEEPROM;
     AVR_RAM_t    *pstRAM;
+
+    //---------------------------------------------------------------------------
+    uint8_t     ucIntPriority;  // Priority of pending interrupts this cycle
 };
 typedef struct _AVR_CPU AVR_CPU;
 
