@@ -68,6 +68,15 @@ void AVR_Interrupt( AVR_CPU *pstCPU_ )
     // Clear the "I" (global interrupt enabled) register in the SR
     pstCPU_->pstRAM->stRegisters.SREG.I = 0;
 
+    // Run the interrupt-acknowledge callback associated with this vector
+    if (pstCPU_->ucIntPriority < 32 && pstCPU_->apfInterruptCallbacks[ pstCPU_->ucIntPriority ])
+    {
+        pstCPU_->apfInterruptCallbacks[ pstCPU_->ucIntPriority ]( pstCPU_, pstCPU_->ucIntPriority );
+    }
+
     // Reset the CPU interrupt priority
     pstCPU_->ucIntPriority = 255;
+
+    // Execute the callback funciton registered to this vector
+
 }

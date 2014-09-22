@@ -36,12 +36,15 @@ typedef void (*PeriphWrite)(void *context_, struct _AVR_CPU *pstCPU_, uint8_t uc
 typedef void (*PeriphClock)(void *context_, struct _AVR_CPU *pstCPU_);
 
 //---------------------------------------------------------------------------
+typedef void (*InterruptAck)(struct _AVR_CPU *pstCPU_, uint8_t ucVector_);
+
+//---------------------------------------------------------------------------
 typedef struct _AVRPeripheral
 {
-    PeriphInit  pfInit;
-    PeriphRead  pfRead;
-    PeriphWrite pfWrite;
-    PeriphClock pfClock;
+    PeriphInit          pfInit;
+    PeriphRead          pfRead;
+    PeriphWrite         pfWrite;
+    PeriphClock         pfClock;
 
     void        *pvContext;
 

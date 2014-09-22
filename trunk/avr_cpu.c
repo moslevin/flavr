@@ -272,3 +272,14 @@ void CPU_AddPeriph( AVR_CPU *pstCPU_, AVRPeripheral *pstPeriph_ )
 
     pstPeriph_->pfInit( pstPeriph_->pvContext, pstCPU_ );
 }
+
+//---------------------------------------------------------------------------
+void CPU_RegisterInterruptCallback( AVR_CPU *pstCPU_, InterruptAck *pfIntAck_, uint8_t ucVector_ )
+{
+    if (ucVector_ >= 32)
+    {
+        return;
+    }
+
+    pstCPU_->apfInterruptCallbacks[ ucVector_ ] = pfIntAck_;
+}
