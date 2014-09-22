@@ -157,14 +157,14 @@ static void UART_RxComplete( struct _AVR_CPU *pstCPU_)
 }
 
 //---------------------------------------------------------------------------
-void UART_Init(void *context_, struct _AVR_CPU *pstCPU_)
+static void UART_Init(void *context_, struct _AVR_CPU *pstCPU_)
 {
     DEBUG_PRINT(stderr, "UART Init\n");
     pstCPU_->pstRAM->stRegisters.UCSR0A.UDRE0 = 1;
 }
 
 //---------------------------------------------------------------------------
-void UART_Read(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t *pucValue_ )
+static void UART_Read(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t *pucValue_ )
 {
     DEBUG_PRINT(stderr, "UART Read: 0x%02x\n", ucAddr_);
     *pucValue_ = pstCPU_->pstRAM->aucRAM[ ucAddr_ ];
@@ -242,7 +242,7 @@ static void UART_WriteUCSR0C(struct _AVR_CPU *pstCPU_, uint8_t u8Value_)
 }
 
 //---------------------------------------------------------------------------
-void UART_Write(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_ )
+static void UART_Write(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_ )
 {    
     switch (ucAddr_)
     {
@@ -328,7 +328,7 @@ static void UART_RxClock(void *context_, struct _AVR_CPU *pstCPU_)
     }
 }
 //---------------------------------------------------------------------------
-void UART_Clock(void *context_, struct _AVR_CPU *pstCPU_)
+static void UART_Clock(void *context_, struct _AVR_CPU *pstCPU_)
 {    
     // Handle Rx and TX clocks.
     UART_TxClock(context_, pstCPU_);

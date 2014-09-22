@@ -30,6 +30,7 @@ SRC_LIST_EMULATOR=\
 	options.c \
 	interactive.c \
 	mega_uart.c \
+	mega_eint.c \
 	flavr.c
 
 printlist:

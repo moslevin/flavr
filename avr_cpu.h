@@ -112,6 +112,9 @@ struct _AVR_CPU
 
     //---------------------------------------------------------------------------
     uint8_t     ucIntPriority;  // Priority of pending interrupts this cycle
+
+    //---------------------------------------------------------------------------
+    InterruptAck apfInterruptCallbacks[32]; // Interrupt callbacks
 };
 typedef struct _AVR_CPU AVR_CPU;
 
@@ -153,4 +156,20 @@ void CPU_RunCycle( AVR_CPU *pstCPU_ );
  * \param pstPeriph_
  */
 void CPU_AddPeriph( AVR_CPU *pstCPU_, AVRPeripheral *pstPeriph_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief CPU_RegisterInterruptCallback
+ *
+ * Install a function callback to be run whenever a specific interrupt vector
+ * is run.  This is useful for resetting peripheral registers once a specific
+ * type of interrupt has been acknowledged.
+ *
+ * \param pstCPU_ Pointer to the CPU to register an interrupt callback for
+ * \param pfIntAck_ Callback function to register
+ * \param ucVector_ Interrupt vector index to install handler at
+ */
+void CPU_RegisterInterruptCallback( AVR_CPU *pstCPU_, InterruptAck pfIntAck_, uint8_t ucVector_ );
+
+
 #endif
