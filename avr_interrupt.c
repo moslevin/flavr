@@ -59,7 +59,7 @@ void AVR_Interrupt( AVR_CPU *pstCPU_ )
     pstCPU_->pstRAM->stRegisters.SPL.r = (u16SP & 0x00FF);
 
     // Read the new PC from the vector table
-    uint16_t u16NewPC = (uint16_t)pstCPU_->pusROM[ pstCPU_->ucIntPriority ];
+    uint16_t u16NewPC = (uint16_t)(pstCPU_->ucIntPriority * 2);
 
     // Set the new PC
     pstCPU_->u16PC = u16NewPC;
@@ -76,7 +76,5 @@ void AVR_Interrupt( AVR_CPU *pstCPU_ )
 
     // Reset the CPU interrupt priority
     pstCPU_->ucIntPriority = 255;
-
-    // Execute the callback funciton registered to this vector
 
 }

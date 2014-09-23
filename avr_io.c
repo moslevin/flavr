@@ -93,7 +93,10 @@ void IO_Write(struct _AVR_CPU *pstCPU_, uint8_t addr_, uint8_t value_ )
     IOWriterList *node = pstCPU_->apstPeriphWriteTable[addr_];
     while (node)
     {
-        node->pfWriter( node->pvContext, pstCPU_, addr_, value_ );
+        if (node->pfWriter)
+        {
+            node->pfWriter( node->pvContext, pstCPU_, addr_, value_ );
+        }
         node = node->next;
     }
 }
@@ -104,7 +107,10 @@ void IO_Read(struct _AVR_CPU *pstCPU_, uint8_t addr_, uint8_t *value_ )
     IOReaderList *node = pstCPU_->apstPeriphReadTable[addr_];
     while (node)
     {
-        node->pfReader( node->pvContext, pstCPU_, addr_, value_ );
+        if (node->pfReader)
+        {
+            node->pfReader( node->pvContext, pstCPU_, addr_, value_ );
+        }
         node = node->next;
     }
 }
@@ -115,7 +121,10 @@ void IO_Clock( struct _AVR_CPU *pstCPU_ )
     IOClockList *node = pstCPU_->pstClockList;
     while (node)
     {
-        node->pfClock( node->pvContext, pstCPU_ );
+        if (node->pfClock)
+        {
+            node->pfClock( node->pvContext, pstCPU_ );
+        }
         node = node->next;
     }
 }
