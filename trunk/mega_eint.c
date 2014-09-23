@@ -69,6 +69,7 @@ static void EINT_Read(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_,
 //---------------------------------------------------------------------------
 static void EICRA_Write( AVR_CPU *pstCPU_, uint8_t ucValue_ )
 {
+    DEBUG_PRINT("EICRA Clock\n");
     ucValue_ &= 0x0F;    // Only the bottom 2 bits are valid.
     pstCPU_->pstRAM->stRegisters.EICRA.r = ucValue_;
 
@@ -76,21 +77,25 @@ static void EICRA_Write( AVR_CPU *pstCPU_, uint8_t ucValue_ )
     if ((pstCPU_->pstRAM->stRegisters.EICRA.ISC00 == 0) &&
         (pstCPU_->pstRAM->stRegisters.EICRA.ISC01 == 0))
     {
+        DEBUG_PRINT("I0-low\n");
         eINT0Sense = INT_SENSE_LOW;
-    }
-    else if ((pstCPU_->pstRAM->stRegisters.EICRA.ISC00 == 0) &&
-             (pstCPU_->pstRAM->stRegisters.EICRA.ISC01 == 1))
-    {
-        eINT0Sense = INT_SENSE_CHANGE;
     }
     else if ((pstCPU_->pstRAM->stRegisters.EICRA.ISC00 == 1) &&
              (pstCPU_->pstRAM->stRegisters.EICRA.ISC01 == 0))
     {
+        DEBUG_PRINT("I0-change\n");
+        eINT0Sense = INT_SENSE_CHANGE;
+    }
+    else if ((pstCPU_->pstRAM->stRegisters.EICRA.ISC00 == 0) &&
+             (pstCPU_->pstRAM->stRegisters.EICRA.ISC01 == 1))
+    {
+        DEBUG_PRINT("I0-rise\n");
         eINT0Sense = INT_SENSE_RISE;
     }
     else if ((pstCPU_->pstRAM->stRegisters.EICRA.ISC00 == 1) &&
              (pstCPU_->pstRAM->stRegisters.EICRA.ISC01 == 1))
     {
+        DEBUG_PRINT("I0-fall\n");
         eINT0Sense = INT_SENSE_FALL;
     }
 
@@ -99,13 +104,13 @@ static void EICRA_Write( AVR_CPU *pstCPU_, uint8_t ucValue_ )
     {
         eINT1Sense = INT_SENSE_LOW;
     }
-    else if ((pstCPU_->pstRAM->stRegisters.EICRA.ISC10 == 0) &&
-             (pstCPU_->pstRAM->stRegisters.EICRA.ISC11 == 1))
+    else if ((pstCPU_->pstRAM->stRegisters.EICRA.ISC10 == 1) &&
+             (pstCPU_->pstRAM->stRegisters.EICRA.ISC11 == 0))
     {
         eINT1Sense = INT_SENSE_CHANGE;
     }
-    else if ((pstCPU_->pstRAM->stRegisters.EICRA.ISC10 == 1) &&
-             (pstCPU_->pstRAM->stRegisters.EICRA.ISC11 == 0))
+    else if ((pstCPU_->pstRAM->stRegisters.EICRA.ISC10 == 0) &&
+             (pstCPU_->pstRAM->stRegisters.EICRA.ISC11 == 1))
     {
         eINT1Sense = INT_SENSE_RISE;
     }
@@ -114,11 +119,20 @@ static void EICRA_Write( AVR_CPU *pstCPU_, uint8_t ucValue_ )
     {
         eINT1Sense = INT_SENSE_FALL;
     }
+    DEBUG_PRINT ("IntSense0,1: %d, %d\n", eINT0Sense, eINT1Sense);
+    DEBUG_PRINT ("EICRA: %d, ISC00 : %d, ISC01 : %d, ISC10: %d, ISC11: %d\n",
+                pstCPU_->pstRAM->stRegisters.EICRA.r,
+                pstCPU_->pstRAM->stRegisters.EICRA.ISC00,
+                pstCPU_->pstRAM->stRegisters.EICRA.ISC01,
+                pstCPU_->pstRAM->stRegisters.EICRA.ISC10,
+                pstCPU_->pstRAM->stRegisters.EICRA.ISC11
+            );
 }
 
 //---------------------------------------------------------------------------
 static void EIFR_Write( AVR_CPU *pstCPU_, uint8_t ucValue_ )
 {
+    DEBUG_PRINT("EIFR Clock\n");
     ucValue_ &= 0x03;   // Only the bottom-2 bits are set
     pstCPU_->pstRAM->stRegisters.EIFR.r = ucValue_;
 }
@@ -126,6 +140,7 @@ static void EIFR_Write( AVR_CPU *pstCPU_, uint8_t ucValue_ )
 //---------------------------------------------------------------------------
 static void EIMSK_Write( AVR_CPU *pstCPU_, uint8_t ucValue_ )
 {
+    DEBUG_PRINT("EIMSK Write\n");
     ucValue_ &= 0x03;   // Only the bottom-2 bits are set
     pstCPU_->pstRAM->stRegisters.EIMSK.r = ucValue_;
 }
@@ -133,6 +148,7 @@ static void EIMSK_Write( AVR_CPU *pstCPU_, uint8_t ucValue_ )
 //---------------------------------------------------------------------------
 static void EINT_Write(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_ )
 {
+    DEBUG_PRINT("EINT Write\n");
     switch (ucAddr_)
     {
     case 0x69:  // EICRA
@@ -160,6 +176,7 @@ static void EINT_Clock(void *context_, struct _AVR_CPU *pstCPU_)
 
     if (pstCPU_->pstRAM->stRegisters.SREG.I == 1)
     {
+        DEBUG_PRINT(" INT Enabled\n");
         if (pstCPU_->pstRAM->stRegisters.EIMSK.INT0 == 1)
         {
             switch (eINT0Sense)
@@ -173,6 +190,7 @@ static void EINT_Clock(void *context_, struct _AVR_CPU *pstCPU_)
             case INT_SENSE_CHANGE:
                 if (pstCPU_->pstRAM->stRegisters.PORTD.PORT2 != ucLastINT0)
                 {
+                    DEBUG_PRINT(" SET INT0\n");
                     bSetINT0 = true;
                 }
                 break;
@@ -258,9 +276,11 @@ static void EINT_AckInt(struct _AVR_CPU *pstCPU_, uint8_t ucVector_)
     switch (ucVector_)
     {
     case 0x01:
+        DEBUG_PRINT("INT0!\n");
         pstCPU_->pstRAM->stRegisters.EIFR.INTF0 = 0;
         break;
     case 0x02:
+        DEBUG_PRINT("INT1!\n");
         pstCPU_->pstRAM->stRegisters.EIFR.INTF1 = 0;
         break;
     }
@@ -272,8 +292,8 @@ AVRPeripheral stEINT_a =
     EINT_Init,
     EINT_Read,
     EINT_Write,
-    EINT_Clock,    
-    0,
+    EINT_Clock,
+    NULL,
     0x69,
     0x69
 };
@@ -281,11 +301,11 @@ AVRPeripheral stEINT_a =
 //---------------------------------------------------------------------------
 AVRPeripheral stEINT_b =
 {
-    EINT_Init,
+    NULL,
     EINT_Read,
     EINT_Write,
-    EINT_Clock,    
-    0,
+    NULL,
+    NULL,
     0x3C,
     0x3D
 };

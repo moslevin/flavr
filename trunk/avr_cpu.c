@@ -113,22 +113,13 @@ static void CPU_GetOpSize( AVR_CPU *pstCPU_, uint16_t OP_ )
 //---------------------------------------------------------------------------
 static void CPU_PeripheralCycle( AVR_CPU *pstCPU_ )
 {
-    // Go through the list of peripherals and clock each and every one
-    // separately.
-    IOClockList *pstIOClock = pstCPU_->pstClockList;
-    while (pstIOClock)
-    {
-        pstIOClock->pfClock( pstIOClock->pvContext, pstCPU_ );
-        pstIOClock = pstIOClock->next;
-    }
+    IO_Clock(pstCPU_);
 }
 
 //---------------------------------------------------------------------------
 void CPU_RunCycle( AVR_CPU *pstCPU_ )
 {
     uint16_t OP;
-
-    IO_Clock( pstCPU_ );
 
     if (!pstCPU_->bAsleep)
     {
@@ -270,11 +261,14 @@ void CPU_AddPeriph( AVR_CPU *pstCPU_, AVRPeripheral *pstPeriph_ )
         IO_AddWriter( pstCPU_, pstPeriph_, i );
     }
 
-    pstPeriph_->pfInit( pstPeriph_->pvContext, pstCPU_ );
+    if (pstPeriph_->pfInit)
+    {
+        pstPeriph_->pfInit( pstPeriph_->pvContext, pstCPU_ );
+    }
 }
 
 //---------------------------------------------------------------------------
-void CPU_RegisterInterruptCallback( AVR_CPU *pstCPU_, InterruptAck *pfIntAck_, uint8_t ucVector_ )
+void CPU_RegisterInterruptCallback( AVR_CPU *pstCPU_, InterruptAck pfIntAck_, uint8_t ucVector_ )
 {
     if (ucVector_ >= 32)
     {

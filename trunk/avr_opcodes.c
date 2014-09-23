@@ -1781,7 +1781,7 @@ static void AVR_Opcode_SWAP( AVR_CPU *pstCPU_ )
 //---------------------------------------------------------------------------
 static void AVR_Opcode_BSET( AVR_CPU *pstCPU_ )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.r |= ~(1 << pstCPU_->b);
+    pstCPU_->pstRAM->stRegisters.SREG.r |= (1 << pstCPU_->b);
 }
 
 //---------------------------------------------------------------------------
