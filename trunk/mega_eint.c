@@ -174,6 +174,9 @@ static void EINT_Clock(void *context_, struct _AVR_CPU *pstCPU_)
     bool bSetINT0 = false;
     bool bSetINT1 = false;
 
+    //!! ToDo - Consider adding support for external stimulus (which would
+    //!! Invoke inputs on PIND as opposed to PORTD)...  This will only work
+    //!! as software interrupts in its current state
     if (pstCPU_->pstRAM->stRegisters.SREG.I == 1)
     {
         DEBUG_PRINT(" INT Enabled\n");
