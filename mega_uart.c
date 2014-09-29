@@ -157,10 +157,19 @@ static void UART_RxComplete( struct _AVR_CPU *pstCPU_)
 }
 
 //---------------------------------------------------------------------------
+static void TXC0_Callback( struct _AVR_CPU *pstCPU_, uint8_t ucVector_ )
+{
+    // On TX Complete interrupt, automatically clear the TXC0 flag.
+    pstCPU_->pstRAM->stRegisters.UCSR0A.TXC0 = 0;
+}
+
+//---------------------------------------------------------------------------
 static void UART_Init(void *context_, struct _AVR_CPU *pstCPU_)
 {
     DEBUG_PRINT(stderr, "UART Init\n");
     pstCPU_->pstRAM->stRegisters.UCSR0A.UDRE0 = 1;
+
+    CPU_RegisterInterruptCallback(pstCPU_, TXC0_Callback, 0x14); // TX Complete
 }
 
 //---------------------------------------------------------------------------
@@ -168,6 +177,14 @@ static void UART_Read(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_,
 {
     DEBUG_PRINT(stderr, "UART Read: 0x%02x\n", ucAddr_);
     *pucValue_ = pstCPU_->pstRAM->aucRAM[ ucAddr_ ];
+    switch (ucAddr_)
+    {
+        case 0xC6: // UDR0
+            pstCPU_->pstRAM->stRegisters.UCSR0A.RXC0 = 0;
+            break;
+        default:
+            break;
+    }
 }
 
 //---------------------------------------------------------------------------
@@ -203,14 +220,13 @@ static void UART_WriteDataReg(struct _AVR_CPU *pstCPU_)
             bTSR_Empty = false;
             bUDR_Empty = true;
             UART_SetEmpty(pstCPU_);
-        }
-        // Otherwise, just load the TXB register, and wait for the current
-        // shift operation to end.
+        }        
         else
         {
             TXB = pstCPU_->pstRAM->stRegisters.UDR0;
             bTSR_Empty = false;
             bUDR_Empty = false;
+            UART_ClearEmpty(pstCPU_);
         }
     }        
 }
