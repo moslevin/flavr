@@ -15,7 +15,10 @@
 /*!
   \file  avr_op_decode.c
 
-  \brief Module providing logic to decode AVR CPU Opcodes
+  \brief Module providing logic to decode AVR CPU Opcodes.
+
+  Implemented based on descriptions provided in Atmel document doc0856
+
 */
 
 #include <stdint.h>
@@ -93,9 +96,9 @@ static void AVR_Decoder_Register_Immediate( AVR_CPU *pstCPU_, uint16_t OP_)
 //---------------------------------------------------------------------------
 static void AVR_Decoder_LDST_YZ_k( AVR_CPU *pstCPU_, uint16_t OP_)
 {
-    uint8_t q = (OP_ & 0x0007) |
-                ((OP_ & 0x0C00) >> 10) |
-                ((OP_ & 0x2000) >> 13);
+    uint8_t q = (OP_ & 0x0007) |            // Awkward encoding... see manual for details.
+                ((OP_ & 0x0C00) >> (7)) |
+                ((OP_ & 0x2000) >> (9));
 
     uint8_t Rd = (OP_ & 0x01F0) >> 4;
 
