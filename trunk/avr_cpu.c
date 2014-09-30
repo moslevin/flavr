@@ -138,6 +138,14 @@ void CPU_RunCycle( AVR_CPU *pstCPU_ )
         // values.
         CPU_Decode( pstCPU_, OP );
 
+#if 0
+        {
+            AVR_Opcode pf = AVR_Disasm_Function(OP);
+            printf("[%04X]: ", pstCPU_->u16PC );
+            pf(pstCPU_);
+        }
+#endif
+
         // Execute the instruction that was just decoded
         CPU_Execute( pstCPU_, OP );
 
