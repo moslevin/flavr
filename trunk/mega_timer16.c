@@ -234,15 +234,36 @@ static void TCCR1A_Write( struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucV
 static void TCCR1B_Write( struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_)
 {
     // Update the waveform generator mode (WGM13:12) bits.
-    uint8_t u8WGMBits = (ucValue_ >> 1) & 0x0D; // WGM13 and 12 are in register bits 3,4
+    uint8_t u8WGMBits = (ucValue_ >> 1) & 0x0C; // WGM13 and 12 are in register bits 3,4
     uint8_t u8WGMTemp = (uint8_t)eWGM;
-    u8WGMTemp &= ~(0x0D);
+    u8WGMTemp &= ~(0x0C);
     u8WGMTemp |= u8WGMBits;
     eWGM = (WaveformGeneratorMode_t)u8WGMTemp;
 
     // Update the clock-select bits
     uint8_t u8ClockSource = ucValue_ & 0x07; // clock select is last 3 bits in reg
     eClockSource = (ClockSource_t)u8ClockSource;
+    switch (eClockSource)
+    {
+    case CLK_SRC_DIV_1:
+        u16DivCycles = 1;
+        break;
+    case CLK_SRC_DIV_8:
+        u16DivCycles = 8;
+        break;
+    case CLK_SRC_DIV_64:
+        u16DivCycles = 64;
+        break;
+    case CLK_SRC_DIV_256:
+        u16DivCycles = 256;
+        break;
+    case CLK_SRC_DIV_1024:
+        u16DivCycles = 1024;
+        break;
+    default:
+        u16DivCycles = 0;
+        break;
+    }
 
     // Update the memory-mapped register.
     pstCPU_->pstRAM->stRegisters.TCCR1B.r = ucValue_ & 0xDF; // Bit 5 is read-only
@@ -360,7 +381,7 @@ static void Timer16_Write(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAd
 static void Timer16_Clock(void *context_, struct _AVR_CPU *pstCPU_)
 {
     if (eClockSource == CLK_SRC_OFF)
-    {
+    {        
         return;
     }
 
@@ -377,13 +398,18 @@ static void Timer16_Clock(void *context_, struct _AVR_CPU *pstCPU_)
         // Decrement the clock-divide value
         if (u16DivRemain)
         {
+            DEBUG_PRINT(" %d ticks remain\n", u16DivRemain);
             u16DivRemain--;
         }
         else
         {
             // clock-divider count hits zero, reset and trigger an update.
-            u16DivRemain = u16DivCycles;
-            bUpdateTimer = true;
+            DEBUG_PRINT(" expire and reset\n");
+            if (u16DivCycles)
+            {
+                u16DivRemain = u16DivCycles;
+                bUpdateTimer = true;
+            }
         }
     }
         break;
@@ -400,10 +426,12 @@ static void Timer16_Clock(void *context_, struct _AVR_CPU *pstCPU_)
 
     if (bUpdateTimer)
     {
+        //DEBUG_PRINT( " WGM Mode %d\n", eWGM );
         switch (eWGM)
         {
         case WGM_NORMAL:
         {
+            DEBUG_PRINT(" Update Normal\n");
             TCNT1_Increment(pstCPU_);
             if (TCNT1_Read(pstCPU_) == 0)
             {
@@ -413,6 +441,7 @@ static void Timer16_Clock(void *context_, struct _AVR_CPU *pstCPU_)
             break;
         case WGM_CTC_OCR:
         {
+            DEBUG_PRINT(" Update CTC\n");
             TCNT1_Increment(pstCPU_);
             if (TCNT1_Read(pstCPU_) == 0)
             {
@@ -422,13 +451,15 @@ static void Timer16_Clock(void *context_, struct _AVR_CPU *pstCPU_)
             {
                 if (TCNT1_Read(pstCPU_) == OCR1A_Read(pstCPU_))
                 {
+                    DEBUG_PRINT(" CTC1A Match\n" );
                     bCTCA = true;
-                    TCNT1_Clear(pstCPU_);
+                    TCNT1_Clear(pstCPU_);                    
                 }
                 if (TCNT1_Read(pstCPU_) == ICR1_Read(pstCPU_))
                 {
+                    DEBUG_PRINT(" ICR1 Match\n" );
                     bICR = true;
-                    TCNT1_Clear(pstCPU_);
+                    TCNT1_Clear(pstCPU_);                    
                 }
             }
         }
@@ -441,18 +472,22 @@ static void Timer16_Clock(void *context_, struct _AVR_CPU *pstCPU_)
     // Set interrupt flags if an appropriate transition has taken place
     if (bOVF)
     {
+        DEBUG_PRINT(" TOV1 Set\n" );
         pstCPU_->pstRAM->stRegisters.TIFR1.TOV1 = 1;
     }
     if (bCTCA)
     {
+        DEBUG_PRINT(" OCF1A Set\n" );
         pstCPU_->pstRAM->stRegisters.TIFR1.OCF1A = 1;
     }
     if (bCTCB)
     {
+        DEBUG_PRINT(" OCF1B Set\n" );
         pstCPU_->pstRAM->stRegisters.TIFR1.OCF1B = 1;
     }
     if (bICR)
     {
+        DEBUG_PRINT(" ICF1 Set\n" );
         pstCPU_->pstRAM->stRegisters.TIFR1.ICF1 = 1;
     }
 
@@ -463,21 +498,25 @@ static void Timer16_Clock(void *context_, struct _AVR_CPU *pstCPU_)
         if ((pstCPU_->pstRAM->stRegisters.TIFR1.TOV1 == 1) &&
             (pstCPU_->pstRAM->stRegisters.TIMSK1.TOIE1 == 1))
         {
+            DEBUG_PRINT(" TOV1 Interrupt Candidate\n" );
             AVR_InterruptCandidate(pstCPU_, 0x0D);
         }
         if ((pstCPU_->pstRAM->stRegisters.TIFR1.OCF1A == 1) &&
             (pstCPU_->pstRAM->stRegisters.TIMSK1.OCIE1A == 1))
         {
-            AVR_InterruptCandidate(pstCPU_, 0x0B);
+            DEBUG_PRINT(" OCF1A Interrupt Candidate\n" );
+            AVR_InterruptCandidate(pstCPU_, 0x0B);            
         }
         if ((pstCPU_->pstRAM->stRegisters.TIFR1.OCF1B == 1) &&
             (pstCPU_->pstRAM->stRegisters.TIMSK1.OCIE1B == 1))
         {
+            DEBUG_PRINT(" OCF1B Interrupt Candidate\n" );
             AVR_InterruptCandidate(pstCPU_, 0x0C);
         }
         if ((pstCPU_->pstRAM->stRegisters.TIFR1.ICF1 == 1) &&
             (pstCPU_->pstRAM->stRegisters.TIMSK1.ICIE1 == 1))
         {
+            DEBUG_PRINT(" ICF1 Interrupt Candidate\n" );
             AVR_InterruptCandidate(pstCPU_, 0x0A);
         }
     }
