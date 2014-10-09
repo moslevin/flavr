@@ -468,7 +468,10 @@ static void AVR_Opcode_SBC( AVR_CPU *pstCPU_ )
     SUB_Full_Carry(pstCPU_, u8Rd, u8Rr, u8Result);
     SUB_Overflow_Flag(pstCPU_, u8Rd, u8Rr, u8Result);
     R8_Negative_Flag(pstCPU_, u8Result);
-    R8_Zero_Flag(pstCPU_, u8Result);
+    if (u8Result)
+    {
+        pstCPU_->pstRAM->stRegisters.SREG.Z = 0;
+    }
     Signed_Flag(pstCPU_);
 }
 
@@ -487,7 +490,10 @@ static void AVR_Opcode_SBCI( AVR_CPU *pstCPU_ )
     SUB_Full_Carry(pstCPU_, u8Rd, u8K, u8Result);
     SUB_Overflow_Flag(pstCPU_, u8Rd, u8K, u8Result);
     R8_Negative_Flag(pstCPU_, u8Result);
-    R8_Zero_Flag(pstCPU_, u8Result);
+    if (u8Result)
+    {
+        pstCPU_->pstRAM->stRegisters.SREG.Z = 0;
+    }
     Signed_Flag(pstCPU_);
 }
 
@@ -1670,39 +1676,45 @@ static void AVR_Opcode_XCH( AVR_CPU *pstCPU_ )
 static void AVR_Opcode_LAS( AVR_CPU *pstCPU_ )
 {
     uint8_t u8Z;
-    uint16_t u16Addr = pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z;
-    u8Z = Data_Read( pstCPU_, u16Addr );
+    uint8_t u8Temp;
 
-    u8Z = *pstCPU_->Rd | u8Z;
+    uint16_t u16Addr = pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z;
+
+    u8Z = Data_Read( pstCPU_, u16Addr );
+    u8Temp = *pstCPU_->Rd | u8Z;
 
     *pstCPU_->Rd = u8Z;    
-    Data_Write( pstCPU_, u16Addr, u8Z );
+    Data_Write( pstCPU_, u16Addr, u8Temp );
 }
 
 //---------------------------------------------------------------------------
 static void AVR_Opcode_LAC( AVR_CPU *pstCPU_ )
 {
     uint8_t u8Z;
+    uint8_t u8Temp;
+
     uint16_t u16Addr = pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z;
-    u8Z = Data_Read( pstCPU_, u16Addr );
 
-    u8Z = *pstCPU_->Rd & ~(u8Z);
-
+    u8Z = Data_Read( pstCPU_, u16Addr );    
+    u8Temp = *pstCPU_->Rd & ~(u8Z);
     *pstCPU_->Rd = u8Z;
-    Data_Write( pstCPU_, u16Addr, u8Z );
+
+    Data_Write( pstCPU_, u16Addr, u8Temp );
 }
 
 //---------------------------------------------------------------------------
 static void AVR_Opcode_LAT( AVR_CPU *pstCPU_ )
 {
     uint8_t u8Z;
+    uint8_t u8Temp;
+
     uint16_t u16Addr = pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z;
+
     u8Z = Data_Read( pstCPU_, u16Addr );
-
-    u8Z = *pstCPU_->Rd ^ u8Z;
-
+    u8Temp = *pstCPU_->Rd ^ u8Z;
     *pstCPU_->Rd = u8Z;
-    Data_Write( pstCPU_, u16Addr, u8Z );
+
+    Data_Write( pstCPU_, u16Addr, u8Temp );
 }
 
 //---------------------------------------------------------------------------
@@ -1716,6 +1728,7 @@ static void AVR_Opcode_LSL( AVR_CPU *pstCPU_ )
     *pstCPU_->Rd = u8Result;
 
     // ---- Update flags ----
+    pstCPU_->pstRAM->stRegisters.SREG.H = ((u8Result & 0x08) == 0x08);
     pstCPU_->pstRAM->stRegisters.SREG.C = ((u8Temp & 0x80) == 0x80);
     R8_Negative_Flag( pstCPU_, u8Result );
     R8_Zero_Flag( pstCPU_, u8Result );
