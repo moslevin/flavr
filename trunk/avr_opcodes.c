@@ -993,11 +993,11 @@ static void AVR_Opcode_RETI( AVR_CPU *pstCPU_ )
 
 //---------------------------------------------------------------------------
 static void AVR_Opcode_CPSE( AVR_CPU *pstCPU_ )
-{
+{    
     if (*pstCPU_->Rr == *pstCPU_->Rd)
-    {
-        uint8_t u8NextOpSize = AVR_Opcode_Size( pstCPU_->pusROM[ pstCPU_->u16PC ] );        
-        Relative_Jump( pstCPU_, u8NextOpSize );
+    {        
+        uint8_t u8NextOpSize = AVR_Opcode_Size( pstCPU_->pusROM[ pstCPU_->u16PC + 1 ] );
+        Relative_Jump( pstCPU_, u8NextOpSize + 1 );
     }
 }
 
@@ -1094,12 +1094,11 @@ static void AVR_Opcode_CPI( AVR_CPU *pstCPU_ )
 //---------------------------------------------------------------------------
 static void AVR_Opcode_SBRC( AVR_CPU *pstCPU_ )
 {
-    // Skip if Bit in IO register clear
-    uint8_t u8IOVal = pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[ pstCPU_->A ];
-    if ((u8IOVal & (1 << pstCPU_->b)) == 0)
+    // Skip if Bit in IO register clear    
+    if ((*pstCPU_->Rd & (1 << pstCPU_->b)) == 0)
     {
-        uint8_t u8NextOpSize = AVR_Opcode_Size( pstCPU_->pusROM[ pstCPU_->u16PC ] );
-        Relative_Jump( pstCPU_, u8NextOpSize );
+        uint8_t u8NextOpSize = AVR_Opcode_Size( pstCPU_->pusROM[ pstCPU_->u16PC + 1 ] );
+        Relative_Jump( pstCPU_, u8NextOpSize + 1 );
     }
 }
 
@@ -1107,11 +1106,10 @@ static void AVR_Opcode_SBRC( AVR_CPU *pstCPU_ )
 static void AVR_Opcode_SBRS( AVR_CPU *pstCPU_ )
 {
     // Skip if Bit in IO register set
-    uint8_t u8IOVal = pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[ pstCPU_->A ];
-    if ((u8IOVal & (1 << pstCPU_->b)) != 0)
-    {
-        uint8_t u8NextOpSize = AVR_Opcode_Size( pstCPU_->pusROM[ pstCPU_->u16PC ] );
-        Relative_Jump( pstCPU_, u8NextOpSize );
+    if ((*pstCPU_->Rd & (1 << pstCPU_->b)) != 0)
+    {        
+        uint8_t u8NextOpSize = AVR_Opcode_Size( pstCPU_->pusROM[ pstCPU_->u16PC + 1 ] );
+        Relative_Jump( pstCPU_, u8NextOpSize + 1 );
     }
 }
 
@@ -1122,8 +1120,8 @@ static void AVR_Opcode_SBIC( AVR_CPU *pstCPU_ )
     uint8_t u8IOVal = Data_Read( pstCPU_, 32 + pstCPU_->A );
     if ((u8IOVal & (1 << pstCPU_->b)) == 0)
     {
-        uint8_t u8NextOpSize = AVR_Opcode_Size( pstCPU_->pusROM[ pstCPU_->u16PC ] );
-        Relative_Jump( pstCPU_, u8NextOpSize );
+        uint8_t u8NextOpSize = AVR_Opcode_Size( pstCPU_->pusROM[ pstCPU_->u16PC + 1 ] );
+        Relative_Jump( pstCPU_, u8NextOpSize + 1 );
     }
 }
 
@@ -1134,8 +1132,8 @@ static void AVR_Opcode_SBIS( AVR_CPU *pstCPU_ )
     uint8_t u8IOVal = Data_Read( pstCPU_, 32 + pstCPU_->A );
     if ((u8IOVal & (1 << pstCPU_->b)) != 0)
     {
-        uint8_t u8NextOpSize = AVR_Opcode_Size( pstCPU_->pusROM[ pstCPU_->u16PC ] );
-        Relative_Jump( pstCPU_, u8NextOpSize );
+        uint8_t u8NextOpSize = AVR_Opcode_Size( pstCPU_->pusROM[ pstCPU_->u16PC + 1 ] );
+        Relative_Jump( pstCPU_, u8NextOpSize + 1 );
     }
 }
 
