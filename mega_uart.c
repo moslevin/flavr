@@ -75,14 +75,14 @@ static void Echo_Rx( AVR_CPU *pstCPU_ )
 //---------------------------------------------------------------------------
 static bool UART_IsRxEnabled( struct _AVR_CPU *pstCPU_)
 {
-    DEBUG_PRINT( "RxEnabled\n");
+    //DEBUG_PRINT( "RxEnabled\n");
     return (pstCPU_->pstRAM->stRegisters.UCSR0B.RXEN0 == 1);
 }
 
 //---------------------------------------------------------------------------
 static bool UART_IsTxEnabled( struct _AVR_CPU *pstCPU_)
 {
-    DEBUG_PRINT( "TxEnabled\n");
+    //DEBUG_PRINT( "TxEnabled\n");
     return (pstCPU_->pstRAM->stRegisters.UCSR0B.TXEN0 == 1);
 }
 
@@ -269,6 +269,7 @@ static void UART_WriteUCSR0C(struct _AVR_CPU *pstCPU_, uint8_t u8Value_)
 //---------------------------------------------------------------------------
 static void UART_Write(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_ )
 {    
+    DEBUG_PRINT("UART Write: %2X=%2X\n", ucAddr_, ucValue_ );
     switch (ucAddr_)
     {
     case 0xC0:  //UCSR0A
@@ -286,10 +287,12 @@ static void UART_Write(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_
         break;
     case 0xC4:  //UBRR0L
     case 0xC5:  //UBRR0H
+        DEBUG_PRINT("Write UBRR0x\n");
         pstCPU_->pstRAM->aucRAM[ ucAddr_ ] = ucValue_;
         UART_WriteBaudReg(pstCPU_);
         break;
     case 0xC6:  //UDR0
+        DEBUG_PRINT("Write UDR0\n");
         pstCPU_->pstRAM->aucRAM[ ucAddr_ ] = ucValue_;
         UART_WriteDataReg(pstCPU_);
         break;
@@ -301,7 +304,7 @@ static void UART_Write(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_
 //---------------------------------------------------------------------------
 static void UART_TxClock(void *context_, struct _AVR_CPU *pstCPU_)
 {
-    DEBUG_PRINT("TX clock...\n");
+    //DEBUG_PRINT("TX clock...\n");
     if (UART_IsTxEnabled(pstCPU_) && u32TxTicksRemaining)
     {
         DEBUG_PRINT("Countdown %d ticks remain\n", u32TxTicksRemaining);
@@ -366,7 +369,7 @@ static void UART_Clock(void *context_, struct _AVR_CPU *pstCPU_)
     // Check interrupts.
     if (pstCPU_->pstRAM->stRegisters.SREG.I == 1)
     {
-        DEBUG_PRINT("Check UART Interrupts\n");
+        //DEBUG_PRINT("Check UART Interrupts\n");
         if (UART_IsTxIntEnabled( pstCPU_ ) && UART_IsTxComplete( pstCPU_ ))
         {
             DEBUG_PRINT("TXC Interrupt\n");
