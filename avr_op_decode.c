@@ -98,7 +98,7 @@ static void AVR_Decoder_LDST_YZ_k( AVR_CPU *pstCPU_, uint16_t OP_)
 {
     uint8_t q = (OP_ & 0x0007) |            // Awkward encoding... see manual for details.
                 ((OP_ & 0x0C00) >> (7)) |
-                ((OP_ & 0x2000) >> (9));
+                ((OP_ & 0x2000) >> (8));
 
     uint8_t Rd = (OP_ & 0x01F0) >> 4;
 
@@ -183,10 +183,10 @@ static void AVR_Decoder_ADIW_SBIW_6( AVR_CPU *pstCPU_, uint16_t OP_)
 static void AVR_Decoder_IO_Bit( AVR_CPU *pstCPU_, uint16_t OP_)
 {
     uint8_t b = (OP_ & 0x0007);
-    uint8_t Rd = (OP_ & 0x00F8) >> 3;
+    uint8_t A = (OP_ & 0x00F8) >> 3;
 
     pstCPU_->b = b;
-    pstCPU_->Rd = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
+    pstCPU_->A = A;
 }
 //---------------------------------------------------------------------------
 static void AVR_Decoder_MUL( AVR_CPU *pstCPU_, uint16_t OP_)

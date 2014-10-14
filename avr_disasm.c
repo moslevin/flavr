@@ -1425,20 +1425,20 @@ static void AVR_Disasm_BCLR( AVR_CPU *pstCPU_ )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_SBI( AVR_CPU *pstCPU_ )
 {
-    uint8_t u8s = pstCPU_->s;
+    uint8_t u8b = pstCPU_->b;
     uint8_t u8A = pstCPU_->A;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "sbi %d, %d                \t ; Set bit in I/O register\n",
                 u8A,
-                u8s
+                u8b
                 );
 }
 
 //---------------------------------------------------------------------------
 static void AVR_Disasm_CBI( AVR_CPU *pstCPU_ )
 {
-    uint8_t u8s = pstCPU_->s;
+    uint8_t u8s = pstCPU_->b;
     uint8_t u8A = pstCPU_->A;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
