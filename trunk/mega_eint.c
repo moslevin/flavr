@@ -26,7 +26,7 @@
 #include "avr_periphregs.h"
 #include "avr_interrupt.h"
 
-#define DEBUG_PRINT(...)
+#define DEBUG_PRINT printf
 
 //---------------------------------------------------------------------------
 typedef enum
@@ -89,14 +89,14 @@ static void EICRA_Write( AVR_CPU *pstCPU_, uint8_t ucValue_ )
     else if ((pstCPU_->pstRAM->stRegisters.EICRA.ISC00 == 0) &&
              (pstCPU_->pstRAM->stRegisters.EICRA.ISC01 == 1))
     {
-        DEBUG_PRINT("I0-rise\n");
-        eINT0Sense = INT_SENSE_RISE;
+        DEBUG_PRINT("I0-fall\n");
+        eINT0Sense = INT_SENSE_FALL;
     }
     else if ((pstCPU_->pstRAM->stRegisters.EICRA.ISC00 == 1) &&
              (pstCPU_->pstRAM->stRegisters.EICRA.ISC01 == 1))
     {
-        DEBUG_PRINT("I0-fall\n");
-        eINT0Sense = INT_SENSE_FALL;
+        DEBUG_PRINT("I0-risel\n");
+        eINT0Sense = INT_SENSE_RISE;
     }
 
     if ((pstCPU_->pstRAM->stRegisters.EICRA.ISC10 == 0) &&
@@ -142,7 +142,7 @@ static void EIMSK_Write( AVR_CPU *pstCPU_, uint8_t ucValue_ )
 {
     DEBUG_PRINT("EIMSK Write\n");
     ucValue_ &= 0x03;   // Only the bottom-2 bits are set
-    pstCPU_->pstRAM->stRegisters.EIMSK.r = ucValue_;
+    pstCPU_->pstRAM->stRegisters.EIMSK.r = ucValue_;    
 }
 
 //---------------------------------------------------------------------------
@@ -152,12 +152,15 @@ static void EINT_Write(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_
     switch (ucAddr_)
     {
     case 0x69:  // EICRA
+        fprintf(stderr, "ERICRA\n");
         EICRA_Write(pstCPU_, ucValue_);
         break;
     case 0x3C:  // EIFR
+        fprintf(stderr, "EIFR\n");
         EIFR_Write(pstCPU_, ucValue_);
         break;
     case 0x3D:  // EIMSK
+        fprintf(stderr, "MASK\n");
         EIMSK_Write(pstCPU_, ucValue_);
         break;
     default:
@@ -177,69 +180,70 @@ static void EINT_Clock(void *context_, struct _AVR_CPU *pstCPU_)
     //!! ToDo - Consider adding support for external stimulus (which would
     //!! Invoke inputs on PIND as opposed to PORTD)...  This will only work
     //!! as software interrupts in its current state
-    if (pstCPU_->pstRAM->stRegisters.SREG.I == 1)
+    //fprintf( stderr, "p/c=[%d,%d]\n", ucLastINT0, pstCPU_->pstRAM->stRegisters.PORTD.PORT2 );
+
+    if (pstCPU_->pstRAM->stRegisters.EIMSK.INT0 == 1)
     {
-        DEBUG_PRINT(" INT Enabled\n");
-        if (pstCPU_->pstRAM->stRegisters.EIMSK.INT0 == 1)
+        switch (eINT0Sense)
         {
-            switch (eINT0Sense)
+        case INT_SENSE_LOW:
+            if (pstCPU_->pstRAM->stRegisters.PORTD.PORT2 == 0)
             {
-            case INT_SENSE_LOW:
-                if (pstCPU_->pstRAM->stRegisters.PORTD.PORT2 == 0)
-                {
-                    bSetINT0 = true;
-                }
-                break;
-            case INT_SENSE_CHANGE:
-                if (pstCPU_->pstRAM->stRegisters.PORTD.PORT2 != ucLastINT0)
-                {
-                    DEBUG_PRINT(" SET INT0\n");
-                    bSetINT0 = true;
-                }
-                break;
-            case INT_SENSE_FALL:
-                if ((pstCPU_->pstRAM->stRegisters.PORTD.PORT2 == 0) && (ucLastINT0 == 1))
-                {
-                    bSetINT0 = true;
-                }
-                break;
-            case INT_SENSE_RISE:
-                if ((pstCPU_->pstRAM->stRegisters.PORTD.PORT2 == 1) && (ucLastINT0 == 0))
-                {
-                    bSetINT0 = true;
-                }
-                break;
+                DEBUG_PRINT(" SET INT0\n");
+                bSetINT0 = true;
             }
+            break;
+        case INT_SENSE_CHANGE:
+            if (pstCPU_->pstRAM->stRegisters.PORTD.PORT2 != ucLastINT0)
+            {
+                DEBUG_PRINT(" SET INT0\n");
+                bSetINT0 = true;
+            }
+            break;
+        case INT_SENSE_FALL:
+            if ((pstCPU_->pstRAM->stRegisters.PORTD.PORT2 == 0) && (ucLastINT0 == 1))
+            {
+                DEBUG_PRINT(" SET INT0\n");
+                bSetINT0 = true;
+            }
+            break;
+        case INT_SENSE_RISE:
+            if ((pstCPU_->pstRAM->stRegisters.PORTD.PORT2 == 1) && (ucLastINT0 == 0))
+            {
+                DEBUG_PRINT(" SET INT0\n");
+                bSetINT0 = true;
+            }
+            break;
         }
-        if (pstCPU_->pstRAM->stRegisters.EIMSK.INT1 == 1)
+    }
+    if (pstCPU_->pstRAM->stRegisters.EIMSK.INT1 == 1)
+    {
+        switch (eINT0Sense)
         {
-            switch (eINT0Sense)
+        case INT_SENSE_LOW:
+            if (pstCPU_->pstRAM->stRegisters.PORTD.PORT3 == 0)
             {
-            case INT_SENSE_LOW:
-                if (pstCPU_->pstRAM->stRegisters.PORTD.PORT3 == 0)
-                {
-                    bSetINT1 = true;
-                }
-                break;
-            case INT_SENSE_CHANGE:
-                if (pstCPU_->pstRAM->stRegisters.PORTD.PORT3 != ucLastINT1)
-                {
-                    bSetINT1 = true;
-                }
-                break;
-            case INT_SENSE_FALL:
-                if ((pstCPU_->pstRAM->stRegisters.PORTD.PORT3 == 0) && (ucLastINT1 == 1))
-                {
-                    bSetINT1 = true;
-                }
-                break;
-            case INT_SENSE_RISE:
-                if ((pstCPU_->pstRAM->stRegisters.PORTD.PORT3 == 1) && (ucLastINT1 == 0))
-                {
-                    bSetINT1 = true;
-                }
-                break;
+                bSetINT1 = true;
             }
+            break;
+        case INT_SENSE_CHANGE:
+            if (pstCPU_->pstRAM->stRegisters.PORTD.PORT3 != ucLastINT1)
+            {
+                bSetINT1 = true;
+            }
+            break;
+        case INT_SENSE_FALL:
+            if ((pstCPU_->pstRAM->stRegisters.PORTD.PORT3 == 0) && (ucLastINT1 == 1))
+            {
+                bSetINT1 = true;
+            }
+            break;
+        case INT_SENSE_RISE:
+            if ((pstCPU_->pstRAM->stRegisters.PORTD.PORT3 == 1) && (ucLastINT1 == 0))
+            {
+                bSetINT1 = true;
+            }
+            break;
         }
     }
 
@@ -252,23 +256,25 @@ static void EINT_Clock(void *context_, struct _AVR_CPU *pstCPU_)
     {
         pstCPU_->pstRAM->stRegisters.EIFR.INTF1 = 1;
     }
-
-    // If we have pending interrupts, and global interrupts are enabled, tell the CPU to
-    // execute the interrupt when it gets the chance.  Note that since interrupts can take a
-    // long time to be acknowledged (based on the system), these flags are set each cycle
-    // until acknowledged.
-    if (pstCPU_->pstRAM->stRegisters.EIFR.INTF0 == 1)
-    {
-        AVR_InterruptCandidate(pstCPU_, 0x01);
-    }
-    if (pstCPU_->pstRAM->stRegisters.EIFR.INTF1 == 1)
-    {
-        AVR_InterruptCandidate(pstCPU_, 0x02);
-    }
-
     // Update locally-cached copy of previous INT0/INT1 pin status.
     ucLastINT0 = pstCPU_->pstRAM->stRegisters.PORTD.PORT2;
     ucLastINT1 = pstCPU_->pstRAM->stRegisters.PORTD.PORT3;
+
+    if (pstCPU_->pstRAM->stRegisters.SREG.I == 1)
+    {
+        // If we have pending interrupts, and global interrupts are enabled, tell the CPU to
+        // execute the interrupt when it gets the chance.  Note that since interrupts can take a
+        // long time to be acknowledged (based on the system), these flags are set each cycle
+        // until acknowledged.
+        if (pstCPU_->pstRAM->stRegisters.EIFR.INTF0 == 1)
+        {
+            AVR_InterruptCandidate(pstCPU_, 0x01);
+        }
+        if (pstCPU_->pstRAM->stRegisters.EIFR.INTF1 == 1)
+        {
+            AVR_InterruptCandidate(pstCPU_, 0x02);
+        }
+    }
 }
 
 //---------------------------------------------------------------------------

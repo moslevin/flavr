@@ -177,7 +177,7 @@ static void Data_Write( AVR_CPU *pstCPU_, uint16_t u16Addr_, uint8_t u8Val_ )
 {
     // Writing to RAM can be a tricky deal, because the address space is shared
     // between RAM, the core registers, and a bunch of peripheral I/O registers.
-    DEBUG_PRINT( "Write: 0x%04X=%02X\n", u16Addr_, u8Val_ );
+    DEBUG_PRINT("Write: 0x%04X=%02X\n", u16Addr_, u8Val_ );
     // Check to see if the write operation falls within the peripheral I/O range
     if (u16Addr_ >= 32 && u16Addr_ <= 255)
     {
@@ -365,14 +365,14 @@ inline void R16_Zero_Flag( AVR_CPU *pstCPU_, uint16_t Result_ )
 inline void ADIW_Overflow_Flag( AVR_CPU *pstCPU_, uint16_t Rd_, uint16_t Result_ )
 {
     pstCPU_->pstRAM->stRegisters.SREG.V =
-            ((Rd_ & 0x0080 == 0) && (Result_ & 0x8000 == 0x8000));
+            ((Rd_ & 0x8000 == 0) && (Result_ & 0x8000 == 0x8000));
 }
 
 //---------------------------------------------------------------------------
 inline void ADIW_Carry_Flag( AVR_CPU *pstCPU_, uint16_t Rd_, uint16_t Result_ )
 {
     pstCPU_->pstRAM->stRegisters.SREG.C =
-            ((Rd_ & 0x0080 == 0x0080) && (Result_ & 0x8000 == 0));
+            ((Rd_ & 0x8000 == 0x8000) && (Result_ & 0x8000 == 0));
 }
 
 //---------------------------------------------------------------------------
@@ -502,7 +502,7 @@ static void AVR_Opcode_SBCI( AVR_CPU *pstCPU_ )
 inline void SBIW_Overflow_Flag( AVR_CPU *pstCPU_, uint16_t Rd_, uint16_t Result_)
 {
     pstCPU_->pstRAM->stRegisters.SREG.V =
-             ((Rd_ & 0x0080 ) == 0x0080) && ((Result_ & 0x8000) == 0);
+             ((Rd_ & 0x8000 ) == 0x8000) && ((Result_ & 0x8000) == 0);
 
 }
 
@@ -510,7 +510,7 @@ inline void SBIW_Overflow_Flag( AVR_CPU *pstCPU_, uint16_t Rd_, uint16_t Result_
 inline void SBIW_Full_Carry( AVR_CPU *pstCPU_, uint16_t Rd_, uint16_t Result_)
 {
     pstCPU_->pstRAM->stRegisters.SREG.C =
-             ((Rd_ & 0x0080 ) == 0) && ((Result_ & 0x8000) == 0x8000);
+             ((Rd_ & 0x8000 ) == 0) && ((Result_ & 0x8000) == 0x8000);
 }
 
 //---------------------------------------------------------------------------
@@ -519,9 +519,11 @@ static void AVR_Opcode_SBIW( AVR_CPU *pstCPU_ )
     uint16_t u16Rd = *pstCPU_->Rd16;
     uint16_t u16Result;
 
+    //fprintf( stderr, "SBIW: RD=[%4X], K=[%2X]\n", u16Rd, pstCPU_->K );
     u16Result = u16Rd - pstCPU_->K;
 
     *pstCPU_->Rd16 = u16Result;
+    //fprintf( stderr, "  Result=[%4X]\n", u16Result );
 
     SBIW_Full_Carry(pstCPU_, u16Rd, u16Result);
     SBIW_Overflow_Flag(pstCPU_, u16Rd, u16Result);
@@ -1838,17 +1840,17 @@ static void AVR_Opcode_BCLR( AVR_CPU *pstCPU_ )
 //---------------------------------------------------------------------------
 static void AVR_Opcode_SBI( AVR_CPU *pstCPU_ )
 {
-    uint8_t u8Temp = Data_Read( pstCPU_, 32 + pstCPU_->A );
+    uint8_t u8Temp = Data_Read( pstCPU_, pstCPU_->A + 32 );
     u8Temp |= (1 << pstCPU_->b);
-    Data_Write( pstCPU_, 32 + pstCPU_->A, u8Temp );
+    Data_Write( pstCPU_, pstCPU_->A + 32, u8Temp );
 }
 
 //---------------------------------------------------------------------------
 static void AVR_Opcode_CBI( AVR_CPU *pstCPU_ )
 {
-    uint8_t u8Temp = Data_Read( pstCPU_, 32 + pstCPU_->A );
+    uint8_t u8Temp = Data_Read( pstCPU_, pstCPU_->A + 32 );
     u8Temp &= ~(1 << pstCPU_->b);
-    Data_Write( pstCPU_, 32 + pstCPU_->A, u8Temp );
+    Data_Write( pstCPU_, pstCPU_->A + 32, u8Temp );
 }
 
 //---------------------------------------------------------------------------
