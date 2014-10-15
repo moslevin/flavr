@@ -82,11 +82,6 @@ const char *Options_GetByName (const char *szAttribute_)
     {
         if (0 == strcmp(astAttributes[j].szAttribute, szAttribute_))
         {
-            if (astAttributes[j].szParameter == 0)
-            {
-                fprintf(stderr, "NULLPARAM!\n");
-                return 0;
-            }
             return (const char*)astAttributes[j].szParameter;
         }
     }
