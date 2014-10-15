@@ -47,6 +47,7 @@
 #include "mega_uart.h"
 #include "mega_eint.h"
 #include "mega_timer16.h"
+#include "mega_timer8.h"
 
 //---------------------------------------------------------------------------
 typedef enum
@@ -138,6 +139,7 @@ void add_plugins(void)
     CPU_AddPeriph(&stCPU, &stEINT_a);
     CPU_AddPeriph(&stCPU, &stEINT_b);
     CPU_AddPeriph(&stCPU, &stTimer16);
+    CPU_AddPeriph(&stCPU, &stTimer8a);
 }
 
 //---------------------------------------------------------------------------

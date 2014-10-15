@@ -200,8 +200,7 @@ static void COMP1B_Ack(struct _AVR_CPU *pstCPU_, uint8_t ucVector_)
 //---------------------------------------------------------------------------
 static void Timer16_Init(void *context_, struct _AVR_CPU *pstCPU_)
 {
-    DEBUG_PRINT(stderr, "Timer16 Init\n");
-    pstCPU_->pstRAM->stRegisters.UCSR0A.UDRE0 = 1;
+    DEBUG_PRINT(stderr, "Timer16 Init\n");    
 
     CPU_RegisterInterruptCallback( pstCPU_, OV1_Ack, 0x0D);
     CPU_RegisterInterruptCallback( pstCPU_, IC1_Ack, 0x0A);
