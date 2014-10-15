@@ -140,6 +140,24 @@ void add_plugins(void)
     CPU_AddPeriph(&stCPU, &stTimer16);
 }
 
+//---------------------------------------------------------------------------
+void flavr_disasm(void)
+{
+    uint32_t u32Size;
+
+    u32Size = stCPU.ulROMSize / sizeof(uint16_t);
+    stCPU.u16PC = 0;
+
+    while (stCPU.u16PC < u32Size)
+    {
+        uint16_t OP = stCPU.pusROM[stCPU.u16PC];
+        printf("0x%04X: [0x%04X] ", stCPU.u16PC, OP);
+        AVR_Decode(&stCPU, OP);
+        AVR_Disasm_Function(OP)(&stCPU);
+        stCPU.u16PC += AVR_Opcode_Size(OP);
+    }
+    exit(0);
+}
 
 //---------------------------------------------------------------------------
 void emulator_init(void)
@@ -173,7 +191,13 @@ void emulator_init(void)
     CPU_Init(&stCPU, &stConfig);
     TraceBuffer_Init( &stTraceBuffer);
     Interactive_Init( &stCPU, &stTraceBuffer );
-    BreakPoint_Insert( &stCPU, 0 );
+
+    // Only insert a breakpoint/enter interactive debugging mode if specified.
+    // Otherwise, start with the emulator running.
+    if (Options_GetByName("--debug"))
+    {
+        BreakPoint_Insert( &stCPU, 0 );
+    }
 
     if (Options_GetByName("--hexfile"))
     {
@@ -181,12 +205,15 @@ void emulator_init(void)
             error_out( INVALID_HEX_FILE );
         }
     }
-    // -- Obviously, this is debug code...
     else
     {
-        if( !AVR_Load_HEX( &stCPU, Options_GetByName("Markade2.hex") ) ) {
-            error_out( INVALID_HEX_FILE );
-        }
+        error_out( INVALID_HEX_FILE );
+    }
+
+    if (Options_GetByName("--disasm"))
+    {
+        // terminates after disassembly is complete
+        flavr_disasm();
     }
 
     add_plugins();
@@ -195,10 +222,14 @@ void emulator_init(void)
 //---------------------------------------------------------------------------
 int main( int argc, char **argv )
 {    
-    splash();
-
     // Initialize all emulator data
     Options_Init(argc, argv);
+
+    if (!Options_GetByName("--silent"))
+    {
+        splash();
+    }
+
     emulator_init();
 
     // Run the emulator/debugger loop.

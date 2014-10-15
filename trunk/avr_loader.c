@@ -51,9 +51,15 @@ bool AVR_Load_HEX( AVR_CPU *pstCPU_, const char *szFilePath_)
     uint32_t u32Addr = 0;
     int fd = -1;
 
-    if (!pstCPU_ || !szFilePath_)
+    if (!pstCPU_)
     {
-        fprintf(stderr, "Invalid args\n");
+        fprintf(stderr, "CPU Not Specified\n");
+        return false;
+    }
+
+    if (!szFilePath_)
+    {
+        fprintf(stderr, "No programming file specified\n");
         return false;
     }
 
@@ -61,7 +67,7 @@ bool AVR_Load_HEX( AVR_CPU *pstCPU_, const char *szFilePath_)
 
     if (-1 == fd)
     {
-        fprintf(stderr, "Unable to create file\n");
+        fprintf(stderr, "Unable to open file\n");
         return false;
     }
 

@@ -23,6 +23,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "emu_config.h"
 
@@ -237,6 +238,10 @@ void CPU_Init( AVR_CPU *pstCPU_, AVR_CPU_Config_t *pstConfig_ )
     pstCPU_->pucEEPROM = (uint8_t*)malloc( pstConfig_->u32EESize );
     pstCPU_->pusROM    = (uint16_t*)malloc( pstConfig_->u32ROMSize );
     pstCPU_->pstRAM    = (AVR_RAM_t*)malloc( pstConfig_->u32RAMSize );
+
+    pstCPU_->ulROMSize = pstConfig_->u32ROMSize;
+    pstCPU_->ulRAMSize = pstConfig_->u32RAMSize;
+    pstCPU_->ulEEPROMSize = pstConfig_->u32EESize;
 
     memset( pstCPU_->pucEEPROM, 0, pstConfig_->u32EESize );
     memset( pstCPU_->pusROM, 0, pstConfig_->u32ROMSize );

@@ -45,49 +45,9 @@ void print_core_regs( AVR_CPU *pstCPU_ )
     PRINT_FUNC("[PC]  = 0x%04X\n", (uint16_t)pstCPU_->u16PC );
     PRINT_FUNC("[SREG]= 0x%02X   [", pstCPU_->pstRAM->stRegisters.SREG.r );
 
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.C)
+    if (1 == pstCPU_->pstRAM->stRegisters.SREG.I)
     {
-        PRINT_FUNC("C");
-    }
-    else
-    {
-        PRINT_FUNC("-");
-    }
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.Z)
-    {
-        PRINT_FUNC("Z");
-    }
-    else
-    {
-        PRINT_FUNC("-");
-    }
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.N)
-    {
-        PRINT_FUNC("N");
-    }
-    else
-    {
-        PRINT_FUNC("-");
-    }
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.V)
-    {
-        PRINT_FUNC("V");
-    }
-    else
-    {
-        PRINT_FUNC("-");
-    }
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.S)
-    {
-        PRINT_FUNC("S");
-    }
-    else
-    {
-        PRINT_FUNC("-");
-    }
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.H)
-    {
-        PRINT_FUNC("H");
+        PRINT_FUNC("I");
     }
     else
     {
@@ -101,9 +61,49 @@ void print_core_regs( AVR_CPU *pstCPU_ )
     {
         PRINT_FUNC("-");
     }
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.I)
+    if (1 == pstCPU_->pstRAM->stRegisters.SREG.H)
     {
-        PRINT_FUNC("I");
+        PRINT_FUNC("H");
+    }
+    else
+    {
+        PRINT_FUNC("-");
+    }
+    if (1 == pstCPU_->pstRAM->stRegisters.SREG.S)
+    {
+        PRINT_FUNC("S");
+    }
+    else
+    {
+        PRINT_FUNC("-");
+    }
+    if (1 == pstCPU_->pstRAM->stRegisters.SREG.V)
+    {
+        PRINT_FUNC("V");
+    }
+    else
+    {
+        PRINT_FUNC("-");
+    }
+    if (1 == pstCPU_->pstRAM->stRegisters.SREG.N)
+    {
+        PRINT_FUNC("N");
+    }
+    else
+    {
+        PRINT_FUNC("-");
+    }
+    if (1 == pstCPU_->pstRAM->stRegisters.SREG.Z)
+    {
+        PRINT_FUNC("Z");
+    }
+    else
+    {
+        PRINT_FUNC("-");
+    }
+    if (1 == pstCPU_->pstRAM->stRegisters.SREG.C)
+    {
+        PRINT_FUNC("C");
     }
     else
     {
