@@ -398,13 +398,13 @@ static void Timer16_Clock(void *context_, struct _AVR_CPU *pstCPU_)
         // Decrement the clock-divide value
         if (u16DivRemain)
         {
-            DEBUG_PRINT(" %d ticks remain\n", u16DivRemain);
+            //DEBUG_PRINT(" %d ticks remain\n", u16DivRemain);
             u16DivRemain--;
         }
         else
         {
             // clock-divider count hits zero, reset and trigger an update.
-            DEBUG_PRINT(" expire and reset\n");
+            //DEBUG_PRINT(" expire and reset\n");
             if (u16DivCycles)
             {
                 u16DivRemain = u16DivCycles;
@@ -449,17 +449,22 @@ static void Timer16_Clock(void *context_, struct _AVR_CPU *pstCPU_)
             }
             else
             {
+                bool bClearTCNT1 = false;
                 if (TCNT1_Read(pstCPU_) == OCR1A_Read(pstCPU_))
                 {
                     DEBUG_PRINT(" CTC1A Match\n" );
                     bCTCA = true;
-                    TCNT1_Clear(pstCPU_);                    
+                    bClearTCNT1 = true;
                 }
                 if (TCNT1_Read(pstCPU_) == ICR1_Read(pstCPU_))
                 {
                     DEBUG_PRINT(" ICR1 Match\n" );
                     bICR = true;
-                    TCNT1_Clear(pstCPU_);                    
+                    bClearTCNT1 = true;
+                }
+                if (bClearTCNT1)
+                {
+                    TCNT1_Clear(pstCPU_);
                 }
             }
         }
@@ -494,7 +499,7 @@ static void Timer16_Clock(void *context_, struct _AVR_CPU *pstCPU_)
     // Check interrupt status to see whether or not any of the pending interrupts
     // should be armed as a candidate this clock cycle
     if (pstCPU_->pstRAM->stRegisters.SREG.I)
-    {
+    {        
         if ((pstCPU_->pstRAM->stRegisters.TIFR1.TOV1 == 1) &&
             (pstCPU_->pstRAM->stRegisters.TIMSK1.TOIE1 == 1))
         {

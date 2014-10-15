@@ -77,4 +77,6 @@ void AVR_Interrupt( AVR_CPU *pstCPU_ )
     // Reset the CPU interrupt priority
     pstCPU_->ucIntPriority = 255;
 
+    // Clear any sleep-mode flags currently set
+    pstCPU_->bAsleep = false;
 }
