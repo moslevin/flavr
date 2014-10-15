@@ -26,7 +26,7 @@
 #include "avr_periphregs.h"
 #include "avr_interrupt.h"
 
-#define DEBUG_PRINT printf
+#define DEBUG_PRINT(...)
 
 //---------------------------------------------------------------------------
 typedef enum
