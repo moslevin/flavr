@@ -151,16 +151,13 @@ static void EINT_Write(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_
     DEBUG_PRINT("EINT Write\n");
     switch (ucAddr_)
     {
-    case 0x69:  // EICRA
-        fprintf(stderr, "ERICRA\n");
+    case 0x69:  // EICRA        
         EICRA_Write(pstCPU_, ucValue_);
         break;
-    case 0x3C:  // EIFR
-        fprintf(stderr, "EIFR\n");
+    case 0x3C:  // EIFR        
         EIFR_Write(pstCPU_, ucValue_);
         break;
-    case 0x3D:  // EIMSK
-        fprintf(stderr, "MASK\n");
+    case 0x3D:  // EIMSK        
         EIMSK_Write(pstCPU_, ucValue_);
         break;
     default:
@@ -179,8 +176,7 @@ static void EINT_Clock(void *context_, struct _AVR_CPU *pstCPU_)
 
     //!! ToDo - Consider adding support for external stimulus (which would
     //!! Invoke inputs on PIND as opposed to PORTD)...  This will only work
-    //!! as software interrupts in its current state
-    //fprintf( stderr, "p/c=[%d,%d]\n", ucLastINT0, pstCPU_->pstRAM->stRegisters.PORTD.PORT2 );
+    //!! as software interrupts in its current state    
 
     if (pstCPU_->pstRAM->stRegisters.EIMSK.INT0 == 1)
     {

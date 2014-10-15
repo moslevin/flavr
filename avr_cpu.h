@@ -110,6 +110,10 @@ struct _AVR_CPU
     uint8_t      *pucEEPROM;
     AVR_RAM_t    *pstRAM;
 
+    uint32_t    ulROMSize;
+    uint32_t    ulEEPROMSize;
+    uint32_t    ulRAMSize;
+
     //---------------------------------------------------------------------------
     uint8_t     ucIntPriority;  // Priority of pending interrupts this cycle
 

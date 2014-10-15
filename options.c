@@ -29,6 +29,7 @@ typedef struct
 {
     const char *szAttribute;    //!< Name of the attribute (i.e. what's parsed from the commandline)
     char *szParameter;          //!< Parameter string associated with the option
+    bool bStandalone;           //!< Attribute is standalone (no parameter value expected)
 } Option_t;
 
 //---------------------------------------------------------------------------
@@ -40,6 +41,9 @@ typedef enum
     OPTION_ROMSIZE,
     OPTION_EESIZE,
     OPTION_HEXFILE,
+    OPTION_DEBUG,
+    OPTION_SILENT,
+    OPTION_DISASM,
 //--
     OPTION_NUM
 } OptionIndex_t;
@@ -47,12 +51,15 @@ typedef enum
 //---------------------------------------------------------------------------
 static Option_t astAttributes[OPTION_NUM] =
 {
-    {"--variant", NULL },
-    {"--freq", NULL },
-    {"--ramsize", NULL },
-    {"--romsize", NULL },
-    {"--eesize", NULL },
-    {"--hexfile", NULL }
+    {"--variant", NULL, false },
+    {"--freq", NULL, false },
+    {"--ramsize", NULL, false },
+    {"--romsize", NULL, false },
+    {"--eesize", NULL, false },
+    {"--hexfile", NULL, false },
+    {"--debug", NULL, true },
+    {"--silent", NULL, true },
+    {"--disasm", NULL, true }
 };
 
 //---------------------------------------------------------------------------
@@ -64,9 +71,7 @@ static void Options_SetDefaults( void )
     astAttributes[ OPTION_RAMSIZE ].szParameter  = strdup( "2048" );
     astAttributes[ OPTION_ROMSIZE ].szParameter  = strdup( "32768" );
     astAttributes[ OPTION_EESIZE ].szParameter   = strdup( "2048" );
-    astAttributes[ OPTION_HEXFILE ].szParameter  = strdup( "markade2.hex" );
 }
-
 //---------------------------------------------------------------------------
 const char *Options_GetByName (const char *szAttribute_)
 {
@@ -77,6 +82,11 @@ const char *Options_GetByName (const char *szAttribute_)
     {
         if (0 == strcmp(astAttributes[j].szAttribute, szAttribute_))
         {
+            if (astAttributes[j].szParameter == 0)
+            {
+                fprintf(stderr, "NULLPARAM!\n");
+                return 0;
+            }
             return (const char*)astAttributes[j].szParameter;
         }
     }
@@ -88,7 +98,7 @@ static uint16_t Options_ParseElement( int start_, int argc_, char **argv_ )
 {
     // Parse out specific option parameter data for a given option attribute
     uint16_t i = start_;
-    uint16_t j;
+    uint16_t j;    
 
     while (i < argc_)
     {        
@@ -97,7 +107,16 @@ static uint16_t Options_ParseElement( int start_, int argc_, char **argv_ )
         {
             if (0 == strcmp(astAttributes[j].szAttribute, argv_[i]))
             {
-                // Match - ensure the user provided a parameter for this attribute
+                // Match - is the option stand-alone, or does it take a parameter?
+                if (astAttributes[j].bStandalone)
+                {
+                    // Standalone argument, auto-seed a "1" value for the parameter to
+                    // indicate that the option was set on the commandline
+                    astAttributes[j].szParameter = strdup("1");
+                    return 1;
+                }
+
+                // ensure the user provided a parameter for this attribute
                 if (i + 1 >= argc_)
                 {
                     fprintf( stderr, "Error: Paramter expected for attribute %s", argv_[i] );
@@ -117,7 +136,7 @@ static uint16_t Options_ParseElement( int start_, int argc_, char **argv_ )
     }
 
     // Unknown option - 1 token
-    // fprintf( stderr, "WARN: Invalid option \"%s\"", argv_[i] );
+    fprintf( stderr, "WARN: Invalid option \"%s\"", argv_[i] );
 
     return 1;
 }

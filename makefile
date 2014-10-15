@@ -1,16 +1,4 @@
 CC=gcc
-SRC_LIST_DISASM=\
-	avr_cpu.c \
-	avr_cpu_print.c \
-	avr_disasm.c \
-	avr_io.c \
-	avr_loader.c \
-	avr_op_decode.c \
-	avr_op_size.c \
-	avr_opcodes.c \
-	avr_op_cycles.c \
-	intel_hex.c \
-	disasm.c
 
 SRC_LIST_EMULATOR=\
 	avr_cpu.c \
@@ -37,17 +25,14 @@ SRC_LIST_EMULATOR=\
 printlist:
 	echo $(SRC_LIST_DISASM)
 
-all: emulator disasm
+all: emulator
 
 emulator: $(SRC_LIST_EMULATOR:%.c=%.o)
-	$(CC) -g3 -o emulator.exe $(SRC_LIST_EMULATOR:%.c=%.o)
-
-
-disasm: $(SRC_LIST_DISASM:%.c=%.o)
-	$(CC) -g3 -o disasm.exe $(SRC_LIST_DISASM:%.c=%.o)
+	$(CC) -g3 -Os -o flavr $(SRC_LIST_EMULATOR:%.c=%.o)
 
 %.o : %.c
-	$(CC) $< -c -g3
+	$(CC) $< -c -g3 -Os
 
 clean:
 	rm *.o
+	rm flavr.exe

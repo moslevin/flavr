@@ -44,9 +44,7 @@ void IO_AddReader(struct _AVR_CPU *pstCPU_, AVRPeripheral *pstPeriph_, uint8_t a
     node->pfReader = pstPeriph_->pfRead;
     node->pvContext = pstPeriph_->pvContext;
 
-    pstCPU_->apstPeriphReadTable[addr_] = node;
-
-    printf( "Peripheral reader added @ addr 0x%04X\n", addr_ );
+    pstCPU_->apstPeriphReadTable[addr_] = node;    
 }
 
 //---------------------------------------------------------------------------
@@ -65,8 +63,6 @@ void IO_AddWriter(struct _AVR_CPU *pstCPU_, AVRPeripheral *pstPeriph_, uint8_t a
     node->pvContext = pstPeriph_->pvContext;
 
     pstCPU_->apstPeriphWriteTable[addr_] = node;
-
-    printf( "Peripheral writer added @ addr 0x%04X\n", addr_ );
 }
 
 //---------------------------------------------------------------------------
