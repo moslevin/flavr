@@ -285,7 +285,8 @@ static void Timer8_Clock(void *context_, struct _AVR_CPU *pstCPU_)
             //DEBUG_PRINT(" %d ticks remain\n", u16DivRemain);
             u16DivRemain--;
         }
-        else
+
+        if (!u16DivRemain)
         {
             // clock-divider count hits zero, reset and trigger an update.
             DEBUG_PRINT(" expire and reset\n");
