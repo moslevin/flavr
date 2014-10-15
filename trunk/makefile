@@ -20,6 +20,7 @@ SRC_LIST_EMULATOR=\
 	mega_uart.c \
 	mega_eint.c \
 	mega_timer16.c \
+	mega_timer8.c \
 	flavr.c
 
 printlist:
