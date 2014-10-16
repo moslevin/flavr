@@ -365,14 +365,14 @@ inline void R16_Zero_Flag( AVR_CPU *pstCPU_, uint16_t Result_ )
 inline void ADIW_Overflow_Flag( AVR_CPU *pstCPU_, uint16_t Rd_, uint16_t Result_ )
 {
     pstCPU_->pstRAM->stRegisters.SREG.V =
-            ((Rd_ & 0x8000 == 0) && (Result_ & 0x8000 == 0x8000));
+            (((Rd_ & 0x8000) == 0) && ((Result_ & 0x8000) == 0x8000));
 }
 
 //---------------------------------------------------------------------------
 inline void ADIW_Carry_Flag( AVR_CPU *pstCPU_, uint16_t Rd_, uint16_t Result_ )
 {
     pstCPU_->pstRAM->stRegisters.SREG.C =
-            ((Rd_ & 0x8000 == 0x8000) && (Result_ & 0x8000 == 0));
+            (((Rd_ & 0x8000) == 0x8000) && ((Result_ & 0x8000) == 0));
 }
 
 //---------------------------------------------------------------------------
@@ -385,7 +385,7 @@ static void AVR_Opcode_ADIW( AVR_CPU *pstCPU_ )
     u16Result = u16Rd + u16K;
     *(pstCPU_->Rd16) = u16Result;
 
-// ---- Update Flags ----
+// ---- Update Flags ----   
     ADIW_Carry_Flag( pstCPU_, u16Rd, u16Result);
     ADIW_Overflow_Flag( pstCPU_, u16Rd, u16Result );
     R16_Negative_Flag( pstCPU_, u16Result );
