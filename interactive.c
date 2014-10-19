@@ -437,7 +437,7 @@ static bool Interactive_Help( char *szCommand_ )
 //---------------------------------------------------------------------------
 static bool Interactive_Disasm( char *szCommand_ )
 {
-    uint16_t OP = pstCPU->pusROM[pstCPU->u16PC];
+    uint16_t OP = pstCPU->pu16ROM[pstCPU->u16PC];
     printf("0x%04X: [0x%04X] ", pstCPU->u16PC, OP);
     AVR_Decode(pstCPU, OP);
     AVR_Disasm_Function(OP)(pstCPU);

@@ -118,7 +118,7 @@ static void AVR_Decoder_LDS_STS( AVR_CPU *pstCPU_, uint16_t OP_)
     uint8_t Rd = (OP_ & 0x01F0) >> 4;
 
     pstCPU_->Rd = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
-    pstCPU_->K = pstCPU_->pusROM[ pstCPU_->u16PC + 1 ];
+    pstCPU_->K = pstCPU_->pu16ROM[ pstCPU_->u16PC + 1 ];
 }
 //---------------------------------------------------------------------------
 static void AVR_Decoder_Register_Single( AVR_CPU *pstCPU_, uint16_t OP_)
@@ -160,7 +160,7 @@ static void AVR_Decoder_DES_round_4( AVR_CPU *pstCPU_, uint16_t OP_)
 //---------------------------------------------------------------------------
 static void AVR_Decoder_JMP_CALL_22( AVR_CPU *pstCPU_, uint16_t OP_)
 {
-    uint16_t op = pstCPU_->pusROM[ pstCPU_->u16PC + 1 ];
+    uint16_t op = pstCPU_->pu16ROM[ pstCPU_->u16PC + 1 ];
     uint32_t k = op;
     k |= (((OP_ & 0x0001) | (OP_ & 0x01F0) >> 3) << 16);
 

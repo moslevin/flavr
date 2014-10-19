@@ -27,9 +27,9 @@ void AVR_InterruptCandidate( AVR_CPU *pstCPU_, uint8_t u8Vector_ )
 {
     // Interrupts are prioritized by index -- lower == higher priority.
     // Candidate is the lowest
-    if (u8Vector_ < pstCPU_->ucIntPriority)
+    if (u8Vector_ < pstCPU_->u8IntPriority)
     {
-        pstCPU_->ucIntPriority = u8Vector_;
+        pstCPU_->u8IntPriority = u8Vector_;
     }
 }
 
@@ -37,7 +37,7 @@ void AVR_InterruptCandidate( AVR_CPU *pstCPU_, uint8_t u8Vector_ )
 void AVR_Interrupt( AVR_CPU *pstCPU_ )
 {
     // First - check to see if there's an interrupt pending.
-    if (pstCPU_->ucIntPriority == 255)
+    if (pstCPU_->u8IntPriority == 255)
     {
         return; // no interrupt pending
     }
@@ -48,8 +48,8 @@ void AVR_Interrupt( AVR_CPU *pstCPU_ )
 
     uint16_t u16StoredPC = pstCPU_->u16PC;
 
-    pstCPU_->pstRAM->aucRAM[ u16SP ]     = (uint8_t)(u16StoredPC & 0x00FF);
-    pstCPU_->pstRAM->aucRAM[ u16SP - 1 ] = (uint8_t)(u16StoredPC >> 8);
+    pstCPU_->pstRAM->au8RAM[ u16SP ]     = (uint8_t)(u16StoredPC & 0x00FF);
+    pstCPU_->pstRAM->au8RAM[ u16SP - 1 ] = (uint8_t)(u16StoredPC >> 8);
 
     // Stack is post-decremented
     u16SP -= 2;
@@ -59,7 +59,7 @@ void AVR_Interrupt( AVR_CPU *pstCPU_ )
     pstCPU_->pstRAM->stRegisters.SPL.r = (u16SP & 0x00FF);
 
     // Read the new PC from the vector table
-    uint16_t u16NewPC = (uint16_t)(pstCPU_->ucIntPriority * 2);
+    uint16_t u16NewPC = (uint16_t)(pstCPU_->u8IntPriority * 2);
 
     // Set the new PC
     pstCPU_->u16PC = u16NewPC;
@@ -69,13 +69,13 @@ void AVR_Interrupt( AVR_CPU *pstCPU_ )
     pstCPU_->pstRAM->stRegisters.SREG.I = 0;
 
     // Run the interrupt-acknowledge callback associated with this vector
-    if (pstCPU_->ucIntPriority < 32 && pstCPU_->apfInterruptCallbacks[ pstCPU_->ucIntPriority ])
+    if (pstCPU_->u8IntPriority < 32 && pstCPU_->apfInterruptCallbacks[ pstCPU_->u8IntPriority ])
     {
-        pstCPU_->apfInterruptCallbacks[ pstCPU_->ucIntPriority ]( pstCPU_, pstCPU_->ucIntPriority );
+        pstCPU_->apfInterruptCallbacks[ pstCPU_->u8IntPriority ]( pstCPU_, pstCPU_->u8IntPriority );
     }
 
     // Reset the CPU interrupt priority
-    pstCPU_->ucIntPriority = 255;
+    pstCPU_->u8IntPriority = 255;
 
     // Clear any sleep-mode flags currently set
     pstCPU_->bAsleep = false;

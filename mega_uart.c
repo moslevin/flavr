@@ -178,7 +178,7 @@ static void UART_Init(void *context_, struct _AVR_CPU *pstCPU_)
 static void UART_Read(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t *pucValue_ )
 {
     DEBUG_PRINT( "UART Read: 0x%02x\n", ucAddr_);
-    *pucValue_ = pstCPU_->pstRAM->aucRAM[ ucAddr_ ];
+    *pucValue_ = pstCPU_->pstRAM->au8RAM[ ucAddr_ ];
     switch (ucAddr_)
     {
         case 0xC6: // UDR0
@@ -277,23 +277,23 @@ static void UART_Write(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_
         break;
     case 0xC1:  //UCSR0B
         DEBUG_PRINT("Write UCRS0B\n");
-        pstCPU_->pstRAM->aucRAM[ ucAddr_ ] = ucValue_;
+        pstCPU_->pstRAM->au8RAM[ ucAddr_ ] = ucValue_;
         break;
     case 0xC2:  //UCSR0C
         DEBUG_PRINT("Write UCRS0C\n");
-        pstCPU_->pstRAM->aucRAM[ ucAddr_ ] = ucValue_;
+        pstCPU_->pstRAM->au8RAM[ ucAddr_ ] = ucValue_;
         break;
     case 0xC3:  // NA.
         break;
     case 0xC4:  //UBRR0L
     case 0xC5:  //UBRR0H
         DEBUG_PRINT("Write UBRR0x\n");
-        pstCPU_->pstRAM->aucRAM[ ucAddr_ ] = ucValue_;
+        pstCPU_->pstRAM->au8RAM[ ucAddr_ ] = ucValue_;
         UART_WriteBaudReg(pstCPU_);
         break;
     case 0xC6:  //UDR0
         DEBUG_PRINT("Write UDR0\n");
-        pstCPU_->pstRAM->aucRAM[ ucAddr_ ] = ucValue_;
+        pstCPU_->pstRAM->au8RAM[ ucAddr_ ] = ucValue_;
         UART_WriteDataReg(pstCPU_);
         break;
     default:

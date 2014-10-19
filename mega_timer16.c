@@ -212,7 +212,7 @@ static void Timer16_Init(void *context_, struct _AVR_CPU *pstCPU_)
 static void Timer16_Read(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t *pucValue_ )
 {
     DEBUG_PRINT(stderr, "Timer16 Read: 0x%02x\n", ucAddr_);
-    *pucValue_ = pstCPU_->pstRAM->aucRAM[ ucAddr_ ];
+    *pucValue_ = pstCPU_->pstRAM->au8RAM[ ucAddr_ ];
 }
 
 //---------------------------------------------------------------------------

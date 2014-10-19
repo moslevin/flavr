@@ -44,7 +44,7 @@ typedef struct
     union
     {
         AVRRegisterFile stRegisters;
-        uint8_t aucRAM[ sizeof(AVRRegisterFile) ];
+        uint8_t au8RAM[ sizeof(AVRRegisterFile) ];
     };
 } AVR_RAM_t;    // Note - the true size of this struct is defined at runtime based on the configured RAM size.
 
@@ -106,16 +106,16 @@ struct _AVR_CPU
     // Setting up regions of memory for general-purpose RAM (shared with the
     // IO space from 0-0xFF), ROM/FLASH, and EEPROM.
     //---------------------------------------------------------------------------
-    uint16_t     *pusROM;
-    uint8_t      *pucEEPROM;
+    uint16_t     *pu16ROM;
+    uint8_t      *pu8EEPROM;
     AVR_RAM_t    *pstRAM;
 
-    uint32_t    ulROMSize;
-    uint32_t    ulEEPROMSize;
-    uint32_t    ulRAMSize;
+    uint32_t    u32ROMSize;
+    uint32_t    u32EEPROMSize;
+    uint32_t    u32RAMSize;
 
     //---------------------------------------------------------------------------
-    uint8_t     ucIntPriority;  // Priority of pending interrupts this cycle
+    uint8_t     u8IntPriority;  // Priority of pending interrupts this cycle
 
     //---------------------------------------------------------------------------
     InterruptAck apfInterruptCallbacks[32]; // Interrupt callbacks
@@ -155,9 +155,10 @@ void CPU_RunCycle( AVR_CPU *pstCPU_ );
 
 //---------------------------------------------------------------------------
 /*!
- * \brief CPU_AddPeriph
- * \param pstCPU_
- * \param pstPeriph_
+ * \brief CPU_AddPeriph Add a new I/O Peripheral to the CPU
+ * \param pstCPU_ Pointer to a valid AVR CPU Object
+ * \param pstPeriph_ Pointer to an initialized AVR Peripheral object to be
+ *                associated with this CPU.
  */
 void CPU_AddPeriph( AVR_CPU *pstCPU_, AVRPeripheral *pstPeriph_ );
 

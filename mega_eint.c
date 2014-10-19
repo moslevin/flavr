@@ -63,7 +63,7 @@ static void EINT_Init(void *context_, struct _AVR_CPU *pstCPU_)
 //---------------------------------------------------------------------------
 static void EINT_Read(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t *pucValue_ )
 {
-    *pucValue_ = pstCPU_->pstRAM->aucRAM[ucAddr_];
+    *pucValue_ = pstCPU_->pstRAM->au8RAM[ucAddr_];
 }
 
 //---------------------------------------------------------------------------

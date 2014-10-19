@@ -26,10 +26,11 @@
 
 //---------------------------------------------------------------------------
 /*!
- * \brief AVR_Load_HEX
- * \param pstCPU_
- * \param szFilePath_
- * \return
+ * \brief AVR_Load_HEX Load a hex file, specified by path, into the flash
+ *        memory of the specified CPU object
+ * \param pstCPU_ CPU Object to be loaded with program content
+ * \param szFilePath_ Pointer to the hexfile path
+ * \return true if the hex file load operation succeeded, false otherwise
  */
 bool AVR_Load_HEX( AVR_CPU *pstCPU_, const char *szFilePath_);
 

@@ -124,7 +124,7 @@ void emulator_loop(void)
         Interactive_CheckAndExecute();
 
         // Store the current CPU state into the tracebuffer
-        TraceBuffer_StoreFromCPU(&stTraceBuffer, &stCPU);
+        // TraceBuffer_StoreFromCPU(&stTraceBuffer, &stCPU);
 
         // Execute a machine cycle
         CPU_RunCycle( &stCPU );
@@ -147,12 +147,12 @@ void flavr_disasm(void)
 {
     uint32_t u32Size;
 
-    u32Size = stCPU.ulROMSize / sizeof(uint16_t);
+    u32Size = stCPU.u32ROMSize / sizeof(uint16_t);
     stCPU.u16PC = 0;
 
     while (stCPU.u16PC < u32Size)
     {
-        uint16_t OP = stCPU.pusROM[stCPU.u16PC];
+        uint16_t OP = stCPU.pu16ROM[stCPU.u16PC];
         printf("0x%04X: [0x%04X] ", stCPU.u16PC, OP);
         AVR_Decode(&stCPU, OP);
         AVR_Disasm_Function(OP)(&stCPU);

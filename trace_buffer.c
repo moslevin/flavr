@@ -49,7 +49,7 @@ void TraceBuffer_StoreFromCPU( TraceBuffer_t *pstTraceBuffer_, AVR_CPU *pstCPU_ 
     pstTraceElement->u16SP         = ((uint16_t)(pstCPU_->pstRAM->stRegisters.SPH.r) << 8) |
                                       (uint16_t)(pstCPU_->pstRAM->stRegisters.SPL.r);
 
-    pstTraceElement->u16OpCode     = pstCPU_->pusROM[ pstCPU_->u16PC ];
+    pstTraceElement->u16OpCode     = pstCPU_->pu16ROM[ pstCPU_->u16PC ];
     pstTraceElement->u8SR          = pstCPU_->pstRAM->stRegisters.SREG.r;
 
     // Memcpy the core registers in one chunk

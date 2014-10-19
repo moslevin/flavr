@@ -40,7 +40,7 @@ static void AVR_Copy_Record( AVR_CPU *pstCPU_, HEX_Record_t *pstHex_)
         u16Data <<= 8;
         u16Data |= pstHex_->u8Data[i];
 
-        pstCPU_->pusROM[(pstHex_->u16Address + i) >> 1] = u16Data;
+        pstCPU_->pu16ROM[(pstHex_->u16Address + i) >> 1] = u16Data;
     }
 }
 
