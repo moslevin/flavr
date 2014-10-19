@@ -53,8 +53,8 @@
 
 static AVR_Decoder astDecoders[65536] = { 0 };
 static AVR_Opcode  astOpcodes[65536] = { 0 };
-static uint8_t     aucOpSizes[65536] = { 0 };
-static uint8_t     aucOpCycles[65536] = { 0 };
+static uint8_t     au8OpSizes[65536] = { 0 };
+static uint8_t     au8OpCycles[65536] = { 0 };
 
 #endif
 
@@ -88,14 +88,14 @@ uint16_t CPU_Fetch( AVR_CPU *pstCPU_ )
     {
         return 0xFFFF;
     }
-    return pstCPU_->pusROM[ pstCPU_->u16PC ];
+    return pstCPU_->pu16ROM[ pstCPU_->u16PC ];
 }
 
 //---------------------------------------------------------------------------
 static void CPU_GetOpCycles( AVR_CPU *pstCPU_, uint16_t OP_ )
 {
 #if FEATURE_USE_JUMPTABLES
-    pstCPU_->u16ExtraCycles = aucOpCycles[ OP_ ];
+    pstCPU_->u16ExtraCycles = au8OpCycles[ OP_ ];
 #else
     pstCPU_->u16ExtraCycles = AVR_Opcode_Cycles( OP_ );
 #endif
@@ -105,7 +105,7 @@ static void CPU_GetOpCycles( AVR_CPU *pstCPU_, uint16_t OP_ )
 static void CPU_GetOpSize( AVR_CPU *pstCPU_, uint16_t OP_ )
 {
 #if FEATURE_USE_JUMPTABLES
-    pstCPU_->u16ExtraPC = aucOpSizes[ OP_ ];
+    pstCPU_->u16ExtraPC = au8OpSizes[ OP_ ];
 #else
     pstCPU_->u16ExtraPC = AVR_Opcode_Size( OP_ );
 #endif
@@ -213,7 +213,7 @@ static void CPU_BuildSizeTable(void)
     uint32_t i;
     for (i = 0; i < 65536; i++)
     {
-        aucOpSizes[i] = AVR_Opcode_Size(i);
+        au8OpSizes[i] = AVR_Opcode_Size(i);
     }
 }
 
@@ -223,7 +223,7 @@ static void CPU_BuildCycleTable(void)
     uint32_t i;
     for (i = 0; i < 65536; i++)
     {
-        aucOpCycles[i] = AVR_Opcode_Cycles(i);
+        au8OpCycles[i] = AVR_Opcode_Cycles(i);
     }
 }
 #endif
@@ -235,16 +235,16 @@ void CPU_Init( AVR_CPU *pstCPU_, AVR_CPU_Config_t *pstConfig_ )
     pstConfig_->u32RAMSize += 256;
 
     // Dynamically allocate memory for RAM, ROM, and EEPROM buffers
-    pstCPU_->pucEEPROM = (uint8_t*)malloc( pstConfig_->u32EESize );
-    pstCPU_->pusROM    = (uint16_t*)malloc( pstConfig_->u32ROMSize );
+    pstCPU_->pu8EEPROM = (uint8_t*)malloc( pstConfig_->u32EESize );
+    pstCPU_->pu16ROM    = (uint16_t*)malloc( pstConfig_->u32ROMSize );
     pstCPU_->pstRAM    = (AVR_RAM_t*)malloc( pstConfig_->u32RAMSize );
 
-    pstCPU_->ulROMSize = pstConfig_->u32ROMSize;
-    pstCPU_->ulRAMSize = pstConfig_->u32RAMSize;
-    pstCPU_->ulEEPROMSize = pstConfig_->u32EESize;
+    pstCPU_->u32ROMSize = pstConfig_->u32ROMSize;
+    pstCPU_->u32RAMSize = pstConfig_->u32RAMSize;
+    pstCPU_->u32EEPROMSize = pstConfig_->u32EESize;
 
-    memset( pstCPU_->pucEEPROM, 0, pstConfig_->u32EESize );
-    memset( pstCPU_->pusROM, 0, pstConfig_->u32ROMSize );
+    memset( pstCPU_->pu8EEPROM, 0, pstConfig_->u32EESize );
+    memset( pstCPU_->pu16ROM, 0, pstConfig_->u32ROMSize );
     memset( pstCPU_->pstRAM, 0, pstConfig_->u32RAMSize );
 
     // Set the base stack pointer to top-of-ram.
@@ -252,7 +252,7 @@ void CPU_Init( AVR_CPU *pstCPU_, AVR_CPU_Config_t *pstConfig_ )
     pstCPU_->pstRAM->stRegisters.SPL.r = 0xFF;
 
     // Reset the interrupt priority register
-    pstCPU_->ucIntPriority = 255;
+    pstCPU_->u8IntPriority = 255;
 
 #if FEATURE_USE_JUMPTABLES
     CPU_BuildCycleTable();

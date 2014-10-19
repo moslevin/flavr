@@ -31,16 +31,25 @@ typedef void (*AVR_Opcode)( AVR_CPU *pstCPU_);
 //---------------------------------------------------------------------------
 /*!
  * \brief AVR_Opcode_Function
- * \param pstCPU_
- * \return
+ *
+ * Return a function pointer corresponding to the CPU logic for a given
+ * opcode.
+ *
+ * \param OP_ Opcode to return an "opcode execution" function pointer for
+ * \return Opcode execution function pointer corresponding to the given opcode.
  */
 AVR_Opcode AVR_Opcode_Function( uint16_t OP_ );
 
 //---------------------------------------------------------------------------
 /*!
  * \brief AVR_RunOpcode
- * \param pstCPU_
- * \param OP_
+ *
+ * Execute the instruction corresponding to the provided opcode, on the provided
+ * CPU object.  Note that the opcode must have just been decoded on the given
+ * CPU object before calling this function.
+ *
+ * \param pstCPU_ Pointer to a valid CPU object that has just decoded the opcode
+ * \param OP_ Opcode to execute
  */
 void AVR_RunOpcode( AVR_CPU *pstCPU_,  uint16_t OP_ );
 

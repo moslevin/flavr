@@ -25,31 +25,6 @@
 #include "avr_op_size.h"
 
 //---------------------------------------------------------------------------
-static uint8_t AVR_Opcode_Size_NOP( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_Register_Pair_4bit( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_Register_Pair_3bit( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_Register_Pair_5bit( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_Register_Immediate( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_LDST_YZ_k( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_LDST( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_Register_Single( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_Register_SC( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_Misc( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_Indirect_Jump( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_DEC_Rd( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_DES_round_4( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_JMP_CALL_22( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_ADIW_SBIW_6( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_IO_Bit( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_MUL( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_IO_In_Out( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_Relative_Jump( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_LDI( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_Conditional_Branch( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_BLD_BST( uint16_t OP_);
-static uint8_t AVR_Opcode_Size_SBRC_SBRS( uint16_t OP_);
-
-//---------------------------------------------------------------------------
 static uint8_t AVR_Opcode_Size_NOP( uint16_t OP_)
 {
     return 1;

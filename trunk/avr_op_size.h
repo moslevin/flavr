@@ -26,8 +26,13 @@
 //---------------------------------------------------------------------------
 /*!
  * \brief AVR_Opocde_Size
- * \param OP_
- * \return The number of words in an opcode
+ *
+ * Return the number of bytes are in a specific opcode based on a 16-bt first
+ * opcode word.
+ *
+ * \param OP_ Opcode word to determine instruction size for
+ *
+ * \return The number of words in an instruction
  */
 uint8_t AVR_Opcode_Size( uint16_t OP_ );
 

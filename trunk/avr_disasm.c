@@ -1628,7 +1628,7 @@ static void AVR_Disasm_XCH( AVR_CPU *pstCPU_ )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_Unimplemented(  AVR_CPU *pstCPU_ )
 {
-    printf( ".db 0x%04X ; Data (not an opcode)\n", pstCPU_->pusROM[ pstCPU_->u16PC ] );
+    printf( ".db 0x%04X ; Data (not an opcode)\n", pstCPU_->pu16ROM[ pstCPU_->u16PC ] );
 }
 
 //---------------------------------------------------------------------------

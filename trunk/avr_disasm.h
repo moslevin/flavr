@@ -23,6 +23,17 @@
 
 #include "avr_opcodes.h"
 
+/*!
+ * \brief AVR_Disasm_Function
+ *
+ * Return a function pointer to a disassembly routine corresponding to a
+ * given opcode.
+ *
+ * \param OP_ Opcode to disasemble
+ * \return Function pointer that, when called with a valid CPU object and
+ *         opcode, will produce a valid disassembly statement to standard
+ *         output.
+ */
 AVR_Opcode AVR_Disasm_Function( uint16_t OP_ );
 
 

@@ -26,10 +26,6 @@
 #include <stdbool.h>
 
 #define CONFIG_IO_ADDRESS_BYTES        (256)                       // First bytes of address space are I/O range
-#define CONFIG_AVR_ROM_SIZE            (65536 * sizeof(uint16_t))  // Size of virtual AVR's ROM
-#define CONFIG_AVR_RAM_SIZE            (16384 * sizeof(uint8_t))   // Size of virtual AVR's RAM
-#define CONFIG_AVR_EEPROM_SIZE         (4096 * sizeof(uint8_t))    // Size of virtual AVR's EEPROM
-
 
 /*!
     Jump-tables can be used to optimize the execution of opcodes by building

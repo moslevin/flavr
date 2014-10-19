@@ -115,13 +115,13 @@ void print_core_regs( AVR_CPU *pstCPU_ )
 //---------------------------------------------------------------------------
 void print_io_reg( AVR_CPU *pstCPU_, uint8_t u8Addr_ )
 {
-    PRINT_FUNC( "[IO%02X]= 0x%02X\n", u8Addr_, pstCPU_->pstRAM->aucRAM[u8Addr_] );
+    PRINT_FUNC( "[IO%02X]= 0x%02X\n", u8Addr_, pstCPU_->pstRAM->au8RAM[u8Addr_] );
 }
 
 //---------------------------------------------------------------------------
 void print_io_reg_with_name( AVR_CPU *pstCPU_, uint8_t u8Addr_, const char *szName_ )
 {
-    PRINT_FUNC( "[%s]= 0x%02X\n", szName_, pstCPU_->pstRAM->aucRAM[u8Addr_] );
+    PRINT_FUNC( "[%s]= 0x%02X\n", szName_, pstCPU_->pstRAM->au8RAM[u8Addr_] );
 }
 
 //---------------------------------------------------------------------------
@@ -146,7 +146,7 @@ void print_ram( AVR_CPU *pstCPU_, uint16_t u16Start_, uint16_t u16Span_ )
         PRINT_FUNC( "|" );
         for (i = 0; i < j; i++)
         {
-            uint8_t u8Char = pstCPU_->pstRAM->aucRAM[u16Start_ + i];
+            uint8_t u8Char = pstCPU_->pstRAM->au8RAM[u16Start_ + i];
             if (u8Char < 32)
             {
                 u8Char = '.';
@@ -165,7 +165,7 @@ void print_ram( AVR_CPU *pstCPU_, uint16_t u16Start_, uint16_t u16Span_ )
         PRINT_FUNC( "|" );
         for (i = 0; i < j; i++)
         {
-            PRINT_FUNC( " %02X", pstCPU_->pstRAM->aucRAM[u16Start_ + i]);
+            PRINT_FUNC( " %02X", pstCPU_->pstRAM->au8RAM[u16Start_ + i]);
         }
 
         if (u16Span_ < RAM_DISPLAY_SPAN)
@@ -203,7 +203,7 @@ void print_rom( AVR_CPU *pstCPU_, uint16_t u16Start_, uint16_t u16Span_ )
         PRINT_FUNC( "|" );
         for (i = 0; i < j; i++)
         {
-            uint16_t u16Val = pstCPU_->pusROM[u16Start_ + i];
+            uint16_t u16Val = pstCPU_->pu16ROM[u16Start_ + i];
             uint8_t u8High = u16Val >> 8;
             uint8_t u8Low = u16Val & 0x00FF;
 
@@ -229,7 +229,7 @@ void print_rom( AVR_CPU *pstCPU_, uint16_t u16Start_, uint16_t u16Span_ )
         PRINT_FUNC( "|" );
         for (i = 0; i < j; i++)
         {
-            PRINT_FUNC( " %04X", pstCPU_->pusROM[u16Start_ + i]);
+            PRINT_FUNC( " %04X", pstCPU_->pu16ROM[u16Start_ + i]);
         }
 
         if (u16Span_ < ROM_DISPLAY_SPAN)
