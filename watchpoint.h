@@ -45,7 +45,7 @@ typedef struct _WatchPoint
  * \param pstCPU_ Pointer to the CPU object to create a watchpoint on
  * \param u16Addr_ Address of the watchpoint.
  */
-void WatchPoint_Insert( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ );
+void WatchPoint_Insert( uint16_t u16Addr_ );
 
 //---------------------------------------------------------------------------
 /*!
@@ -57,7 +57,7 @@ void WatchPoint_Insert( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ );
  * \param pstCPU_  Pointer to the CPU object to remove the watchpoint from
  * \param u16Addr_ Address to remove data watchpoints from (if any)
  */
-void WatchPoint_Delete( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ );
+void WatchPoint_Delete( uint16_t u16Addr_ );
 
 //---------------------------------------------------------------------------
 /*!
@@ -69,7 +69,7 @@ void WatchPoint_Delete( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ );
  * \param u16Addr_ Address to check
  * \return true if watchpoint is installed at the specified adress
  */
-bool WatchPoint_EnabledAtAddress( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ );
+bool WatchPoint_EnabledAtAddress( uint16_t u16Addr_ );
 
 #endif
 

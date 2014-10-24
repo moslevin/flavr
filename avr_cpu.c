@@ -38,6 +38,8 @@
 
 #include "trace_buffer.h"
 
+AVR_CPU stCPU;
+
 #if FEATURE_USE_JUMPTABLES
 //---------------------------------------------------------------------------
 // 2 levels of jump tables are required for AVR.
@@ -59,130 +61,122 @@ static uint8_t     au8OpCycles[65536] = { 0 };
 #endif
 
 //---------------------------------------------------------------------------
-static void CPU_Decode( AVR_CPU *pstCPU_, uint16_t OP_ )
+static void CPU_Decode( uint16_t OP_ )
 {
 #if FEATURE_USE_JUMPTABLES
-    astDecoders[OP_](pstCPU_, OP_);
+    astDecoders[OP_]( OP_);
 #else
     AVR_Decoder pfOp = AVR_Decoder_Function( OP_ );
-    pfOP( pstCPU_, OP_ );
+    pfOP(  OP_ );
 #endif
 }
 
 //---------------------------------------------------------------------------
-static void CPU_Execute( AVR_CPU *pstCPU_, uint16_t OP_ )
+static void CPU_Execute( uint16_t OP_ )
 {
 #if FEATURE_USE_JUMPTABLES
-    astOpcodes[OP_](pstCPU_);
+    astOpcodes[OP_]();
 #else
     AVR_Opcode pfOp = AVR_Opcode_Function(OP_);
-    pfOP( pstCPU_, OP_ );
+    pfOP(  OP_ );
 #endif
 }
 
 //---------------------------------------------------------------------------
-uint16_t CPU_Fetch( AVR_CPU *pstCPU_ )
+uint16_t CPU_Fetch( void )
 {
-    uint16_t PC = pstCPU_->u16PC;
+    uint16_t PC = stCPU.u16PC;
     if (PC >= 16384)
     {
         return 0xFFFF;
     }
-    return pstCPU_->pu16ROM[ pstCPU_->u16PC ];
+    return stCPU.pu16ROM[ stCPU.u16PC ];
 }
 
 //---------------------------------------------------------------------------
-static void CPU_GetOpCycles( AVR_CPU *pstCPU_, uint16_t OP_ )
+static void CPU_GetOpCycles( uint16_t OP_ )
 {
 #if FEATURE_USE_JUMPTABLES
-    pstCPU_->u16ExtraCycles = au8OpCycles[ OP_ ];
+    stCPU.u16ExtraCycles = au8OpCycles[ OP_ ];
 #else
-    pstCPU_->u16ExtraCycles = AVR_Opcode_Cycles( OP_ );
+    stCPU.u16ExtraCycles = AVR_Opcode_Cycles( OP_ );
 #endif
 }
 
 //---------------------------------------------------------------------------
-static void CPU_GetOpSize( AVR_CPU *pstCPU_, uint16_t OP_ )
+static void CPU_GetOpSize( uint16_t OP_ )
 {
 #if FEATURE_USE_JUMPTABLES
-    pstCPU_->u16ExtraPC = au8OpSizes[ OP_ ];
+    stCPU.u16ExtraPC = au8OpSizes[ OP_ ];
 #else
-    pstCPU_->u16ExtraPC = AVR_Opcode_Size( OP_ );
+    stCPU.u16ExtraPC = AVR_Opcode_Size( OP_ );
 #endif
 }
 
 //---------------------------------------------------------------------------
-static void CPU_PeripheralCycle( AVR_CPU *pstCPU_ )
+static void CPU_PeripheralCycle( void )
 {
-    IO_Clock(pstCPU_);
+    IO_Clock();
 }
 
 //---------------------------------------------------------------------------
-void CPU_RunCycle( AVR_CPU *pstCPU_ )
+void CPU_RunCycle( void )
 {
     uint16_t OP;
 
-    if (!pstCPU_->bAsleep)
+    if (!stCPU.bAsleep)
     {
 
-        OP = CPU_Fetch( pstCPU_ );
+        OP = CPU_Fetch(  );
 
         // From the first word fetched, figure out how big this opcode is
         // (either 16 or 32-bit)
-        CPU_GetOpSize( pstCPU_, OP );
+        CPU_GetOpSize(  OP );
 
         // Based on the first word fetched, figure out the minimum number of
         // CPU cycles required to execute the instruction fetched.
-        CPU_GetOpCycles( pstCPU_, OP );
+        CPU_GetOpCycles(  OP );
 
         // Decode the instruction, load internal registers with appropriate
         // values.
-        CPU_Decode( pstCPU_, OP );
-
-#if 0
-        {
-            AVR_Opcode pf = AVR_Disasm_Function(OP);
-            printf("[%04X]: ", pstCPU_->u16PC );
-            pf(pstCPU_);
-        }
-#endif
+        CPU_Decode(  OP );
 
         // Execute the instruction that was just decoded
-        CPU_Execute( pstCPU_, OP );
+        CPU_Execute(  OP );
 
         // Update the PC based on the size of the instruction + whatever
         // modifications occurred during the execution cycle.
-        pstCPU_->u16PC += pstCPU_->u16ExtraPC;
+        stCPU.u16PC += stCPU.u16ExtraPC;
 
         // Add CPU clock cycles to the global cycle counter based on
         // the minimum instruction time, plus whatever modifiers are applied
         // during execution of the instruction.
-        pstCPU_->u64CycleCount += pstCPU_->u16ExtraCycles;
+        stCPU.u64CycleCount += stCPU.u16ExtraCycles;
 
         // Cycle-accurate peripheral clocking -- one iteration for each
         // peripheral for each CPU cycle of the instruction.
         // Note that CPU Interrupts are generated in the peripheral
         // phase of the instruction cycle.
-        while (pstCPU_->u16ExtraCycles--)
+        while (stCPU.u16ExtraCycles--)
         {
-            CPU_PeripheralCycle( pstCPU_ );
+            CPU_PeripheralCycle(  );
         }
 
         // Increment the "total executed instruction counter"
-        pstCPU_->u64InstructionCount++;                
+        stCPU.u64InstructionCount++;
 
     }
     else
     {
         // CPU is asleep, just NOP and wait until we hit an interrupt.
-        pstCPU_->u64CycleCount++;
-        CPU_PeripheralCycle( pstCPU_ );                
+        stCPU.u64CycleCount++;
+        CPU_PeripheralCycle(  );
     }
 
     // Check to see if there are any pending interrupts - if so, vector
     // to the appropriate location.  This has no effect if no interrupts
     // are pending
-    AVR_Interrupt( pstCPU_ );
+    AVR_Interrupt(  );
 }
 
 
@@ -229,30 +223,31 @@ static void CPU_BuildCycleTable(void)
 #endif
 
 //---------------------------------------------------------------------------
-void CPU_Init( AVR_CPU *pstCPU_, AVR_CPU_Config_t *pstConfig_ )
+void CPU_Init( AVR_CPU_Config_t *pstConfig_ )
 {
-    memset(pstCPU_, 0, sizeof(*pstCPU_));
+    memset( &stCPU, 0, sizeof(stCPU));
     pstConfig_->u32RAMSize += 256;
 
     // Dynamically allocate memory for RAM, ROM, and EEPROM buffers
-    pstCPU_->pu8EEPROM = (uint8_t*)malloc( pstConfig_->u32EESize );
-    pstCPU_->pu16ROM    = (uint16_t*)malloc( pstConfig_->u32ROMSize );
-    pstCPU_->pstRAM    = (AVR_RAM_t*)malloc( pstConfig_->u32RAMSize );
+    stCPU.pu8EEPROM = (uint8_t*)malloc( pstConfig_->u32EESize );
+    stCPU.pu16ROM    = (uint16_t*)malloc( pstConfig_->u32ROMSize );
+    stCPU.pstRAM    = (AVR_RAM_t*)malloc( pstConfig_->u32RAMSize );
 
-    pstCPU_->u32ROMSize = pstConfig_->u32ROMSize;
-    pstCPU_->u32RAMSize = pstConfig_->u32RAMSize;
-    pstCPU_->u32EEPROMSize = pstConfig_->u32EESize;
+    stCPU.u32ROMSize = pstConfig_->u32ROMSize;
+    stCPU.u32RAMSize = pstConfig_->u32RAMSize;
+    stCPU.u32EEPROMSize = pstConfig_->u32EESize;
 
-    memset( pstCPU_->pu8EEPROM, 0, pstConfig_->u32EESize );
-    memset( pstCPU_->pu16ROM, 0, pstConfig_->u32ROMSize );
-    memset( pstCPU_->pstRAM, 0, pstConfig_->u32RAMSize );
+    memset( stCPU.pu8EEPROM, 0, pstConfig_->u32EESize );
+    memset( stCPU.pu16ROM, 0, pstConfig_->u32ROMSize );
+    memset( stCPU.pstRAM, 0, pstConfig_->u32RAMSize );
 
     // Set the base stack pointer to top-of-ram.
-    pstCPU_->pstRAM->stRegisters.SPH.r = 0x08;
-    pstCPU_->pstRAM->stRegisters.SPL.r = 0xFF;
+    uint16_t u16InitialStack = 256 + pstConfig_->u32RAMSize - 1;
+    stCPU.pstRAM->stRegisters.SPH.r = (uint8_t)(u16InitialStack >> 8);
+    stCPU.pstRAM->stRegisters.SPL.r = (uint8_t)(u16InitialStack & 0xFF);
 
     // Reset the interrupt priority register
-    pstCPU_->u8IntPriority = 255;
+    stCPU.u8IntPriority = 255;
 
 #if FEATURE_USE_JUMPTABLES
     CPU_BuildCycleTable();
@@ -263,30 +258,30 @@ void CPU_Init( AVR_CPU *pstCPU_, AVR_CPU_Config_t *pstConfig_ )
 }
 
 //---------------------------------------------------------------------------
-void CPU_AddPeriph( AVR_CPU *pstCPU_, AVRPeripheral *pstPeriph_ )
+void CPU_AddPeriph( AVRPeripheral *pstPeriph_ )
 {    
-    IO_AddClocker( pstCPU_, pstPeriph_ );
+    IO_AddClocker(  pstPeriph_ );
 
     uint8_t i;
     for (i = pstPeriph_->u8AddrStart; i <= pstPeriph_->u8AddrEnd; i++)
     {
-        IO_AddReader( pstCPU_, pstPeriph_, i );
-        IO_AddWriter( pstCPU_, pstPeriph_, i );
+        IO_AddReader(  pstPeriph_, i );
+        IO_AddWriter(  pstPeriph_, i );
     }
 
     if (pstPeriph_->pfInit)
     {
-        pstPeriph_->pfInit( pstPeriph_->pvContext, pstCPU_ );
+        pstPeriph_->pfInit( pstPeriph_->pvContext );
     }
 }
 
 //---------------------------------------------------------------------------
-void CPU_RegisterInterruptCallback( AVR_CPU *pstCPU_, InterruptAck pfIntAck_, uint8_t ucVector_ )
+void CPU_RegisterInterruptCallback( InterruptAck pfIntAck_, uint8_t ucVector_ )
 {
     if (ucVector_ >= 32)
     {
         return;
     }
 
-    pstCPU_->apfInterruptCallbacks[ ucVector_ ] = pfIntAck_;
+    stCPU.apfInterruptCallbacks[ ucVector_ ] = pfIntAck_;
 }

@@ -90,133 +90,133 @@ static uint8_t  u8Temp;  // The 8-bit temporary register used in 16-bit register
 static uint16_t u8Count; // Internal 16-bit count register
 
 //---------------------------------------------------------------------------
-static void TCNT1_Increment(struct _AVR_CPU *pstCPU_ )
+static void TCNT1_Increment( )
 {
     uint16_t u16NewVal = 0;
 
-    u16NewVal = (pstCPU_->pstRAM->stRegisters.TCNT1H << 8 ) |
-                 pstCPU_->pstRAM->stRegisters.TCNT1L;
+    u16NewVal = (stCPU.pstRAM->stRegisters.TCNT1H << 8 ) |
+                 stCPU.pstRAM->stRegisters.TCNT1L;
 
     u16NewVal++;
-    pstCPU_->pstRAM->stRegisters.TCNT1L = (u16NewVal & 0x00FF);
-    pstCPU_->pstRAM->stRegisters.TCNT1H = (u16NewVal >> 8);
+    stCPU.pstRAM->stRegisters.TCNT1L = (u16NewVal & 0x00FF);
+    stCPU.pstRAM->stRegisters.TCNT1H = (u16NewVal >> 8);
 }
 
 //---------------------------------------------------------------------------
-static uint16_t TCNT1_Read(struct _AVR_CPU *pstCPU_ )
+static uint16_t TCNT1_Read( )
 {
     uint16_t u16Ret = 0;
 
-    u16Ret = (pstCPU_->pstRAM->stRegisters.TCNT1H << 8 ) |
-              pstCPU_->pstRAM->stRegisters.TCNT1L;
+    u16Ret = (stCPU.pstRAM->stRegisters.TCNT1H << 8 ) |
+              stCPU.pstRAM->stRegisters.TCNT1L;
     return u16Ret;
 }
 
 //---------------------------------------------------------------------------
-static void TCNT1_Clear(struct _AVR_CPU *pstCPU_ )
+static void TCNT1_Clear( )
 {
-    pstCPU_->pstRAM->stRegisters.TCNT1H = 0;
-    pstCPU_->pstRAM->stRegisters.TCNT1L = 0;
+    stCPU.pstRAM->stRegisters.TCNT1H = 0;
+    stCPU.pstRAM->stRegisters.TCNT1L = 0;
 }
 
 //---------------------------------------------------------------------------
-static uint16_t OCR1A_Read(struct _AVR_CPU *pstCPU_ )
+static uint16_t OCR1A_Read( )
 {
     uint16_t u16Ret = 0;
 
-    u16Ret = (pstCPU_->pstRAM->stRegisters.OCR1AH << 8 ) |
-              pstCPU_->pstRAM->stRegisters.OCR1AL;
+    u16Ret = (stCPU.pstRAM->stRegisters.OCR1AH << 8 ) |
+              stCPU.pstRAM->stRegisters.OCR1AL;
     return u16Ret;
 }
 
 //---------------------------------------------------------------------------
-static uint16_t OCR1B_Read(struct _AVR_CPU *pstCPU_ )
+static uint16_t OCR1B_Read( )
 {
     uint16_t u16Ret = 0;
 
-    u16Ret = (pstCPU_->pstRAM->stRegisters.OCR1BH << 8 ) |
-              pstCPU_->pstRAM->stRegisters.OCR1BL;
+    u16Ret = (stCPU.pstRAM->stRegisters.OCR1BH << 8 ) |
+              stCPU.pstRAM->stRegisters.OCR1BL;
     return u16Ret;
 }
 
 //---------------------------------------------------------------------------
-static uint16_t ICR1_Read(struct _AVR_CPU *pstCPU_ )
+static uint16_t ICR1_Read( )
 {
     uint16_t u16Ret = 0;
 
-    u16Ret = (pstCPU_->pstRAM->stRegisters.ICR1H << 8 ) |
-              pstCPU_->pstRAM->stRegisters.ICR1L;
+    u16Ret = (stCPU.pstRAM->stRegisters.ICR1H << 8 ) |
+              stCPU.pstRAM->stRegisters.ICR1L;
     return u16Ret;
 }
 
 //---------------------------------------------------------------------------
-static bool Timer16_Is_TOIE1_Enabled(struct _AVR_CPU *pstCPU_)
+static bool Timer16_Is_TOIE1_Enabled()
 {
-    return (pstCPU_->pstRAM->stRegisters.TIMSK1.TOIE1 == 1);
+    return (stCPU.pstRAM->stRegisters.TIMSK1.TOIE1 == 1);
 }
 
 //---------------------------------------------------------------------------
-static bool Timer16_Is_OCIE1A_Enabled(struct _AVR_CPU *pstCPU_)
+static bool Timer16_Is_OCIE1A_Enabled()
 {
-    return (pstCPU_->pstRAM->stRegisters.TIMSK1.OCIE1A == 1);
+    return (stCPU.pstRAM->stRegisters.TIMSK1.OCIE1A == 1);
 }
 
 //---------------------------------------------------------------------------
-static bool Timer16_Is_OCIE1B_Enabled(struct _AVR_CPU *pstCPU_)
+static bool Timer16_Is_OCIE1B_Enabled()
 {
-    return (pstCPU_->pstRAM->stRegisters.TIMSK1.OCIE1B == 1);
+    return (stCPU.pstRAM->stRegisters.TIMSK1.OCIE1B == 1);
 }
 
 //---------------------------------------------------------------------------
-static bool Timer16_Is_ICIE1_Enabled(struct _AVR_CPU *pstCPU_)
+static bool Timer16_Is_ICIE1_Enabled()
 {
-    return (pstCPU_->pstRAM->stRegisters.TIMSK1.ICIE1 == 1);
+    return (stCPU.pstRAM->stRegisters.TIMSK1.ICIE1 == 1);
 }
 
 //---------------------------------------------------------------------------
-static void OV1_Ack(struct _AVR_CPU *pstCPU_, uint8_t ucVector_)
+static void OV1_Ack(  uint8_t ucVector_)
 {
-    pstCPU_->pstRAM->stRegisters.TIFR1.TOV1 = 0;
+    stCPU.pstRAM->stRegisters.TIFR1.TOV1 = 0;
 }
 
 //---------------------------------------------------------------------------
-static void IC1_Ack(struct _AVR_CPU *pstCPU_, uint8_t ucVector_)
+static void IC1_Ack(  uint8_t ucVector_)
 {
-    pstCPU_->pstRAM->stRegisters.TIFR1.ICF1 = 0;
+    stCPU.pstRAM->stRegisters.TIFR1.ICF1 = 0;
 }
 
 //---------------------------------------------------------------------------
-static void COMP1A_Ack(struct _AVR_CPU *pstCPU_, uint8_t ucVector_)
+static void COMP1A_Ack(  uint8_t ucVector_)
 {
-    pstCPU_->pstRAM->stRegisters.TIFR1.OCF1A = 0;
+    stCPU.pstRAM->stRegisters.TIFR1.OCF1A = 0;
 }
 
 //---------------------------------------------------------------------------
-static void COMP1B_Ack(struct _AVR_CPU *pstCPU_, uint8_t ucVector_)
+static void COMP1B_Ack(  uint8_t ucVector_)
 {
-    pstCPU_->pstRAM->stRegisters.TIFR1.OCF1B = 0;
+    stCPU.pstRAM->stRegisters.TIFR1.OCF1B = 0;
 }
 
 //---------------------------------------------------------------------------
-static void Timer16_Init(void *context_, struct _AVR_CPU *pstCPU_)
+static void Timer16_Init(void *context_ )
 {
     DEBUG_PRINT(stderr, "Timer16 Init\n");    
 
-    CPU_RegisterInterruptCallback( pstCPU_, OV1_Ack, 0x0D);
-    CPU_RegisterInterruptCallback( pstCPU_, IC1_Ack, 0x0A);
-    CPU_RegisterInterruptCallback( pstCPU_, COMP1A_Ack, 0x0B);
-    CPU_RegisterInterruptCallback( pstCPU_, COMP1B_Ack, 0x0C);
+    CPU_RegisterInterruptCallback( OV1_Ack, 0x0D);
+    CPU_RegisterInterruptCallback( IC1_Ack, 0x0A);
+    CPU_RegisterInterruptCallback( COMP1A_Ack, 0x0B);
+    CPU_RegisterInterruptCallback( COMP1B_Ack, 0x0C);
 }
 
 //---------------------------------------------------------------------------
-static void Timer16_Read(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t *pucValue_ )
+static void Timer16_Read(void *context_, uint8_t ucAddr_, uint8_t *pucValue_ )
 {
     DEBUG_PRINT(stderr, "Timer16 Read: 0x%02x\n", ucAddr_);
-    *pucValue_ = pstCPU_->pstRAM->au8RAM[ ucAddr_ ];
+    *pucValue_ = stCPU.pstRAM->au8RAM[ ucAddr_ ];
 }
 
 //---------------------------------------------------------------------------
-static void TCCR1A_Write( struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_)
+static void TCCR1A_Write( uint8_t ucAddr_, uint8_t ucValue_)
 {
     // Update the waveform generator mode (WGM11:10) bits.
     uint8_t u8WGMBits = ucValue_ & 0x03; // WGM11 and 10 are in bits 0,1
@@ -226,11 +226,11 @@ static void TCCR1A_Write( struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucV
     eWGM = (WaveformGeneratorMode_t)u8WGMTemp;
 
     // Update the memory-mapped register.
-    pstCPU_->pstRAM->stRegisters.TCCR1A.r = ucValue_ & 0xF3;
+    stCPU.pstRAM->stRegisters.TCCR1A.r = ucValue_ & 0xF3;
 }
 
 //---------------------------------------------------------------------------
-static void TCCR1B_Write( struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_)
+static void TCCR1B_Write( uint8_t ucAddr_, uint8_t ucValue_)
 {
     // Update the waveform generator mode (WGM13:12) bits.
     uint8_t u8WGMBits = (ucValue_ >> 1) & 0x0C; // WGM13 and 12 are in register bits 3,4
@@ -265,111 +265,111 @@ static void TCCR1B_Write( struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucV
     }
 
     // Update the memory-mapped register.
-    pstCPU_->pstRAM->stRegisters.TCCR1B.r = ucValue_ & 0xDF; // Bit 5 is read-only
+    stCPU.pstRAM->stRegisters.TCCR1B.r = ucValue_ & 0xDF; // Bit 5 is read-only
 }
 
 //---------------------------------------------------------------------------
-static void TCCR1C_Write( struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_)
+static void TCCR1C_Write( uint8_t ucAddr_, uint8_t ucValue_)
 {
-    pstCPU_->pstRAM->stRegisters.TCCR1C.r = ucValue_;
+    stCPU.pstRAM->stRegisters.TCCR1C.r = ucValue_;
 }
 
 //---------------------------------------------------------------------------
-static void TCNT1L_Write( struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_)
+static void TCNT1L_Write( uint8_t ucAddr_, uint8_t ucValue_)
 {
     // Writing the low-word forces the high-word to be stored from the internal
     // temp register... which is why the high byte must be written first.
-    pstCPU_->pstRAM->stRegisters.TCNT1L = ucValue_;
-    pstCPU_->pstRAM->stRegisters.TCNT1H = u8Temp;
+    stCPU.pstRAM->stRegisters.TCNT1L = ucValue_;
+    stCPU.pstRAM->stRegisters.TCNT1H = u8Temp;
 }
 //---------------------------------------------------------------------------
-static void TCNT1H_Write( struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_)
+static void TCNT1H_Write( uint8_t ucAddr_, uint8_t ucValue_)
 {
     u8Temp = ucValue_;
 }
 //---------------------------------------------------------------------------
-static void ICR1L_Write( struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_)
+static void ICR1L_Write( uint8_t ucAddr_, uint8_t ucValue_)
 {
     // Writing the low-word forces the high-word to be stored from the internal
     // temp register... which is why the high byte must be written first.
-    pstCPU_->pstRAM->stRegisters.ICR1L = ucValue_;
-    pstCPU_->pstRAM->stRegisters.ICR1H = u8Temp;
+    stCPU.pstRAM->stRegisters.ICR1L = ucValue_;
+    stCPU.pstRAM->stRegisters.ICR1H = u8Temp;
 }
 //---------------------------------------------------------------------------
-static void ICR1H_Write( struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_)
-{
-    u8Temp = ucValue_;
-}
-
-//---------------------------------------------------------------------------
-static void OCR1AL_Write( struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_)
-{
-    // Writing the low-word forces the high-word to be stored from the internal
-    // temp register... which is why the high byte must be written first.
-    pstCPU_->pstRAM->stRegisters.OCR1AL = ucValue_;
-    pstCPU_->pstRAM->stRegisters.OCR1AH = u8Temp;
-}
-
-//---------------------------------------------------------------------------
-static void OCR1AH_Write( struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_)
+static void ICR1H_Write( uint8_t ucAddr_, uint8_t ucValue_)
 {
     u8Temp = ucValue_;
 }
 
 //---------------------------------------------------------------------------
-static void OCR1BL_Write( struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_)
+static void OCR1AL_Write( uint8_t ucAddr_, uint8_t ucValue_)
 {
     // Writing the low-word forces the high-word to be stored from the internal
     // temp register... which is why the high byte must be written first.
-    pstCPU_->pstRAM->stRegisters.OCR1BL = ucValue_;
-    pstCPU_->pstRAM->stRegisters.OCR1BH = u8Temp;
+    stCPU.pstRAM->stRegisters.OCR1AL = ucValue_;
+    stCPU.pstRAM->stRegisters.OCR1AH = u8Temp;
 }
 
 //---------------------------------------------------------------------------
-static void OCR1BH_Write( struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_)
+static void OCR1AH_Write( uint8_t ucAddr_, uint8_t ucValue_)
 {
     u8Temp = ucValue_;
 }
 
 //---------------------------------------------------------------------------
-static void Timer16_Write(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_ )
+static void OCR1BL_Write( uint8_t ucAddr_, uint8_t ucValue_)
+{
+    // Writing the low-word forces the high-word to be stored from the internal
+    // temp register... which is why the high byte must be written first.
+    stCPU.pstRAM->stRegisters.OCR1BL = ucValue_;
+    stCPU.pstRAM->stRegisters.OCR1BH = u8Temp;
+}
+
+//---------------------------------------------------------------------------
+static void OCR1BH_Write( uint8_t ucAddr_, uint8_t ucValue_)
+{
+    u8Temp = ucValue_;
+}
+
+//---------------------------------------------------------------------------
+static void Timer16_Write(void *context_, uint8_t ucAddr_, uint8_t ucValue_ )
 {
     switch (ucAddr_)
     {
     case 0x80:  //TCCR1A
-        TCCR1A_Write(pstCPU_, ucAddr_, ucValue_);
+        TCCR1A_Write(ucAddr_, ucValue_);
         break;
     case 0x81:  //TCCR1B
-        TCCR1B_Write(pstCPU_, ucAddr_, ucValue_);
+        TCCR1B_Write(ucAddr_, ucValue_);
         break;
     case 0x82:  //TCCR1C
-        TCCR1C_Write(pstCPU_, ucAddr_, ucValue_);
+        TCCR1C_Write(ucAddr_, ucValue_);
         break;
     case 0x83:  // Reserved
         break;
     case 0x84:  // TCNT1L
-        TCNT1L_Write(pstCPU_, ucAddr_, ucValue_);
+        TCNT1L_Write(ucAddr_, ucValue_);
         break;
     case 0x85:  // TCNT1H
-        TCNT1H_Write(pstCPU_, ucAddr_, ucValue_);
+        TCNT1H_Write(ucAddr_, ucValue_);
         break;
     case 0x86:  // ICR1L
-        ICR1L_Write(pstCPU_, ucAddr_, ucValue_);
+        ICR1L_Write(ucAddr_, ucValue_);
         break;
     case 0x87:  // ICR1H
-        ICR1H_Write(pstCPU_, ucAddr_, ucValue_);
+        ICR1H_Write(ucAddr_, ucValue_);
         break;
     case 0x88:  // OCR1AL
-        OCR1AL_Write(pstCPU_, ucAddr_, ucValue_);
+        OCR1AL_Write(ucAddr_, ucValue_);
         break;
     case 0x89:  // OCR1AH
-        OCR1AH_Write(pstCPU_, ucAddr_, ucValue_);
+        OCR1AH_Write(ucAddr_, ucValue_);
         break;
     case 0x8A:  // OCR1BL
-        OCR1BL_Write(pstCPU_, ucAddr_, ucValue_);
+        OCR1BL_Write(ucAddr_, ucValue_);
         break;
     case 0x8B:  // OCR1BH
-        OCR1BH_Write(pstCPU_, ucAddr_, ucValue_);
+        OCR1BH_Write(ucAddr_, ucValue_);
         break;
     default:
         break;
@@ -377,7 +377,7 @@ static void Timer16_Write(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAd
 }
 
 //---------------------------------------------------------------------------
-static void Timer16_Clock(void *context_, struct _AVR_CPU *pstCPU_)
+static void Timer16_Clock(void *context_ )
 {
     if (eClockSource == CLK_SRC_OFF)
     {        
@@ -432,8 +432,8 @@ static void Timer16_Clock(void *context_, struct _AVR_CPU *pstCPU_)
         case WGM_NORMAL:
         {
             DEBUG_PRINT(" Update Normal\n");
-            TCNT1_Increment(pstCPU_);
-            if (TCNT1_Read(pstCPU_) == 0)
+            TCNT1_Increment();
+            if (TCNT1_Read() == 0)
             {
                 bOVF = true;
             }
@@ -442,21 +442,21 @@ static void Timer16_Clock(void *context_, struct _AVR_CPU *pstCPU_)
         case WGM_CTC_OCR:
         {
             DEBUG_PRINT(" Update CTC\n");
-            TCNT1_Increment(pstCPU_);
-            if (TCNT1_Read(pstCPU_) == 0)
+            TCNT1_Increment();
+            if (TCNT1_Read() == 0)
             {
                 bOVF = true;
             }
             else
             {
                 bool bClearTCNT1 = false;
-                if (TCNT1_Read(pstCPU_) == OCR1A_Read(pstCPU_))
+                if (TCNT1_Read() == OCR1A_Read())
                 {
                     DEBUG_PRINT(" CTC1A Match\n" );
                     bCTCA = true;
                     bClearTCNT1 = true;
                 }
-                if (TCNT1_Read(pstCPU_) == ICR1_Read(pstCPU_))
+                if (TCNT1_Read() == ICR1_Read())
                 {
                     DEBUG_PRINT(" ICR1 Match\n" );
                     bICR = true;
@@ -464,7 +464,7 @@ static void Timer16_Clock(void *context_, struct _AVR_CPU *pstCPU_)
                 }
                 if (bClearTCNT1)
                 {
-                    TCNT1_Clear(pstCPU_);
+                    TCNT1_Clear();
                 }
             }
         }
@@ -478,51 +478,51 @@ static void Timer16_Clock(void *context_, struct _AVR_CPU *pstCPU_)
     if (bOVF)
     {
         DEBUG_PRINT(" TOV1 Set\n" );
-        pstCPU_->pstRAM->stRegisters.TIFR1.TOV1 = 1;
+        stCPU.pstRAM->stRegisters.TIFR1.TOV1 = 1;
     }
     if (bCTCA)
     {
         DEBUG_PRINT(" OCF1A Set\n" );
-        pstCPU_->pstRAM->stRegisters.TIFR1.OCF1A = 1;
+        stCPU.pstRAM->stRegisters.TIFR1.OCF1A = 1;
     }
     if (bCTCB)
     {
         DEBUG_PRINT(" OCF1B Set\n" );
-        pstCPU_->pstRAM->stRegisters.TIFR1.OCF1B = 1;
+        stCPU.pstRAM->stRegisters.TIFR1.OCF1B = 1;
     }
     if (bICR)
     {
         DEBUG_PRINT(" ICF1 Set\n" );
-        pstCPU_->pstRAM->stRegisters.TIFR1.ICF1 = 1;
+        stCPU.pstRAM->stRegisters.TIFR1.ICF1 = 1;
     }
 
     // Check interrupt status to see whether or not any of the pending interrupts
     // should be armed as a candidate this clock cycle
-    if (pstCPU_->pstRAM->stRegisters.SREG.I)
+    if (stCPU.pstRAM->stRegisters.SREG.I)
     {        
-        if ((pstCPU_->pstRAM->stRegisters.TIFR1.TOV1 == 1) &&
-            (pstCPU_->pstRAM->stRegisters.TIMSK1.TOIE1 == 1))
+        if ((stCPU.pstRAM->stRegisters.TIFR1.TOV1 == 1) &&
+            (stCPU.pstRAM->stRegisters.TIMSK1.TOIE1 == 1))
         {
             DEBUG_PRINT(" TOV1 Interrupt Candidate\n" );
-            AVR_InterruptCandidate(pstCPU_, 0x0D);
+            AVR_InterruptCandidate(0x0D);
         }
-        if ((pstCPU_->pstRAM->stRegisters.TIFR1.OCF1A == 1) &&
-            (pstCPU_->pstRAM->stRegisters.TIMSK1.OCIE1A == 1))
+        if ((stCPU.pstRAM->stRegisters.TIFR1.OCF1A == 1) &&
+            (stCPU.pstRAM->stRegisters.TIMSK1.OCIE1A == 1))
         {
             DEBUG_PRINT(" OCF1A Interrupt Candidate\n" );
-            AVR_InterruptCandidate(pstCPU_, 0x0B);            
+            AVR_InterruptCandidate(0x0B);
         }
-        if ((pstCPU_->pstRAM->stRegisters.TIFR1.OCF1B == 1) &&
-            (pstCPU_->pstRAM->stRegisters.TIMSK1.OCIE1B == 1))
+        if ((stCPU.pstRAM->stRegisters.TIFR1.OCF1B == 1) &&
+            (stCPU.pstRAM->stRegisters.TIMSK1.OCIE1B == 1))
         {
             DEBUG_PRINT(" OCF1B Interrupt Candidate\n" );
-            AVR_InterruptCandidate(pstCPU_, 0x0C);
+            AVR_InterruptCandidate(0x0C);
         }
-        if ((pstCPU_->pstRAM->stRegisters.TIFR1.ICF1 == 1) &&
-            (pstCPU_->pstRAM->stRegisters.TIMSK1.ICIE1 == 1))
+        if ((stCPU.pstRAM->stRegisters.TIFR1.ICF1 == 1) &&
+            (stCPU.pstRAM->stRegisters.TIMSK1.ICIE1 == 1))
         {
             DEBUG_PRINT(" ICF1 Interrupt Candidate\n" );
-            AVR_InterruptCandidate(pstCPU_, 0x0A);
+            AVR_InterruptCandidate(0x0A);
         }
     }
 }

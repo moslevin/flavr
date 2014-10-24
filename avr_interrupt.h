@@ -35,7 +35,7 @@
  * \param pstCPU_ Pointer to the CPU object to run the interrupt
  * \param u8Vector_ - Candidate interrupt vector.
  */
-void AVR_InterruptCandidate( AVR_CPU *pstCPU_, uint8_t u8Vector_ );
+void AVR_InterruptCandidate( uint8_t u8Vector_ );
 
 //---------------------------------------------------------------------------
 /*!
@@ -47,6 +47,6 @@ void AVR_InterruptCandidate( AVR_CPU *pstCPU_, uint8_t u8Vector_ );
  *
  * \param pstCPU_ Pointer to the CPU object to run the interrupt
  */
-void AVR_Interrupt( AVR_CPU *pstCPU_ );
+void AVR_Interrupt( void );
 
 #endif //__AVR_INTERRUPT_H__

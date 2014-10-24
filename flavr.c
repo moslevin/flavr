@@ -25,6 +25,7 @@
 #include <stdint.h>
 
 #include "emu_config.h"
+#include "variant.h"
 
 //---------------------------------------------------------------------------
 #include "avr_coreregs.h"
@@ -56,12 +57,12 @@ typedef enum
     RAM_TOO_BIG,
     RAM_TOO_SMALL,
     ROM_TOO_BIG,
-    INVALID_HEX_FILE
+    INVALID_HEX_FILE,
+    INVALID_VARIANT
 } ErrorReason_t;
 
 //---------------------------------------------------------------------------
 static TraceBuffer_t stTraceBuffer;
-static AVR_CPU stCPU;
 
 //---------------------------------------------------------------------------
 void splash(void)
@@ -103,6 +104,9 @@ void error_out( ErrorReason_t eReason_ )
         case INVALID_HEX_FILE:
             printf( "HEX Programming file cannot be loaded\n");
             break;
+        case INVALID_VARIANT:
+            printf( "Unknown variant not supported\n");
+            break;
         default:
             printf( "Some other reason\n" );
     }
@@ -112,10 +116,17 @@ void error_out( ErrorReason_t eReason_ )
 //---------------------------------------------------------------------------
 void emulator_loop(void)
 {
+    bool bUseTrace = false;
+
+    if ( Options_GetByName("--trace") && Options_GetByName("--debug") )
+    {
+        bUseTrace = true;
+    }
+
     while (1)
     {
         // Check to see if we've hit a breakpoint
-        if (BreakPoint_EnabledAtAddress(&stCPU, stCPU.u16PC))
+        if (BreakPoint_EnabledAtAddress(stCPU.u16PC))
         {
             Interactive_Set();
         }
@@ -124,10 +135,13 @@ void emulator_loop(void)
         Interactive_CheckAndExecute();
 
         // Store the current CPU state into the tracebuffer
-        // TraceBuffer_StoreFromCPU(&stTraceBuffer, &stCPU);
+        if (bUseTrace)
+        {
+            TraceBuffer_StoreFromCPU(&stTraceBuffer);
+        }
 
         // Execute a machine cycle
-        CPU_RunCycle( &stCPU );
+        CPU_RunCycle(  );
     }
     // doesn't return, except by quitting from debugger, or by signal.
 }
@@ -135,11 +149,11 @@ void emulator_loop(void)
 //---------------------------------------------------------------------------
 void add_plugins(void)
 {
-    CPU_AddPeriph(&stCPU, &stUART);
-    CPU_AddPeriph(&stCPU, &stEINT_a);
-    CPU_AddPeriph(&stCPU, &stEINT_b);
-    CPU_AddPeriph(&stCPU, &stTimer16);
-    CPU_AddPeriph(&stCPU, &stTimer8a);
+    CPU_AddPeriph(&stUART);
+    CPU_AddPeriph(&stEINT_a);
+    CPU_AddPeriph(&stEINT_b);
+    CPU_AddPeriph(&stTimer16);
+    CPU_AddPeriph(&stTimer8a);
 }
 
 //---------------------------------------------------------------------------
@@ -154,8 +168,8 @@ void flavr_disasm(void)
     {
         uint16_t OP = stCPU.pu16ROM[stCPU.u16PC];
         printf("0x%04X: [0x%04X] ", stCPU.u16PC, OP);
-        AVR_Decode(&stCPU, OP);
-        AVR_Disasm_Function(OP)(&stCPU);
+        AVR_Decode(OP);
+        AVR_Disasm_Function(OP)();
         stCPU.u16PC += AVR_Opcode_Size(OP);
     }
     exit(0);
@@ -167,9 +181,17 @@ void emulator_init(void)
     AVR_CPU_Config_t stConfig;
 
     // -- Initialize the emulator based on command-line args
-    stConfig.u32RAMSize = atoi(Options_GetByName("--ramsize"));
-    stConfig.u32ROMSize = atoi(Options_GetByName("--romsize"));
-    stConfig.u32EESize = atoi(Options_GetByName("--eesize"));
+    const AVR_Variant_t *pstVariant;
+
+    pstVariant = Variant_GetByName( Options_GetByName("--variant") );
+    if (!pstVariant)
+    {
+        error_out( INVALID_VARIANT );
+    }
+
+    stConfig.u32EESize  = pstVariant->u32EESize;
+    stConfig.u32RAMSize = pstVariant->u32RAMSize;
+    stConfig.u32ROMSize = pstVariant->u32ROMSize;
 
     if (stConfig.u32EESize >= 32768)
     {
@@ -190,20 +212,21 @@ void emulator_init(void)
         error_out( ROM_TOO_BIG );
     }
 
-    CPU_Init(&stCPU, &stConfig);
+    CPU_Init(&stConfig);
+
     TraceBuffer_Init( &stTraceBuffer);
-    Interactive_Init( &stCPU, &stTraceBuffer );
+    Interactive_Init( &stTraceBuffer );
 
     // Only insert a breakpoint/enter interactive debugging mode if specified.
     // Otherwise, start with the emulator running.
     if (Options_GetByName("--debug"))
     {
-        BreakPoint_Insert( &stCPU, 0 );
+        BreakPoint_Insert( 0 );
     }
 
     if (Options_GetByName("--hexfile"))
     {
-        if( !AVR_Load_HEX( &stCPU, Options_GetByName("--hexfile") ) ) {
+        if( !AVR_Load_HEX( Options_GetByName("--hexfile") ) ) {
             error_out( INVALID_HEX_FILE );
         }
     }

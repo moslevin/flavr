@@ -61,128 +61,128 @@ static uint32_t u32TxTicksRemaining = 0;
 static uint32_t u32RxTicksRemaining = 0;
 
 //---------------------------------------------------------------------------
-static void Echo_Tx( AVR_CPU *pstCPU_ )
+static void Echo_Tx(   )
 {
     printf("%c", TSR);
 }
 
 //---------------------------------------------------------------------------
-static void Echo_Rx( AVR_CPU *pstCPU_ )
+static void Echo_Rx(   )
 {
     printf("%c", RSR);
 }
 
 //---------------------------------------------------------------------------
-static bool UART_IsRxEnabled( struct _AVR_CPU *pstCPU_)
+static bool UART_IsRxEnabled( void )
 {
     //DEBUG_PRINT( "RxEnabled\n");
-    return (pstCPU_->pstRAM->stRegisters.UCSR0B.RXEN0 == 1);
+    return (stCPU.pstRAM->stRegisters.UCSR0B.RXEN0 == 1);
 }
 
 //---------------------------------------------------------------------------
-static bool UART_IsTxEnabled( struct _AVR_CPU *pstCPU_)
+static bool UART_IsTxEnabled( void )
 {
     //DEBUG_PRINT( "TxEnabled\n");
-    return (pstCPU_->pstRAM->stRegisters.UCSR0B.TXEN0 == 1);
+    return (stCPU.pstRAM->stRegisters.UCSR0B.TXEN0 == 1);
 }
 
 //---------------------------------------------------------------------------
-static bool UART_IsTxIntEnabled( struct _AVR_CPU *pstCPU_)
+static bool UART_IsTxIntEnabled( void )
 {
-    return (pstCPU_->pstRAM->stRegisters.UCSR0B.TXCIE0 == 1);
+    return (stCPU.pstRAM->stRegisters.UCSR0B.TXCIE0 == 1);
 }
 
 //---------------------------------------------------------------------------
-static bool UART_IsDREIntEnabled( struct _AVR_CPU *pstCPU_)
+static bool UART_IsDREIntEnabled( void )
 {
-    return (pstCPU_->pstRAM->stRegisters.UCSR0B.UDRIE0 == 1);
+    return (stCPU.pstRAM->stRegisters.UCSR0B.UDRIE0 == 1);
 }
 
 //---------------------------------------------------------------------------
-static bool UART_IsRxIntEnabled( struct _AVR_CPU *pstCPU_)
+static bool UART_IsRxIntEnabled( void )
 {
-    return (pstCPU_->pstRAM->stRegisters.UCSR0B.RXCIE0 == 1);
+    return (stCPU.pstRAM->stRegisters.UCSR0B.RXCIE0 == 1);
 }
 
 //---------------------------------------------------------------------------
-static bool UART_IsDoubleSpeed( struct _AVR_CPU *pstCPU_ )
+static bool UART_IsDoubleSpeed(   )
 {
-    return (pstCPU_->pstRAM->stRegisters.UCSR0A.U2X0 == 1);
+    return (stCPU.pstRAM->stRegisters.UCSR0A.U2X0 == 1);
 }
 
 //---------------------------------------------------------------------------
-static void UART_SetDoubleSpeed( struct _AVR_CPU *pstCPU_ )
+static void UART_SetDoubleSpeed(   )
 {
-    pstCPU_->pstRAM->stRegisters.UCSR0A.U2X0 = 1;
+    stCPU.pstRAM->stRegisters.UCSR0A.U2X0 = 1;
 }
 
 //---------------------------------------------------------------------------
-static void UART_SetEmpty( struct _AVR_CPU *pstCPU_)
+static void UART_SetEmpty( void )
 {
-    pstCPU_->pstRAM->stRegisters.UCSR0A.UDRE0 = 1;
+    stCPU.pstRAM->stRegisters.UCSR0A.UDRE0 = 1;
 }
 
 //---------------------------------------------------------------------------
-static void UART_ClearEmpty( struct _AVR_CPU *pstCPU_)
+static void UART_ClearEmpty( void )
 {
-    pstCPU_->pstRAM->stRegisters.UCSR0A.UDRE0 = 0;
+    stCPU.pstRAM->stRegisters.UCSR0A.UDRE0 = 0;
 }
 
 //---------------------------------------------------------------------------
-static bool UART_IsEmpty( struct _AVR_CPU *pstCPU_)
+static bool UART_IsEmpty( void )
 {
-    return (pstCPU_->pstRAM->stRegisters.UCSR0A.UDRE0 == 1);
+    return (stCPU.pstRAM->stRegisters.UCSR0A.UDRE0 == 1);
 }
 
 //---------------------------------------------------------------------------
-static bool UART_IsTxComplete( struct _AVR_CPU *pstCPU_)
+static bool UART_IsTxComplete( void )
 {
-    return (pstCPU_->pstRAM->stRegisters.UCSR0A.TXC0 == 1);
+    return (stCPU.pstRAM->stRegisters.UCSR0A.TXC0 == 1);
 }
 
 //---------------------------------------------------------------------------
-static void UART_TxComplete( struct _AVR_CPU *pstCPU_)
+static void UART_TxComplete( void )
 {
-    pstCPU_->pstRAM->stRegisters.UCSR0A.TXC0 = 1;    
+    stCPU.pstRAM->stRegisters.UCSR0A.TXC0 = 1;    
 }
 
 //---------------------------------------------------------------------------
-static bool UART_IsRxComplete( struct _AVR_CPU *pstCPU_)
+static bool UART_IsRxComplete( void )
 {
-    return (pstCPU_->pstRAM->stRegisters.UCSR0A.RXC0 == 1);
+    return (stCPU.pstRAM->stRegisters.UCSR0A.RXC0 == 1);
 }
 
 //---------------------------------------------------------------------------
-static void UART_RxComplete( struct _AVR_CPU *pstCPU_)
+static void UART_RxComplete( void )
 {
-    pstCPU_->pstRAM->stRegisters.UCSR0A.RXC0 = 1;
+    stCPU.pstRAM->stRegisters.UCSR0A.RXC0 = 1;
 }
 
 //---------------------------------------------------------------------------
-static void TXC0_Callback( struct _AVR_CPU *pstCPU_, uint8_t ucVector_ )
+static void TXC0_Callback(  uint8_t ucVector_ )
 {
     // On TX Complete interrupt, automatically clear the TXC0 flag.
-    pstCPU_->pstRAM->stRegisters.UCSR0A.TXC0 = 0;
+    stCPU.pstRAM->stRegisters.UCSR0A.TXC0 = 0;
 }
 
 //---------------------------------------------------------------------------
-static void UART_Init(void *context_, struct _AVR_CPU *pstCPU_)
+static void UART_Init(void *context_ )
 {
     DEBUG_PRINT("UART Init\n");
-    pstCPU_->pstRAM->stRegisters.UCSR0A.UDRE0 = 1;
+    stCPU.pstRAM->stRegisters.UCSR0A.UDRE0 = 1;
 
-    CPU_RegisterInterruptCallback(pstCPU_, TXC0_Callback, 0x14); // TX Complete
+    CPU_RegisterInterruptCallback( TXC0_Callback, 0x14); // TX Complete
 }
 
 //---------------------------------------------------------------------------
-static void UART_Read(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t *pucValue_ )
+static void UART_Read(void *context_, uint8_t ucAddr_, uint8_t *pucValue_ )
 {
     DEBUG_PRINT( "UART Read: 0x%02x\n", ucAddr_);
-    *pucValue_ = pstCPU_->pstRAM->au8RAM[ ucAddr_ ];
+    *pucValue_ = stCPU.pstRAM->au8RAM[ ucAddr_ ];
     switch (ucAddr_)
     {
         case 0xC6: // UDR0
-            pstCPU_->pstRAM->stRegisters.UCSR0A.RXC0 = 0;
+            stCPU.pstRAM->stRegisters.UCSR0A.RXC0 = 0;
             break;
         default:
             break;
@@ -190,27 +190,27 @@ static void UART_Read(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_,
 }
 
 //---------------------------------------------------------------------------
-static void UART_WriteBaudReg(struct _AVR_CPU *pstCPU_)
+static void UART_WriteBaudReg( )
 {
     DEBUG_PRINT( "WriteBaud\n");
-    uint16_t u16Baud =  (uint16_t)(pstCPU_->pstRAM->stRegisters.UBRR0L) |
-                        ((uint16_t)(pstCPU_->pstRAM->stRegisters.UBRR0H) << 8);
+    uint16_t u16Baud =  (uint16_t)(stCPU.pstRAM->stRegisters.UBRR0L) |
+                        ((uint16_t)(stCPU.pstRAM->stRegisters.UBRR0H) << 8);
 
     u32BaudTicks = u16Baud;
 }
 
 //---------------------------------------------------------------------------
-static void UART_WriteDataReg(struct _AVR_CPU *pstCPU_)
+static void UART_WriteDataReg( )
 {
     DEBUG_PRINT("UART Write UDR...\n");
-    if (UART_IsTxEnabled(pstCPU_))
+    if (UART_IsTxEnabled())
     {
         DEBUG_PRINT("Enabled...\n");
         // Only set the baud timer if the UART is idle
         if (!u32TxTicksRemaining)
         {
             u32TxTicksRemaining = u32BaudTicks;
-            if (UART_IsDoubleSpeed(pstCPU_))
+            if (UART_IsDoubleSpeed())
             {
                 u32TxTicksRemaining >>= 1;
             }
@@ -219,18 +219,18 @@ static void UART_WriteDataReg(struct _AVR_CPU *pstCPU_)
         // If the shift register is empty, load it immediately
         if (bTSR_Empty)
         {            
-            TSR = pstCPU_->pstRAM->stRegisters.UDR0;
+            TSR = stCPU.pstRAM->stRegisters.UDR0;
             TXB = 0;
             bTSR_Empty = false;
             bUDR_Empty = true;
-            UART_SetEmpty(pstCPU_);
+            UART_SetEmpty();
         }        
         else
         {
-            TXB = pstCPU_->pstRAM->stRegisters.UDR0;
+            TXB = stCPU.pstRAM->stRegisters.UDR0;
             bTSR_Empty = false;
             bUDR_Empty = false;
-            UART_ClearEmpty(pstCPU_);
+            UART_ClearEmpty();
         }
     }
     else
@@ -240,61 +240,61 @@ static void UART_WriteDataReg(struct _AVR_CPU *pstCPU_)
 }
 
 //---------------------------------------------------------------------------
-static void UART_WriteUCSR0A(struct _AVR_CPU *pstCPU_, uint8_t u8Value_)
+static void UART_WriteUCSR0A( uint8_t u8Value_)
 {
     DEBUG_PRINT("UART Write UCSR0A...\n");
-    uint8_t u8Reg = pstCPU_->pstRAM->stRegisters.UCSR0A.r;
+    uint8_t u8Reg = stCPU.pstRAM->stRegisters.UCSR0A.r;
     if (u8Value_ & 0x40) // TXC was set explicitly -- clear it in the SR.
     {
         u8Reg &= ~0x40;
     }
     u8Reg &= ~(0xBC);
 
-    pstCPU_->pstRAM->stRegisters.UCSR0A.r |= u8Reg;
+    stCPU.pstRAM->stRegisters.UCSR0A.r |= u8Reg;
 
 }
 
 //---------------------------------------------------------------------------
-static void UART_WriteUCSR0B(struct _AVR_CPU *pstCPU_, uint8_t u8Value_)
+static void UART_WriteUCSR0B( uint8_t u8Value_)
 {
 
 }
 
 //---------------------------------------------------------------------------
-static void UART_WriteUCSR0C(struct _AVR_CPU *pstCPU_, uint8_t u8Value_)
+static void UART_WriteUCSR0C( uint8_t u8Value_)
 {
 
 }
 
 //---------------------------------------------------------------------------
-static void UART_Write(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_ )
+static void UART_Write(void *context_, uint8_t ucAddr_, uint8_t ucValue_ )
 {    
     DEBUG_PRINT("UART Write: %2X=%2X\n", ucAddr_, ucValue_ );
     switch (ucAddr_)
     {
     case 0xC0:  //UCSR0A
-        UART_WriteUCSR0A( pstCPU_, ucValue_ );
+        UART_WriteUCSR0A( ucValue_ );
         break;
     case 0xC1:  //UCSR0B
         DEBUG_PRINT("Write UCRS0B\n");
-        pstCPU_->pstRAM->au8RAM[ ucAddr_ ] = ucValue_;
+        stCPU.pstRAM->au8RAM[ ucAddr_ ] = ucValue_;
         break;
     case 0xC2:  //UCSR0C
         DEBUG_PRINT("Write UCRS0C\n");
-        pstCPU_->pstRAM->au8RAM[ ucAddr_ ] = ucValue_;
+        stCPU.pstRAM->au8RAM[ ucAddr_ ] = ucValue_;
         break;
     case 0xC3:  // NA.
         break;
     case 0xC4:  //UBRR0L
     case 0xC5:  //UBRR0H
         DEBUG_PRINT("Write UBRR0x\n");
-        pstCPU_->pstRAM->au8RAM[ ucAddr_ ] = ucValue_;
-        UART_WriteBaudReg(pstCPU_);
+        stCPU.pstRAM->au8RAM[ ucAddr_ ] = ucValue_;
+        UART_WriteBaudReg();
         break;
     case 0xC6:  //UDR0
         DEBUG_PRINT("Write UDR0\n");
-        pstCPU_->pstRAM->au8RAM[ ucAddr_ ] = ucValue_;
-        UART_WriteDataReg(pstCPU_);
+        stCPU.pstRAM->au8RAM[ ucAddr_ ] = ucValue_;
+        UART_WriteDataReg();
         break;
     default:
         break;
@@ -302,17 +302,17 @@ static void UART_Write(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_
 }
 
 //---------------------------------------------------------------------------
-static void UART_TxClock(void *context_, struct _AVR_CPU *pstCPU_)
+static void UART_TxClock(void *context_ )
 {
     //DEBUG_PRINT("TX clock...\n");
-    if (UART_IsTxEnabled(pstCPU_) && u32TxTicksRemaining)
+    if (UART_IsTxEnabled() && u32TxTicksRemaining)
     {
         DEBUG_PRINT("Countdown %d ticks remain\n", u32TxTicksRemaining);
         u32TxTicksRemaining--;
         if (!u32TxTicksRemaining)
         {
             // Local echo of the freshly "shifted out" data to the terminal
-            Echo_Tx(pstCPU_);
+            Echo_Tx();
 
             // If there's something queued in the TXB, reload the TSR
             // register, flag the UDR as empty, and TSR as full.
@@ -323,7 +323,7 @@ static void UART_TxClock(void *context_, struct _AVR_CPU *pstCPU_)
                 bUDR_Empty = true;
                 bTSR_Empty = false;
 
-                UART_SetEmpty(pstCPU_);
+                UART_SetEmpty();
             }
             // Nothing pending in the TXB?  Flag the TSR as empty, and
             // set the "Transmit complete" flag in the register.
@@ -333,57 +333,57 @@ static void UART_TxClock(void *context_, struct _AVR_CPU *pstCPU_)
                 TSR = 0;
                 bTSR_Empty = true;
 
-                UART_TxComplete(pstCPU_);
+                UART_TxComplete();
             }
         }
     }
 }
 
 //---------------------------------------------------------------------------
-static void UART_RxClock(void *context_, struct _AVR_CPU *pstCPU_)
+static void UART_RxClock(void *context_ )
 {
-    if (UART_IsRxEnabled(pstCPU_) && u32RxTicksRemaining)
+    if (UART_IsRxEnabled() && u32RxTicksRemaining)
     {
         u32RxTicksRemaining--;
         if (!u32RxTicksRemaining)
         {
             // Local echo of the freshly "shifted in" data to the terminal
-            Echo_Rx(pstCPU_);
+            Echo_Rx();
 
             // Move data from receive shift register into the receive buffer
             RXB = RSR;
             RSR = 0;
 
             // Set the RX Complete flag
-            UART_RxComplete(pstCPU_);
+            UART_RxComplete();
         }
     }
 }
 //---------------------------------------------------------------------------
-static void UART_Clock(void *context_, struct _AVR_CPU *pstCPU_)
+static void UART_Clock(void *context_ )
 {    
     // Handle Rx and TX clocks.
-    UART_TxClock(context_, pstCPU_);
-    UART_RxClock(context_, pstCPU_);
+    UART_TxClock(context_);
+    UART_RxClock(context_);
 
     // Check interrupts.
-    if (pstCPU_->pstRAM->stRegisters.SREG.I == 1)
+    if (stCPU.pstRAM->stRegisters.SREG.I == 1)
     {
         //DEBUG_PRINT("Check UART Interrupts\n");
-        if (UART_IsTxIntEnabled( pstCPU_ ) && UART_IsTxComplete( pstCPU_ ))
+        if (UART_IsTxIntEnabled(  ) && UART_IsTxComplete(  ))
         {
             DEBUG_PRINT("TXC Interrupt\n");
-            AVR_InterruptCandidate( pstCPU_, 0x14 );
+            AVR_InterruptCandidate( 0x14 );
         }
-        if (UART_IsDREIntEnabled( pstCPU_ ) && UART_IsEmpty( pstCPU_ ))
+        if (UART_IsDREIntEnabled(  ) && UART_IsEmpty(  ))
         {
             DEBUG_PRINT("DRE Interrupt\n");
-            AVR_InterruptCandidate( pstCPU_, 0x13 );
+            AVR_InterruptCandidate( 0x13 );
         }
-        if (UART_IsRxIntEnabled( pstCPU_ ) && UART_IsRxComplete( pstCPU_ ))
+        if (UART_IsRxIntEnabled(  ) && UART_IsRxComplete(  ))
         {
             printf("RXC Interrupt\n");
-            AVR_InterruptCandidate( pstCPU_, 0x12 );
+            AVR_InterruptCandidate( 0x12 );
         }
     }
 }

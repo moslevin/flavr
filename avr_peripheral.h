@@ -23,23 +23,22 @@
 
 #include <stdint.h>
 
-struct _AVR_CPU;
 //---------------------------------------------------------------------------
 // Peripheral callout functions - used to implement arbitrary peripherals
 // which are able to intercept/react to read/write operations to specific
 // I/O addresses.
 //---------------------------------------------------------------------------
 
-typedef void (*PeriphInit) (void *context_, struct _AVR_CPU *pstCPU_);
-typedef void (*PeriphRead) (void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t *pucValue_ );
-typedef void (*PeriphWrite)(void *context_, struct _AVR_CPU *pstCPU_, uint8_t ucAddr_, uint8_t ucValue_ );
-typedef void (*PeriphClock)(void *context_, struct _AVR_CPU *pstCPU_);
+typedef void (*PeriphInit) (void *context_ );
+typedef void (*PeriphRead) (void *context_, uint8_t ucAddr_, uint8_t *pucValue_ );
+typedef void (*PeriphWrite)(void *context_, uint8_t ucAddr_, uint8_t ucValue_ );
+typedef void (*PeriphClock)(void *context_ );
 
 //---------------------------------------------------------------------------
-typedef void (*InterruptAck)(struct _AVR_CPU *pstCPU_, uint8_t ucVector_);
+typedef void (*InterruptAck)( uint8_t ucVector_);
 
 //---------------------------------------------------------------------------
-typedef struct _AVRPeripheral
+typedef struct AVRPeripheral
 {
     PeriphInit          pfInit;
     PeriphRead          pfRead;

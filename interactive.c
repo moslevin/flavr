@@ -45,7 +45,7 @@ typedef struct
 //---------------------------------------------------------------------------
 static bool bIsInteractive;
 static bool bRetrigger;
-static AVR_CPU *pstCPU = 0;
+
 static TraceBuffer_t *pstTrace = 0;
 
 //---------------------------------------------------------------------------
@@ -162,7 +162,7 @@ void Interactive_CheckAndExecute( void )
         bIsInteractive = true;
         bRetrigger = false;
     }
-    printf( "Debugging @ Address [0x%X]\n", pstCPU->u16PC );
+    printf( "Debugging @ Address [0x%X]\n", stCPU.u16PC );
 
     // Keep attempting to parse commands until a valid one was encountered
     while (!Interactive_Execute_i()) { /* Do Nothing */ }
@@ -176,9 +176,8 @@ void Interactive_Set( void )
 }
 
 //---------------------------------------------------------------------------
-void Interactive_Init( AVR_CPU *pstCPU_, TraceBuffer_t *pstTrace_ )
+void Interactive_Init( TraceBuffer_t *pstTrace_ )
 {
-    pstCPU = pstCPU_;
     pstTrace = pstTrace_;
     bIsInteractive = false;
     bRetrigger = false;
@@ -282,13 +281,13 @@ static bool Interactive_Break( char *szCommand_ )
         return false;
     }
 
-    if (BreakPoint_EnabledAtAddress( pstCPU, (uint16_t)uiAddr))
+    if (BreakPoint_EnabledAtAddress( (uint16_t)uiAddr))
     {
-        BreakPoint_Delete( pstCPU, (uint16_t)uiAddr);
+        BreakPoint_Delete( (uint16_t)uiAddr);
     }
     else
     {
-        BreakPoint_Insert( pstCPU, (uint16_t)uiAddr);
+        BreakPoint_Insert( (uint16_t)uiAddr);
     }
 
     return false;
@@ -310,13 +309,13 @@ static bool Interactive_Watch( char *szCommand_ )
         return false;
     }
 
-    if (WatchPoint_EnabledAtAddress(pstCPU, (uint16_t)uiAddr))
+    if (WatchPoint_EnabledAtAddress((uint16_t)uiAddr))
     {
-        WatchPoint_Delete( pstCPU, (uint16_t)uiAddr);
+        WatchPoint_Delete( (uint16_t)uiAddr);
     }
     else
     {
-        WatchPoint_Insert( pstCPU, (uint16_t)uiAddr);
+        WatchPoint_Insert( (uint16_t)uiAddr);
     }
     return false;
 }
@@ -342,7 +341,7 @@ static bool Interactive_ROM( char *szCommand_ )
         return false;
     }
 
-    print_rom( pstCPU, (uint16_t)uiAddr, (uint16_t)uiLen );
+    print_rom( (uint16_t)uiAddr, (uint16_t)uiLen );
 
     return false;
 }
@@ -369,7 +368,7 @@ static bool Interactive_RAM( char *szCommand_ )
         return false;
     }
 
-    print_ram( pstCPU, (uint16_t)uiAddr, (uint16_t)uiLen );
+    print_ram( (uint16_t)uiAddr, (uint16_t)uiLen );
 
     return false;
 }
@@ -404,7 +403,7 @@ static bool Interactive_EE( char *szCommand_ )
 //---------------------------------------------------------------------------
 static bool Interactive_Registers( char *szCommand_ )
 {
-    print_core_regs( pstCPU );
+    print_core_regs( );
     return false;
 }
 
@@ -437,16 +436,16 @@ static bool Interactive_Help( char *szCommand_ )
 //---------------------------------------------------------------------------
 static bool Interactive_Disasm( char *szCommand_ )
 {
-    uint16_t OP = pstCPU->pu16ROM[pstCPU->u16PC];
-    printf("0x%04X: [0x%04X] ", pstCPU->u16PC, OP);
-    AVR_Decode(pstCPU, OP);
-    AVR_Disasm_Function(OP)(pstCPU);
+    uint16_t OP = stCPU.pu16ROM[stCPU.u16PC];
+    printf("0x%04X: [0x%04X] ", stCPU.u16PC, OP);
+    AVR_Decode(OP);
+    AVR_Disasm_Function(OP)();
     return false;
 }
 
 //---------------------------------------------------------------------------
 static bool Interactive_Trace( char *szCommand_ )
 {
-    TraceBuffer_Print( pstTrace, TRACE_PRINT_COMPACT | TRACE_PRINT_DISASSEMBLY, pstCPU );
+    TraceBuffer_Print( pstTrace, TRACE_PRINT_COMPACT | TRACE_PRINT_DISASSEMBLY );
     return false;
 }

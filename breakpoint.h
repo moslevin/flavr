@@ -45,7 +45,7 @@ typedef struct _BreakPoint
  * \param pstCPU_ Pointer to the CPU object on which to create a breakpoint.
  * \param u16Addr_ Address of the breakpoint.
  */
-void BreakPoint_Insert( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ );
+void BreakPoint_Insert( uint16_t u16Addr_ );
 
 //---------------------------------------------------------------------------
 /*!
@@ -57,7 +57,7 @@ void BreakPoint_Insert( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ );
  * \param pstCPU_ Pointer to the CPU object on which to delete the breakpoint.
  * \param u16Addr_ Address of the breakpoint to delete.
  */
-void BreakPoint_Delete( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ );
+void BreakPoint_Delete( uint16_t u16Addr_ );
 
 //---------------------------------------------------------------------------
 /*!
@@ -70,7 +70,7 @@ void BreakPoint_Delete( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ );
  * \param u16Addr_  Address (in flash) to check for breakpoint on.
  * \return true if a breakpoint has been set on the given address.
  */
-bool BreakPoint_EnabledAtAddress( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ );
+bool BreakPoint_EnabledAtAddress( uint16_t u16Addr_ );
 
 #endif
 

@@ -26,7 +26,7 @@
 
 //---------------------------------------------------------------------------
 // Format decoder function jump table
-typedef void (*AVR_Decoder)( AVR_CPU *pstCPU_, uint16_t OP_);
+typedef void (*AVR_Decoder)( uint16_t OP_);
 
 //---------------------------------------------------------------------------
 /*!
@@ -50,7 +50,7 @@ AVR_Decoder AVR_Decoder_Function( uint16_t OP_ );
  * \param pstCPU_ Pointer to the CPU object with which to decode the instruction
  * \param OP_ Opcode to decode
  */
-void AVR_Decode( AVR_CPU *pstCPU_, uint16_t OP_ );
+void AVR_Decode( uint16_t OP_ );
 
 #endif
 

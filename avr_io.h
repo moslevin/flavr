@@ -55,7 +55,7 @@ typedef struct _IOClockList
  * \param pstPeriph_
  * \param addr_
  */
-void IO_AddReader(struct _AVR_CPU *pstCPU_, AVRPeripheral *pstPeriph_, uint8_t addr_);
+void IO_AddReader(  AVRPeripheral *pstPeriph_, uint8_t addr_);
 
 //--------------------------------------------------------------------------
 /*!
@@ -64,7 +64,7 @@ void IO_AddReader(struct _AVR_CPU *pstCPU_, AVRPeripheral *pstPeriph_, uint8_t a
  * \param pstPeriph_
  * \param addr_
  */
-void IO_AddWriter(struct _AVR_CPU *pstCPU_, AVRPeripheral *pstPeriph_, uint8_t addr_);
+void IO_AddWriter(  AVRPeripheral *pstPeriph_, uint8_t addr_);
 
 //--------------------------------------------------------------------------
 /*!
@@ -72,7 +72,7 @@ void IO_AddWriter(struct _AVR_CPU *pstCPU_, AVRPeripheral *pstPeriph_, uint8_t a
  * \param pstCPU_
  * \param pstPeriph_
  */
-void IO_AddClocker(struct _AVR_CPU *pstCPU_, AVRPeripheral *pstPeriph_ );
+void IO_AddClocker(  AVRPeripheral *pstPeriph_ );
 
 //--------------------------------------------------------------------------
 /*!
@@ -81,7 +81,7 @@ void IO_AddClocker(struct _AVR_CPU *pstCPU_, AVRPeripheral *pstPeriph_ );
  * \param addr_
  * \param value_
  */
-void IO_Write(struct _AVR_CPU *pstCPU_, uint8_t addr_, uint8_t value_ );
+void IO_Write(  uint8_t addr_, uint8_t value_ );
 
 //---------------------------------------------------------------------------
 /*!
@@ -90,13 +90,13 @@ void IO_Write(struct _AVR_CPU *pstCPU_, uint8_t addr_, uint8_t value_ );
  * \param addr_
  * \param value_
  */
-void IO_Read(struct _AVR_CPU *pstCPU_, uint8_t addr_, uint8_t *value_ );
+void IO_Read(  uint8_t addr_, uint8_t *value_ );
 
 //---------------------------------------------------------------------------
 /*!
  * \brief IO_Clock
  * \param pstCPU_
  */
-void IO_Clock( struct _AVR_CPU *pstCPU_ );
+void IO_Clock( void );
 
 #endif

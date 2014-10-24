@@ -26,10 +26,10 @@
 #include "breakpoint.h"
 
 //---------------------------------------------------------------------------
-void BreakPoint_Insert( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ )
+void BreakPoint_Insert( uint16_t u16Addr_ )
 {
     // Don't add multiple breakpoints at the same address
-    if (BreakPoint_EnabledAtAddress( pstCPU_, u16Addr_ ))
+    if (BreakPoint_EnabledAtAddress(  u16Addr_ ))
     {
         return;
     }
@@ -38,23 +38,23 @@ void BreakPoint_Insert( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ )
 
     pstNewBreak = (BreakPoint_t*)malloc( sizeof(BreakPoint_t) );
 
-    pstNewBreak->next = pstCPU_->pstBreakPoints;
+    pstNewBreak->next = stCPU.pstBreakPoints;
     pstNewBreak->prev = NULL;
 
     pstNewBreak->u16Addr = u16Addr_;
 
-    if (pstCPU_->pstBreakPoints)
+    if (stCPU.pstBreakPoints)
     {
-        BreakPoint_t *pstTemp = pstCPU_->pstBreakPoints;
+        BreakPoint_t *pstTemp = stCPU.pstBreakPoints;
         pstTemp->prev = pstNewBreak;
     }
-    pstCPU_->pstBreakPoints = pstNewBreak;
+    stCPU.pstBreakPoints = pstNewBreak;
 }
 
 //---------------------------------------------------------------------------
-void BreakPoint_Delete( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ )
+void BreakPoint_Delete( uint16_t u16Addr_ )
 {
-    BreakPoint_t *pstTemp = pstCPU_->pstBreakPoints;
+    BreakPoint_t *pstTemp = stCPU.pstBreakPoints;
 
     while (pstTemp)
     {
@@ -74,9 +74,9 @@ void BreakPoint_Delete( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ )
             }
 
             // Adjust list-head if necessary
-            if (pstTemp == pstCPU_->pstBreakPoints)
+            if (pstTemp == stCPU.pstBreakPoints)
             {
-                pstCPU_->pstBreakPoints = pstNext;
+                stCPU.pstBreakPoints = pstNext;
             }
 
             // Free the node/iterate to next node.
@@ -92,9 +92,9 @@ void BreakPoint_Delete( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ )
 }
 
 //---------------------------------------------------------------------------
-bool BreakPoint_EnabledAtAddress( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ )
+bool BreakPoint_EnabledAtAddress( uint16_t u16Addr_ )
 {
-    BreakPoint_t *pstTemp = pstCPU_->pstBreakPoints;
+    BreakPoint_t *pstTemp = stCPU.pstBreakPoints;
 
     while (pstTemp)
     {

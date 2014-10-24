@@ -26,7 +26,7 @@
 
 //---------------------------------------------------------------------------
 // Format opcode function jump table
-typedef void (*AVR_Opcode)( AVR_CPU *pstCPU_);
+typedef void (*AVR_Opcode)( );
 
 //---------------------------------------------------------------------------
 /*!
@@ -51,6 +51,6 @@ AVR_Opcode AVR_Opcode_Function( uint16_t OP_ );
  * \param pstCPU_ Pointer to a valid CPU object that has just decoded the opcode
  * \param OP_ Opcode to execute
  */
-void AVR_RunOpcode( AVR_CPU *pstCPU_,  uint16_t OP_ );
+void AVR_RunOpcode(  uint16_t OP_ );
 
 #endif

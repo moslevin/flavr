@@ -28,73 +28,73 @@
 #include "avr_op_decode.h"
 
 //---------------------------------------------------------------------------
-static void AVR_Decoder_NOP( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_Register_Pair_4bit( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_Register_Pair_3bit( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_Register_Pair_5bit( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_Register_Immediate( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_LDST_YZ_k( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_LDST( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_Register_Single( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_Register_SC( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_Misc( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_Indirect_Jump( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_DEC_Rd( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_DES_round_4( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_JMP_CALL_22( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_ADIW_SBIW_6( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_IO_Bit( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_MUL( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_IO_In_Out( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_Relative_Jump( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_LDI( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_Conditional_Branch( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_BLD_BST( AVR_CPU *pstCPU_, uint16_t OP_);
-static void AVR_Decoder_SBRC_SBRS( AVR_CPU *pstCPU_, uint16_t OP_);
+static void AVR_Decoder_NOP( uint16_t OP_);
+static void AVR_Decoder_Register_Pair_4bit( uint16_t OP_);
+static void AVR_Decoder_Register_Pair_3bit( uint16_t OP_);
+static void AVR_Decoder_Register_Pair_5bit( uint16_t OP_);
+static void AVR_Decoder_Register_Immediate( uint16_t OP_);
+static void AVR_Decoder_LDST_YZ_k( uint16_t OP_);
+static void AVR_Decoder_LDST( uint16_t OP_);
+static void AVR_Decoder_Register_Single( uint16_t OP_);
+static void AVR_Decoder_Register_SC( uint16_t OP_);
+static void AVR_Decoder_Misc( uint16_t OP_);
+static void AVR_Decoder_Indirect_Jump( uint16_t OP_);
+static void AVR_Decoder_DEC_Rd( uint16_t OP_);
+static void AVR_Decoder_DES_round_4( uint16_t OP_);
+static void AVR_Decoder_JMP_CALL_22( uint16_t OP_);
+static void AVR_Decoder_ADIW_SBIW_6( uint16_t OP_);
+static void AVR_Decoder_IO_Bit( uint16_t OP_);
+static void AVR_Decoder_MUL( uint16_t OP_);
+static void AVR_Decoder_IO_In_Out( uint16_t OP_);
+static void AVR_Decoder_Relative_Jump( uint16_t OP_);
+static void AVR_Decoder_LDI( uint16_t OP_);
+static void AVR_Decoder_Conditional_Branch( uint16_t OP_);
+static void AVR_Decoder_BLD_BST( uint16_t OP_);
+static void AVR_Decoder_SBRC_SBRS( uint16_t OP_);
 
 //---------------------------------------------------------------------------
-static void AVR_Decoder_NOP( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_NOP( uint16_t OP_)
 {
     // Nothing to do here...
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_Register_Pair_4bit( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_Register_Pair_4bit( uint16_t OP_)
 {
     uint8_t Rr = (OP_ & 0x000F);
     uint8_t Rd = ((OP_ & 0x00F0) >> 4);
 
-    pstCPU_->Rr16 = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r_word[Rr]);
-    pstCPU_->Rd16 = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r_word[Rd]);
+    stCPU.Rr16 = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r_word[Rr]);
+    stCPU.Rd16 = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r_word[Rd]);
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_Register_Pair_3bit( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_Register_Pair_3bit( uint16_t OP_)
 {
     uint8_t Rr = (OP_ & 0x0007) + 16;
     uint8_t Rd = ((OP_ & 0x0070) >> 4) + 16;
 
-    pstCPU_->Rr = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[Rr]);
-    pstCPU_->Rd = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
+    stCPU.Rr = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[Rr]);
+    stCPU.Rd = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_Register_Pair_5bit( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_Register_Pair_5bit( uint16_t OP_)
 {
     uint8_t Rr = (OP_ & 0x000F) | ((OP_ & 0x0200) >> 5);
     uint8_t Rd = (OP_ & 0x01F0) >> 4;
 
-    pstCPU_->Rr = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[Rr]);
-    pstCPU_->Rd = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
+    stCPU.Rr = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[Rr]);
+    stCPU.Rd = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_Register_Immediate( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_Register_Immediate( uint16_t OP_)
 {
     uint8_t K = (OP_ & 0x000F) | ((OP_ & 0x0F00) >> 4);
     uint8_t Rd = ((OP_ & 0x00F0) >> 4) + 16;
 
-    pstCPU_->K = K;
-    pstCPU_->Rd = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
+    stCPU.K = K;
+    stCPU.Rd = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_LDST_YZ_k( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_LDST_YZ_k( uint16_t OP_)
 {
     uint8_t q = (OP_ & 0x0007) |            // Awkward encoding... see manual for details.
                 ((OP_ & 0x0C00) >> (7)) |
@@ -102,112 +102,112 @@ static void AVR_Decoder_LDST_YZ_k( AVR_CPU *pstCPU_, uint16_t OP_)
 
     uint8_t Rd = (OP_ & 0x01F0) >> 4;
 
-    pstCPU_->q = q;
-    pstCPU_->Rd = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
+    stCPU.q = q;
+    stCPU.Rd = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_LDST( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_LDST( uint16_t OP_)
 {
     uint8_t Rd = (OP_ & 0x01F0) >> 4;
 
-    pstCPU_->Rd = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);        
+    stCPU.Rd = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);        
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_LDS_STS( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_LDS_STS( uint16_t OP_)
 {
     uint8_t Rd = (OP_ & 0x01F0) >> 4;
 
-    pstCPU_->Rd = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
-    pstCPU_->K = pstCPU_->pu16ROM[ pstCPU_->u16PC + 1 ];
+    stCPU.Rd = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
+    stCPU.K = stCPU.pu16ROM[ stCPU.u16PC + 1 ];
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_Register_Single( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_Register_Single( uint16_t OP_)
 {
     uint8_t Rd = (OP_ & 0x01F0) >> 4;
 
-    pstCPU_->Rd = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
+    stCPU.Rd = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_Register_SC( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_Register_SC( uint16_t OP_)
 {
     uint8_t b = (OP_ & 0x0070) >> 4;
 
-    pstCPU_->b = b;
+    stCPU.b = b;
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_Misc( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_Misc( uint16_t OP_)
 {
     // Nothing to do here.
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_Indirect_Jump( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_Indirect_Jump( uint16_t OP_)
 {
     // Nothing to do here.
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_DEC_Rd( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_DEC_Rd( uint16_t OP_)
 {
     uint8_t Rd = (OP_ & 0x01F0) >> 4;
 
-    pstCPU_->Rd = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
+    stCPU.Rd = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_DES_round_4( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_DES_round_4( uint16_t OP_)
 {
     uint8_t K = (OP_ & 0x00F0) >> 4;
-    pstCPU_->K = K;
+    stCPU.K = K;
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_JMP_CALL_22( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_JMP_CALL_22( uint16_t OP_)
 {
-    uint16_t op = pstCPU_->pu16ROM[ pstCPU_->u16PC + 1 ];
+    uint16_t op = stCPU.pu16ROM[ stCPU.u16PC + 1 ];
     uint32_t k = op;
     k |= (((OP_ & 0x0001) | (OP_ & 0x01F0) >> 3) << 16);
 
-    pstCPU_->k = k;
+    stCPU.k = k;
 
     // These are 2-cycle instructions.  Clock the CPU here, since we're fetching
     // the second word of data for this opcode here.
-    IO_Clock( pstCPU_ );
+    IO_Clock(  );
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_ADIW_SBIW_6( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_ADIW_SBIW_6( uint16_t OP_)
 {
     uint8_t K = (OP_ & 0x000F) | ((OP_ & 0x00C0) >> 2);
     uint8_t Rd16 = (((OP_ & 0x0030) >> 4) * 2) + 24;
 
-    pstCPU_->K = K;
-    pstCPU_->Rd16 = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r_word[Rd16 >> 1]);
+    stCPU.K = K;
+    stCPU.Rd16 = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r_word[Rd16 >> 1]);
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_IO_Bit( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_IO_Bit( uint16_t OP_)
 {
     uint8_t b = (OP_ & 0x0007);
     uint8_t A = (OP_ & 0x00F8) >> 3;
 
-    pstCPU_->b = b;
-    pstCPU_->A = A;
+    stCPU.b = b;
+    stCPU.A = A;
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_MUL( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_MUL( uint16_t OP_)
 {
     uint8_t Rr = (OP_ & 0x000F) | ((OP_ & 0x0200) >> 5);
     uint8_t Rd = (OP_ & 0x01F0) >> 4;
 
-    pstCPU_->Rr = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[Rr]);
-    pstCPU_->Rd = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
+    stCPU.Rr = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[Rr]);
+    stCPU.Rd = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_IO_In_Out( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_IO_In_Out( uint16_t OP_)
 {
     uint8_t A = (OP_ & 0x000F) | ((OP_ & 0x0600) >> 5);
     uint8_t Rd = (OP_ & 0x01F0) >> 4;
 
-    pstCPU_->A = A;
-    pstCPU_->Rd = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
+    stCPU.A = A;
+    stCPU.Rd = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_Relative_Jump( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_Relative_Jump( uint16_t OP_)
 {
     // NB: -2K <= k <= 2K
     uint16_t k = (OP_ & 0x0FFF);
@@ -215,61 +215,61 @@ static void AVR_Decoder_Relative_Jump( AVR_CPU *pstCPU_, uint16_t OP_)
     // Check for sign bit in 12-bit value...
     if (k & 0x0800)
     {
-        pstCPU_->k_s = (int32_t)((~k & 0x07FF) + 1) * -1;
+        stCPU.k_s = (int32_t)((~k & 0x07FF) + 1) * -1;
     }
     else
     {
-        pstCPU_->k_s = (int32_t)k;
+        stCPU.k_s = (int32_t)k;
     }
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_LDI( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_LDI( uint16_t OP_)
 {
     uint8_t K = (OP_ & 0x000F) | ((OP_ & 0x0F00) >> 4);
     uint8_t Rd = ((OP_ & 0x00F0) >> 4) + 16;
 
-    pstCPU_->K = K;
-    pstCPU_->Rd = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
+    stCPU.K = K;
+    stCPU.Rd = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_Conditional_Branch( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_Conditional_Branch( uint16_t OP_)
 {
     // NB: -64 <= k <= 63
     uint8_t b = (OP_ & 0x0007);
     uint8_t k = ((OP_ & 0x03F8) >> 3);
 
-    pstCPU_->b = b;
+    stCPU.b = b;
 
     // Check for sign bit in 7-bit value...
     if (k & 0x40)
     {
         // Convert to signed 32-bit integer... probably a cleaner way
         // of doing this, but I'm tired.
-        pstCPU_->k_s = (int32_t)((~k & 0x3F) + 1) * -1;
+        stCPU.k_s = (int32_t)((~k & 0x3F) + 1) * -1;
     }
     else
     {
-        pstCPU_->k_s = (int32_t)k;
+        stCPU.k_s = (int32_t)k;
     }
 }
 //---------------------------------------------------------------------------
-static void AVR_Decoder_BLD_BST( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_BLD_BST( uint16_t OP_)
 {
     uint8_t b = (OP_ & 0x0007);
     uint8_t Rd = ((OP_ & 0x01F0) >> 4);
 
-    pstCPU_->b = b;
-    pstCPU_->Rd = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
+    stCPU.b = b;
+    stCPU.Rd = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Decoder_SBRC_SBRS( AVR_CPU *pstCPU_, uint16_t OP_)
+static void AVR_Decoder_SBRC_SBRS( uint16_t OP_)
 {
     uint8_t b = (OP_ & 0x0007);
     uint8_t Rd = ((OP_ & 0x01F0) >> 4);
 
-    pstCPU_->b = b;
-    pstCPU_->Rd = &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
+    stCPU.b = b;
+    stCPU.Rd = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
 }
 
 //---------------------------------------------------------------------------
@@ -422,9 +422,9 @@ AVR_Decoder AVR_Decoder_Function( uint16_t OP_ )
 }
 
 //---------------------------------------------------------------------------
-void AVR_Decode( AVR_CPU *pstCPU_, uint16_t OP_ )
+void AVR_Decode( uint16_t OP_ )
 {
     AVR_Decoder myDecoder;
     myDecoder = AVR_Decoder_Function(OP_);
-    myDecoder(pstCPU_, OP_);
+    myDecoder( OP_);
 }
