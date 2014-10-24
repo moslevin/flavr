@@ -23,6 +23,25 @@
 #include "avr_cpu.h"
 
 //---------------------------------------------------------------------------
+static void AVR_NextInterrupt(void)
+{
+    uint32_t i = 0x80000000;
+    uint32_t j = 31;
+    while (i)
+    {
+        if ((stCPU.u32IntFlags & i) == i)
+        {
+            stCPU.u8IntPriority = j;
+        }
+        i >>= 1;
+        j--;
+    }
+
+    stCPU.u8IntPriority = 255;
+    stCPU.u32IntFlags = 0;
+}
+
+//---------------------------------------------------------------------------
 void AVR_InterruptCandidate( uint8_t u8Vector_ )
 {
     // Interrupts are prioritized by index -- lower == higher priority.
@@ -31,6 +50,7 @@ void AVR_InterruptCandidate( uint8_t u8Vector_ )
     {
         stCPU.u8IntPriority = u8Vector_;
     }
+    stCPU.u32IntFlags |= (1 << u8Vector_);
 }
 
 //---------------------------------------------------------------------------
@@ -75,7 +95,8 @@ void AVR_Interrupt( void )
     }
 
     // Reset the CPU interrupt priority
-    stCPU.u8IntPriority = 255;
+    stCPU.u32IntFlags &= ~(1 << stCPU.u8IntPriority);
+    AVR_NextInterrupt();
 
     // Clear any sleep-mode flags currently set
     stCPU.bAsleep = false;

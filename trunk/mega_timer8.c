@@ -303,14 +303,14 @@ static void Timer8_Clock(void *context_ )
         break;
     }
 
-    // Handle event flags on timer updates
-    bool bOVF   = false;
-    bool bCTCA  = false;
-    bool bCTCB  = false;    
 
     if (bUpdateTimer)
     {
-        //DEBUG_PRINT( " WGM Mode %d\n", eWGM );
+        // Handle event flags on timer updates
+        bool bOVF   = false;
+        bool bCTCA  = false;
+        bool bCTCB  = false;
+
         switch (eWGM)
         {
         case WGM_NORMAL:
@@ -345,47 +345,40 @@ static void Timer8_Clock(void *context_ )
         default:
             break;
         }
-    }
 
-    // Set interrupt flags if an appropriate transition has taken place
-    if (bOVF)
-    {
-        DEBUG_PRINT(" TOV0 Set\n" );
-        stCPU.pstRAM->stRegisters.TIFR0.TOV0 = 1;
-    }
-    if (bCTCA)
-    {
-        DEBUG_PRINT(" OCF0A Set\n" );
-        stCPU.pstRAM->stRegisters.TIFR0.OCF0A = 1;
-    }
-    if (bCTCB)
-    {
-        DEBUG_PRINT(" OCF0B Set\n" );
-        stCPU.pstRAM->stRegisters.TIFR0.OCF0B = 1;
-    }
+        // Set interrupt flags if an appropriate transition has taken place
+        if (bOVF)
+        {
+            DEBUG_PRINT(" TOV0 Set\n" );
+            stCPU.pstRAM->stRegisters.TIFR0.TOV0 = 1;
 
-    // Check interrupt status to see whether or not any of the pending interrupts
-    // should be armed as a candidate this clock cycle
-    if (stCPU.pstRAM->stRegisters.SREG.I)
-    {        
-        if ((stCPU.pstRAM->stRegisters.TIFR0.TOV0 == 1) &&
-            (stCPU.pstRAM->stRegisters.TIMSK0.TOIE0 == 1))
-        {
-            DEBUG_PRINT(" TOV0 Interrupt Candidate\n" );
-            AVR_InterruptCandidate(0x10);
+            if (stCPU.pstRAM->stRegisters.TIMSK0.TOIE0 == 1)
+            {
+                DEBUG_PRINT(" TOV0 Interrupt Candidate\n" );
+                AVR_InterruptCandidate(0x10);
+            }
         }
-        if ((stCPU.pstRAM->stRegisters.TIFR0.OCF0A == 1) &&
-            (stCPU.pstRAM->stRegisters.TIMSK0.OCIE0A == 1))
+        if (bCTCA)
         {
-            DEBUG_PRINT(" OCF0A Interrupt Candidate\n" );
-            AVR_InterruptCandidate(0x0E);
+            DEBUG_PRINT(" OCF0A Set\n" );
+            stCPU.pstRAM->stRegisters.TIFR0.OCF0A = 1;
+            if (stCPU.pstRAM->stRegisters.TIMSK0.OCIE0A == 1)
+            {
+                DEBUG_PRINT(" OCF0A Interrupt Candidate\n" );
+                AVR_InterruptCandidate(0x0E);
+            }
         }
-        if ((stCPU.pstRAM->stRegisters.TIFR0.OCF0B == 1) &&
-            (stCPU.pstRAM->stRegisters.TIMSK0.OCIE0B == 1))
+        if (bCTCB)
         {
-            DEBUG_PRINT(" OCF0B Interrupt Candidate\n" );
-            AVR_InterruptCandidate(0x0F);
+            DEBUG_PRINT(" OCF0B Set\n" );
+            stCPU.pstRAM->stRegisters.TIFR0.OCF0B = 1;
+            if (stCPU.pstRAM->stRegisters.TIMSK0.OCIE0B == 1)
+            {
+                DEBUG_PRINT(" OCF0B Interrupt Candidate\n" );
+                AVR_InterruptCandidate(0x0F);
+            }
         }
+
     }
 }
 
