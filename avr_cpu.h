@@ -116,6 +116,7 @@ typedef struct
 
     //---------------------------------------------------------------------------
     uint8_t     u8IntPriority;  // Priority of pending interrupts this cycle
+    uint32_t    u32IntFlags;    // Bitmask for the 32 interrupts
 
     //---------------------------------------------------------------------------
     InterruptAck apfInterruptCallbacks[32]; // Interrupt callbacks

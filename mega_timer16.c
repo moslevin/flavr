@@ -418,14 +418,15 @@ static void Timer16_Clock(void *context_ )
         break;
     }
 
-    // Handle event flags on timer updates
-    bool bOVF   = false;
-    bool bCTCA  = false;
-    bool bCTCB  = false;
-    bool bICR   = false;
 
     if (bUpdateTimer)
     {
+        // Handle event flags on timer updates
+        bool bOVF   = false;
+        bool bCTCA  = false;
+        bool bCTCB  = false;
+        bool bICR   = false;
+
         //DEBUG_PRINT( " WGM Mode %d\n", eWGM );
         switch (eWGM)
         {
@@ -472,57 +473,57 @@ static void Timer16_Clock(void *context_ )
         default:
             break;
         }
-    }
 
-    // Set interrupt flags if an appropriate transition has taken place
-    if (bOVF)
-    {
-        DEBUG_PRINT(" TOV1 Set\n" );
-        stCPU.pstRAM->stRegisters.TIFR1.TOV1 = 1;
-    }
-    if (bCTCA)
-    {
-        DEBUG_PRINT(" OCF1A Set\n" );
-        stCPU.pstRAM->stRegisters.TIFR1.OCF1A = 1;
-    }
-    if (bCTCB)
-    {
-        DEBUG_PRINT(" OCF1B Set\n" );
-        stCPU.pstRAM->stRegisters.TIFR1.OCF1B = 1;
-    }
-    if (bICR)
-    {
-        DEBUG_PRINT(" ICF1 Set\n" );
-        stCPU.pstRAM->stRegisters.TIFR1.ICF1 = 1;
-    }
+        // Set interrupt flags if an appropriate transition has taken place
+        if (bOVF)
+        {
+            DEBUG_PRINT(" TOV1 Set\n" );
+            stCPU.pstRAM->stRegisters.TIFR1.TOV1 = 1;
+        }
+        if (bCTCA)
+        {
+            DEBUG_PRINT(" OCF1A Set\n" );
+            stCPU.pstRAM->stRegisters.TIFR1.OCF1A = 1;
+        }
+        if (bCTCB)
+        {
+            DEBUG_PRINT(" OCF1B Set\n" );
+            stCPU.pstRAM->stRegisters.TIFR1.OCF1B = 1;
+        }
+        if (bICR)
+        {
+            DEBUG_PRINT(" ICF1 Set\n" );
+            stCPU.pstRAM->stRegisters.TIFR1.ICF1 = 1;
+        }
 
-    // Check interrupt status to see whether or not any of the pending interrupts
-    // should be armed as a candidate this clock cycle
-    if (stCPU.pstRAM->stRegisters.SREG.I)
-    {        
-        if ((stCPU.pstRAM->stRegisters.TIFR1.TOV1 == 1) &&
-            (stCPU.pstRAM->stRegisters.TIMSK1.TOIE1 == 1))
+        // Check interrupt status to see whether or not any of the pending interrupts
+        // should be armed as a candidate this clock cycle
+        if (stCPU.pstRAM->stRegisters.SREG.I)
         {
-            DEBUG_PRINT(" TOV1 Interrupt Candidate\n" );
-            AVR_InterruptCandidate(0x0D);
-        }
-        if ((stCPU.pstRAM->stRegisters.TIFR1.OCF1A == 1) &&
-            (stCPU.pstRAM->stRegisters.TIMSK1.OCIE1A == 1))
-        {
-            DEBUG_PRINT(" OCF1A Interrupt Candidate\n" );
-            AVR_InterruptCandidate(0x0B);
-        }
-        if ((stCPU.pstRAM->stRegisters.TIFR1.OCF1B == 1) &&
-            (stCPU.pstRAM->stRegisters.TIMSK1.OCIE1B == 1))
-        {
-            DEBUG_PRINT(" OCF1B Interrupt Candidate\n" );
-            AVR_InterruptCandidate(0x0C);
-        }
-        if ((stCPU.pstRAM->stRegisters.TIFR1.ICF1 == 1) &&
-            (stCPU.pstRAM->stRegisters.TIMSK1.ICIE1 == 1))
-        {
-            DEBUG_PRINT(" ICF1 Interrupt Candidate\n" );
-            AVR_InterruptCandidate(0x0A);
+            if ((stCPU.pstRAM->stRegisters.TIFR1.TOV1 == 1) &&
+                (stCPU.pstRAM->stRegisters.TIMSK1.TOIE1 == 1))
+            {
+                DEBUG_PRINT(" TOV1 Interrupt Candidate\n" );
+                AVR_InterruptCandidate(0x0D);
+            }
+            if ((stCPU.pstRAM->stRegisters.TIFR1.OCF1A == 1) &&
+                (stCPU.pstRAM->stRegisters.TIMSK1.OCIE1A == 1))
+            {
+                DEBUG_PRINT(" OCF1A Interrupt Candidate\n" );
+                AVR_InterruptCandidate(0x0B);
+            }
+            if ((stCPU.pstRAM->stRegisters.TIFR1.OCF1B == 1) &&
+                (stCPU.pstRAM->stRegisters.TIMSK1.OCIE1B == 1))
+            {
+                DEBUG_PRINT(" OCF1B Interrupt Candidate\n" );
+                AVR_InterruptCandidate(0x0C);
+            }
+            if ((stCPU.pstRAM->stRegisters.TIFR1.ICF1 == 1) &&
+                (stCPU.pstRAM->stRegisters.TIMSK1.ICIE1 == 1))
+            {
+                DEBUG_PRINT(" ICF1 Interrupt Candidate\n" );
+                AVR_InterruptCandidate(0x0A);
+            }
         }
     }
 }
