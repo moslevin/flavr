@@ -49,7 +49,7 @@ typedef struct
 } AVR_RAM_t;    // Note - the true size of this struct is defined at runtime based on the configured RAM size.
 
 //---------------------------------------------------------------------------
-struct _AVR_CPU
+typedef struct
 {
     //---------------------------------------------------------------------------
     // Jump tables for peripheral read/write functions.  This implementaton uses
@@ -119,8 +119,8 @@ struct _AVR_CPU
 
     //---------------------------------------------------------------------------
     InterruptAck apfInterruptCallbacks[32]; // Interrupt callbacks
-};
-typedef struct _AVR_CPU AVR_CPU;
+} AVR_CPU;
+
 
 //---------------------------------------------------------------------------
 typedef struct
@@ -136,7 +136,7 @@ typedef struct
  * \param pstCPU_ Pointer to a valid AVR CPU object
  * \param pstConfig_ Pointer to an initialized AVR_CPU_Config_t struct
  */
-void CPU_Init( AVR_CPU *pstCPU_, AVR_CPU_Config_t *pstConfig_ );
+void CPU_Init( AVR_CPU_Config_t *pstConfig_ );
 
 //---------------------------------------------------------------------------
 /*!
@@ -144,14 +144,14 @@ void CPU_Init( AVR_CPU *pstCPU_, AVR_CPU_Config_t *pstConfig_ );
  * \param pstCPU_ Pointer to a valid AVR CPU object
  * \return First word of the next opcode
  */
-uint16_t CPU_Fetch( AVR_CPU *pstCPU_ );
+uint16_t CPU_Fetch( void );
 
 //---------------------------------------------------------------------------
 /*!
  * \brief CPU_RunCycle Run a CPU instruction cycle
  * \param pstCPU_ Pointer to a valid AVR CPU object
  */
-void CPU_RunCycle( AVR_CPU *pstCPU_ );
+void CPU_RunCycle( void );
 
 //---------------------------------------------------------------------------
 /*!
@@ -160,7 +160,7 @@ void CPU_RunCycle( AVR_CPU *pstCPU_ );
  * \param pstPeriph_ Pointer to an initialized AVR Peripheral object to be
  *                associated with this CPU.
  */
-void CPU_AddPeriph( AVR_CPU *pstCPU_, AVRPeripheral *pstPeriph_ );
+void CPU_AddPeriph( AVRPeripheral *pstPeriph_ );
 
 //---------------------------------------------------------------------------
 /*!
@@ -174,7 +174,9 @@ void CPU_AddPeriph( AVR_CPU *pstCPU_, AVRPeripheral *pstPeriph_ );
  * \param pfIntAck_ Callback function to register
  * \param ucVector_ Interrupt vector index to install handler at
  */
-void CPU_RegisterInterruptCallback( AVR_CPU *pstCPU_, InterruptAck pfIntAck_, uint8_t ucVector_ );
+void CPU_RegisterInterruptCallback( InterruptAck pfIntAck_, uint8_t ucVector_ );
 
+
+extern AVR_CPU stCPU;
 
 #endif

@@ -27,10 +27,10 @@
 #include "watchpoint.h"
 
 //---------------------------------------------------------------------------
-void WatchPoint_Insert( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ )
+void WatchPoint_Insert( uint16_t u16Addr_ )
 {
     // Don't add multiple watchpoints at the same address
-    if (WatchPoint_EnabledAtAddress( pstCPU_, u16Addr_ ))
+    if (WatchPoint_EnabledAtAddress( u16Addr_ ))
     {
         return;
     }
@@ -39,23 +39,23 @@ void WatchPoint_Insert( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ )
 
     pstNewWatch = (WatchPoint_t*)malloc( sizeof(WatchPoint_t) );
 
-    pstNewWatch->next = pstCPU_->pstWatchPoints;
+    pstNewWatch->next = stCPU.pstWatchPoints;
     pstNewWatch->prev = NULL;
 
     pstNewWatch->u16Addr = u16Addr_;
 
-    if (pstCPU_->pstWatchPoints)
+    if (stCPU.pstWatchPoints)
     {
-        WatchPoint_t *pstTemp = pstCPU_->pstWatchPoints;
+        WatchPoint_t *pstTemp = stCPU.pstWatchPoints;
         pstTemp->prev = pstNewWatch;
     }
-    pstCPU_->pstWatchPoints = pstNewWatch;
+    stCPU.pstWatchPoints = pstNewWatch;
 }
 
 //---------------------------------------------------------------------------
-void WatchPoint_Delete( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ )
+void WatchPoint_Delete( uint16_t u16Addr_ )
 {
-    WatchPoint_t *pstTemp = pstCPU_->pstWatchPoints;
+    WatchPoint_t *pstTemp = stCPU.pstWatchPoints;
 
     while (pstTemp)
     {
@@ -75,9 +75,9 @@ void WatchPoint_Delete( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ )
             }
 
             // Adjust list-head if necessary
-            if (pstTemp == pstCPU_->pstWatchPoints)
+            if (pstTemp == stCPU.pstWatchPoints)
             {
-                pstCPU_->pstWatchPoints = pstNext;
+                stCPU.pstWatchPoints = pstNext;
             }
 
             // Free the node/iterate to next node.
@@ -93,9 +93,9 @@ void WatchPoint_Delete( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ )
 }
 
 //---------------------------------------------------------------------------
-bool WatchPoint_EnabledAtAddress( struct _AVR_CPU *pstCPU_, uint16_t u16Addr_ )
+bool WatchPoint_EnabledAtAddress( uint16_t u16Addr_ )
 {
-    WatchPoint_t *pstTemp = pstCPU_->pstWatchPoints;
+    WatchPoint_t *pstTemp = stCPU.pstWatchPoints;
 
     while (pstTemp)
     {

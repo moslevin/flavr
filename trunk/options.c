@@ -37,13 +37,11 @@ typedef enum
 {
     OPTION_VARIANT,
     OPTION_FREQ,
-    OPTION_RAMSIZE,
-    OPTION_ROMSIZE,
-    OPTION_EESIZE,
     OPTION_HEXFILE,
     OPTION_DEBUG,
     OPTION_SILENT,
     OPTION_DISASM,
+    OPTION_TRACE,
 //--
     OPTION_NUM
 } OptionIndex_t;
@@ -53,13 +51,11 @@ static Option_t astAttributes[OPTION_NUM] =
 {
     {"--variant", NULL, false },
     {"--freq", NULL, false },
-    {"--ramsize", NULL, false },
-    {"--romsize", NULL, false },
-    {"--eesize", NULL, false },
     {"--hexfile", NULL, false },
     {"--debug", NULL, true },
     {"--silent", NULL, true },
-    {"--disasm", NULL, true }
+    {"--disasm", NULL, true },
+    {"--trace", NULL, true }
 };
 
 //---------------------------------------------------------------------------
@@ -68,9 +64,6 @@ static void Options_SetDefaults( void )
     //!ToDO - Grab these default values from the emu_config.h file.
     astAttributes[ OPTION_VARIANT ].szParameter  = strdup( "atmega328p" );
     astAttributes[ OPTION_FREQ ].szParameter     = strdup( "16000000" );
-    astAttributes[ OPTION_RAMSIZE ].szParameter  = strdup( "2048" );
-    astAttributes[ OPTION_ROMSIZE ].szParameter  = strdup( "32768" );
-    astAttributes[ OPTION_EESIZE ].szParameter   = strdup( "2048" );
 }
 //---------------------------------------------------------------------------
 const char *Options_GetByName (const char *szAttribute_)

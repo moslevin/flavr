@@ -75,7 +75,7 @@ void TraceBuffer_Init( TraceBuffer_t *pstTraceBuffer_ );
  *
  * \param pstCPU_ Pointer to an AVR CPU struct from which to store the trace data
  */
-void TraceBuffer_StoreFromCPU( TraceBuffer_t *pstTraceBuffer_, AVR_CPU *pstCPU_ );
+void TraceBuffer_StoreFromCPU( TraceBuffer_t *pstTraceBuffer_ );
 
 //---------------------------------------------------------------------------
 /*!
@@ -97,7 +97,7 @@ void TraceBuffer_LoadElement( TraceBuffer_t *pstTraceBuffer_, TraceElement_t *ps
  * \param pstElement_ Pointer to the trace element to print
  * * \param eFormat_ Formatting type for the print
  */
-void TraceBuffer_PrintElement( TraceElement_t *pstElement_, TracePrintFormat_t eFormat_, AVR_CPU *pstCPU_ );
+void TraceBuffer_PrintElement( TraceElement_t *pstElement_, TracePrintFormat_t eFormat_ );
 
 //---------------------------------------------------------------------------
 /*!
@@ -108,6 +108,6 @@ void TraceBuffer_PrintElement( TraceElement_t *pstElement_, TracePrintFormat_t e
  *
  * \param eFormat_ Formatting type for the print
  */
-void TraceBuffer_Print( TraceBuffer_t *pstTraceBuffer_, TracePrintFormat_t eFormat_, AVR_CPU *pstCPU_ );
+void TraceBuffer_Print( TraceBuffer_t *pstTraceBuffer_, TracePrintFormat_t eFormat_ );
 
 #endif

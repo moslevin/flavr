@@ -30,7 +30,7 @@
 #define DEBUG_PRINT(...)
 
 //---------------------------------------------------------------------------
-static void Data_Write( AVR_CPU *pstCPU_, uint16_t u16Addr_, uint8_t u8Val_ )
+static void Data_Write( uint16_t u16Addr_, uint8_t u8Val_ )
 {
     // Writing to RAM can be a tricky deal, because the address space is shared
     // between RAM, the core registers, and a bunch of peripheral I/O registers.
@@ -39,7 +39,7 @@ static void Data_Write( AVR_CPU *pstCPU_, uint16_t u16Addr_, uint8_t u8Val_ )
     if (u16Addr_ >= 32 && u16Addr_ <= 255)
     {
         // I/O range - check to see if there's a peripheral installed at this address
-        IOWriterList *pstIOWrite = pstCPU_->apstPeriphWriteTable[ u16Addr_ ];
+        IOWriterList *pstIOWrite = stCPU.apstPeriphWriteTable[ u16Addr_ ];
 
         // If there is a peripheral or peripherals
         if (pstIOWrite)
@@ -48,25 +48,25 @@ static void Data_Write( AVR_CPU *pstCPU_, uint16_t u16Addr_, uint8_t u8Val_ )
             // call their write handler
             while (pstIOWrite)
             {
-                pstIOWrite->pfWriter( pstIOWrite->pvContext, pstCPU_, (uint8_t)u16Addr_, u8Val_ );
+                pstIOWrite->pfWriter( pstIOWrite->pvContext, (uint8_t)u16Addr_, u8Val_ );
                 pstIOWrite = pstIOWrite->next;
             }
         }
         // Otherwise, there is no peripheral -- just assume we can treat this as normal RAM.
         else
         {
-            pstCPU_->pstRAM->au8RAM[ u16Addr_ ] = u8Val_;
+            stCPU.pstRAM->au8RAM[ u16Addr_ ] = u8Val_;
         }
     }
     // RAM address range - direct write-through.
     else
     {
-        pstCPU_->pstRAM->au8RAM[ u16Addr_ ] = u8Val_;
+        stCPU.pstRAM->au8RAM[ u16Addr_ ] = u8Val_;
     }
 }
 
 //---------------------------------------------------------------------------
-static uint8_t Data_Read( AVR_CPU *pstCPU_, uint16_t u16Addr_)
+static uint8_t Data_Read( uint16_t u16Addr_)
 {
     // Writing to RAM can be a tricky deal, because the address space is shared
     // between RAM, the core registers, and a bunch of peripheral I/O registers.
@@ -76,7 +76,7 @@ static uint8_t Data_Read( AVR_CPU *pstCPU_, uint16_t u16Addr_)
     if (u16Addr_ >= 32 && u16Addr_ <= 255)
     {
         // I/O range - check to see if there's a peripheral installed at this address
-        IOReaderList *pstIORead = pstCPU_->apstPeriphReadTable[ u16Addr_ ];
+        IOReaderList *pstIORead = stCPU.apstPeriphReadTable[ u16Addr_ ];
         DEBUG_PRINT( "Peripheral Read: 0x%04X\n", u16Addr_ );
         // If there is a peripheral or peripherals
         if (pstIORead)
@@ -87,7 +87,7 @@ static uint8_t Data_Read( AVR_CPU *pstCPU_, uint16_t u16Addr_)
             uint8_t u8Val;
             while (pstIORead)
             {
-                pstIORead->pfReader( pstIORead->pvContext, pstCPU_, (uint8_t)u16Addr_, &u8Val);
+                pstIORead->pfReader( pstIORead->pvContext,  (uint8_t)u16Addr_, &u8Val);
                 pstIORead = pstIORead->next;
             }
             return u8Val;
@@ -96,1724 +96,1724 @@ static uint8_t Data_Read( AVR_CPU *pstCPU_, uint16_t u16Addr_)
         else
         {
             DEBUG_PRINT(" No peripheral\n");
-            return pstCPU_->pstRAM->au8RAM[ u16Addr_ ];
+            return stCPU.pstRAM->au8RAM[ u16Addr_ ];
         }
     }
     // RAM address range - direct read
     else
     {
-        return pstCPU_->pstRAM->au8RAM[ u16Addr_ ];
+        return stCPU.pstRAM->au8RAM[ u16Addr_ ];
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_NOP( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_NOP( void )
 {
     // Nop - do nothing.
 }
 
 //---------------------------------------------------------------------------
-inline void ADD_Half_Carry( AVR_CPU *pstCPU_, uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
+inline void ADD_Half_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 {
-    pstCPU_->pstRAM->stRegisters.SREG.H =
+    stCPU.pstRAM->stRegisters.SREG.H =
             ( ((Rd_ & Rr_)    & 0x08 )
             | ((Rr_ & (~Result_)) & 0x08 )
             | (((~Result_) & Rd_) & 0x08) ) != false;
 }
 
 //---------------------------------------------------------------------------
-inline void ADD_Full_Carry( AVR_CPU *pstCPU_, uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
+inline void ADD_Full_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 {
-    pstCPU_->pstRAM->stRegisters.SREG.C =
+    stCPU.pstRAM->stRegisters.SREG.C =
             ( ((Rd_ & Rr_)    & 0x80 )
             | ((Rr_ & (~Result_)) & 0x80 )
             | (((~Result_) & Rd_) & 0x80) ) != false;
 }
 
 //---------------------------------------------------------------------------
-inline void ADD_Overflow_Flag( AVR_CPU *pstCPU_, uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
+inline void ADD_Overflow_Flag( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 {
-    pstCPU_->pstRAM->stRegisters.SREG.V =
+    stCPU.pstRAM->stRegisters.SREG.V =
              ( ((Rd_ & Rr_ & ~Result_)  & 0x80 )
              | ((~Rd_ & ~Rr_ & Result_) & 0x80 ) ) != 0;
 }
 
 //---------------------------------------------------------------------------
-inline void Signed_Flag( AVR_CPU *pstCPU_ )
+inline void Signed_Flag( void )
 {
-    unsigned int N = pstCPU_->pstRAM->stRegisters.SREG.N;
-    unsigned int V = pstCPU_->pstRAM->stRegisters.SREG.V;
+    unsigned int N = stCPU.pstRAM->stRegisters.SREG.N;
+    unsigned int V = stCPU.pstRAM->stRegisters.SREG.V;
 
-    pstCPU_->pstRAM->stRegisters.SREG.S = N ^ V;
+    stCPU.pstRAM->stRegisters.SREG.S = N ^ V;
 }
 
 //---------------------------------------------------------------------------
-inline void R8_Zero_Flag( AVR_CPU *pstCPU_, uint8_t R_ )
+inline void R8_Zero_Flag( uint8_t R_ )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.Z = (R_ == 0);
+    stCPU.pstRAM->stRegisters.SREG.Z = (R_ == 0);
 }
 
 //---------------------------------------------------------------------------
-inline void R8_CPC_Zero_Flag( AVR_CPU *pstCPU_, uint8_t R_ )
+inline void R8_CPC_Zero_Flag( uint8_t R_ )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.Z = (pstCPU_->pstRAM->stRegisters.SREG.Z && (R_ == 0));
+    stCPU.pstRAM->stRegisters.SREG.Z = (stCPU.pstRAM->stRegisters.SREG.Z && (R_ == 0));
 }
 
 //---------------------------------------------------------------------------
-inline void R8_Negative_Flag( AVR_CPU *pstCPU_, uint8_t R_ )
+inline void R8_Negative_Flag( uint8_t R_ )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.N = ((R_ & 0x80) == 0x80);
+    stCPU.pstRAM->stRegisters.SREG.N = ((R_ & 0x80) == 0x80);
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ADD( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ADD( void )
 {
     uint8_t u8Result;
-    uint8_t u8Rd = *(pstCPU_->Rd);
-    uint8_t u8Rr = *(pstCPU_->Rr);
+    uint8_t u8Rd = *(stCPU.Rd);
+    uint8_t u8Rr = *(stCPU.Rr);
 
     u8Result = u8Rd + u8Rr;
-    *(pstCPU_->Rd) = u8Result;
+    *(stCPU.Rd) = u8Result;
 
 // ---- Update flags ----
-    ADD_Half_Carry( pstCPU_, u8Rd, u8Rr, u8Result );
-    ADD_Full_Carry( pstCPU_, u8Rd, u8Rr, u8Result );
-    ADD_Overflow_Flag( pstCPU_, u8Rd, u8Rr, u8Result );
-    R8_Negative_Flag( pstCPU_, u8Result );
-    R8_Zero_Flag( pstCPU_, u8Result );
-    Signed_Flag( pstCPU_ );
+    ADD_Half_Carry(  u8Rd, u8Rr, u8Result );
+    ADD_Full_Carry(  u8Rd, u8Rr, u8Result );
+    ADD_Overflow_Flag(  u8Rd, u8Rr, u8Result );
+    R8_Negative_Flag(  u8Result );
+    R8_Zero_Flag(  u8Result );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ADC( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ADC( void )
 {
     uint8_t u8Result;
-    uint8_t u8Rd = *(pstCPU_->Rd);
-    uint8_t u8Rr = *(pstCPU_->Rr);
-    uint8_t u8Carry = (pstCPU_->pstRAM->stRegisters.SREG.C);
+    uint8_t u8Rd = *(stCPU.Rd);
+    uint8_t u8Rr = *(stCPU.Rr);
+    uint8_t u8Carry = (stCPU.pstRAM->stRegisters.SREG.C);
 
     u8Result = u8Rd + u8Rr + u8Carry;
-    *(pstCPU_->Rd) = u8Result;
+    *(stCPU.Rd) = u8Result;
 
 // ---- Update flags ----
-    ADD_Half_Carry( pstCPU_, u8Rd, u8Rr, u8Result );
-    ADD_Full_Carry( pstCPU_, u8Rd, u8Rr, u8Result );
-    ADD_Overflow_Flag( pstCPU_, u8Rd, u8Rr, u8Result );
-    R8_Negative_Flag( pstCPU_, u8Result );
-    R8_Zero_Flag( pstCPU_, u8Result );
-    Signed_Flag( pstCPU_ );
+    ADD_Half_Carry(  u8Rd, u8Rr, u8Result );
+    ADD_Full_Carry(  u8Rd, u8Rr, u8Result );
+    ADD_Overflow_Flag(  u8Rd, u8Rr, u8Result );
+    R8_Negative_Flag(  u8Result );
+    R8_Zero_Flag(  u8Result );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-inline void R16_Negative_Flag( AVR_CPU *pstCPU_, uint16_t Result_ )
+inline void R16_Negative_Flag( uint16_t Result_ )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.N =
+    stCPU.pstRAM->stRegisters.SREG.N =
             ((Result_ & 0x8000) != 0);
 }
 
 //---------------------------------------------------------------------------
-inline void R16_Zero_Flag( AVR_CPU *pstCPU_, uint16_t Result_ )
+inline void R16_Zero_Flag( uint16_t Result_ )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.Z =
+    stCPU.pstRAM->stRegisters.SREG.Z =
             (Result_ == 0);
 }
 
 //---------------------------------------------------------------------------
-inline void ADIW_Overflow_Flag( AVR_CPU *pstCPU_, uint16_t Rd_, uint16_t Result_ )
+inline void ADIW_Overflow_Flag( uint16_t Rd_, uint16_t Result_ )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.V =
+    stCPU.pstRAM->stRegisters.SREG.V =
             (((Rd_ & 0x8000) == 0) && ((Result_ & 0x8000) == 0x8000));
 }
 
 //---------------------------------------------------------------------------
-inline void ADIW_Carry_Flag( AVR_CPU *pstCPU_, uint16_t Rd_, uint16_t Result_ )
+inline void ADIW_Carry_Flag( uint16_t Rd_, uint16_t Result_ )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.C =
+    stCPU.pstRAM->stRegisters.SREG.C =
             (((Rd_ & 0x8000) == 0x8000) && ((Result_ & 0x8000) == 0));
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ADIW( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ADIW( void )
 {
-    uint16_t u16K = (pstCPU_->K);
-    uint16_t u16Rd = *(pstCPU_->Rd16);
+    uint16_t u16K = (stCPU.K);
+    uint16_t u16Rd = *(stCPU.Rd16);
     uint16_t u16Result;
 
     u16Result = u16Rd + u16K;
-    *(pstCPU_->Rd16) = u16Result;
+    *(stCPU.Rd16) = u16Result;
 
 // ---- Update Flags ----   
-    ADIW_Carry_Flag( pstCPU_, u16Rd, u16Result);
-    ADIW_Overflow_Flag( pstCPU_, u16Rd, u16Result );
-    R16_Negative_Flag( pstCPU_, u16Result );
-    R16_Zero_Flag( pstCPU_, u16Result );
-    Signed_Flag( pstCPU_ );
+    ADIW_Carry_Flag(  u16Rd, u16Result);
+    ADIW_Overflow_Flag(  u16Rd, u16Result );
+    R16_Negative_Flag(  u16Result );
+    R16_Zero_Flag(  u16Result );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-inline void SUB_Overflow_Flag( AVR_CPU *pstCPU_, uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
+inline void SUB_Overflow_Flag( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 {
-    pstCPU_->pstRAM->stRegisters.SREG.V =
+    stCPU.pstRAM->stRegisters.SREG.V =
              ( ((Rd_ & ~Rr_ & ~Result_) & 0x80 )
              | ((~Rd_ & Rr_ & Result_) & 0x80 ) ) != 0;
 }
 //---------------------------------------------------------------------------
-inline void SUB_Half_Carry( AVR_CPU *pstCPU_, uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
+inline void SUB_Half_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 {
-    pstCPU_->pstRAM->stRegisters.SREG.H =
+    stCPU.pstRAM->stRegisters.SREG.H =
              ( ((~Rd_ & Rr_) & 0x08 )
              | ((Rr_ & Result_) & 0x08 )
              | ((Result_ & ~Rd_) & 0x08 ) ) == 0x08;
 }
 //---------------------------------------------------------------------------
-inline void SUB_Full_Carry( AVR_CPU *pstCPU_, uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
+inline void SUB_Full_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 {
-    pstCPU_->pstRAM->stRegisters.SREG.C =
+    stCPU.pstRAM->stRegisters.SREG.C =
              ( ((~Rd_ & Rr_) & 0x80 )
              | ((Rr_ & Result_) & 0x80 )
              | ((Result_ & ~Rd_) & 0x80 ) ) == 0x80;
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_SUB( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_SUB( void )
 {
-    uint8_t u8Rd = *pstCPU_->Rd;
-    uint8_t u8Rr = *pstCPU_->Rr;
+    uint8_t u8Rd = *stCPU.Rd;
+    uint8_t u8Rr = *stCPU.Rr;
     uint8_t u8Result = u8Rd - u8Rr;
 
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     //--Flags
-    SUB_Half_Carry(pstCPU_, u8Rd, u8Rr, u8Result);
-    SUB_Full_Carry(pstCPU_, u8Rd, u8Rr, u8Result);
-    SUB_Overflow_Flag(pstCPU_, u8Rd, u8Rr, u8Result);
-    R8_Negative_Flag(pstCPU_, u8Result);
-    R8_Zero_Flag(pstCPU_, u8Result);
-    Signed_Flag(pstCPU_);
+    SUB_Half_Carry( u8Rd, u8Rr, u8Result);
+    SUB_Full_Carry( u8Rd, u8Rr, u8Result);
+    SUB_Overflow_Flag( u8Rd, u8Rr, u8Result);
+    R8_Negative_Flag( u8Result);
+    R8_Zero_Flag( u8Result);
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_SUBI( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_SUBI( void )
 {
-    uint8_t u8Rd = *pstCPU_->Rd;
-    uint8_t u8K = (uint8_t)pstCPU_->K;
+    uint8_t u8Rd = *stCPU.Rd;
+    uint8_t u8K = (uint8_t)stCPU.K;
     uint8_t u8Result = u8Rd - u8K;
 
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     //--Flags
-    SUB_Half_Carry(pstCPU_, u8Rd, u8K, u8Result);
-    SUB_Full_Carry(pstCPU_, u8Rd, u8K, u8Result);
-    SUB_Overflow_Flag(pstCPU_, u8Rd, u8K, u8Result);
-    R8_Negative_Flag(pstCPU_, u8Result);
-    R8_Zero_Flag(pstCPU_, u8Result);
-    Signed_Flag(pstCPU_);
+    SUB_Half_Carry( u8Rd, u8K, u8Result);
+    SUB_Full_Carry( u8Rd, u8K, u8Result);
+    SUB_Overflow_Flag( u8Rd, u8K, u8Result);
+    R8_Negative_Flag( u8Result);
+    R8_Zero_Flag( u8Result);
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_SBC( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_SBC( void )
 {
-    uint8_t u8Rd = *pstCPU_->Rd;
-    uint8_t u8Rr = *pstCPU_->Rr;
-    uint8_t u8C = pstCPU_->pstRAM->stRegisters.SREG.C;
+    uint8_t u8Rd = *stCPU.Rd;
+    uint8_t u8Rr = *stCPU.Rr;
+    uint8_t u8C = stCPU.pstRAM->stRegisters.SREG.C;
     uint8_t u8Result = u8Rd - u8Rr - u8C;
 
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     //--Flags
-    SUB_Half_Carry(pstCPU_, u8Rd, u8Rr, u8Result);
-    SUB_Full_Carry(pstCPU_, u8Rd, u8Rr, u8Result);
-    SUB_Overflow_Flag(pstCPU_, u8Rd, u8Rr, u8Result);
-    R8_Negative_Flag(pstCPU_, u8Result);
+    SUB_Half_Carry( u8Rd, u8Rr, u8Result);
+    SUB_Full_Carry( u8Rd, u8Rr, u8Result);
+    SUB_Overflow_Flag( u8Rd, u8Rr, u8Result);
+    R8_Negative_Flag( u8Result);
     if (u8Result)
     {
-        pstCPU_->pstRAM->stRegisters.SREG.Z = 0;
+        stCPU.pstRAM->stRegisters.SREG.Z = 0;
     }
-    Signed_Flag(pstCPU_);
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_SBCI( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_SBCI( void )
 {
-    uint8_t u8Rd = *pstCPU_->Rd;
-    uint8_t u8K = (uint8_t)pstCPU_->K;
-    uint8_t u8C = pstCPU_->pstRAM->stRegisters.SREG.C;
+    uint8_t u8Rd = *stCPU.Rd;
+    uint8_t u8K = (uint8_t)stCPU.K;
+    uint8_t u8C = stCPU.pstRAM->stRegisters.SREG.C;
     uint8_t u8Result = u8Rd - u8K - u8C;
 
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     //--Flags
-    SUB_Half_Carry(pstCPU_, u8Rd, u8K, u8Result);
-    SUB_Full_Carry(pstCPU_, u8Rd, u8K, u8Result);
-    SUB_Overflow_Flag(pstCPU_, u8Rd, u8K, u8Result);
-    R8_Negative_Flag(pstCPU_, u8Result);
+    SUB_Half_Carry( u8Rd, u8K, u8Result);
+    SUB_Full_Carry( u8Rd, u8K, u8Result);
+    SUB_Overflow_Flag( u8Rd, u8K, u8Result);
+    R8_Negative_Flag( u8Result);
     if (u8Result)
     {
-        pstCPU_->pstRAM->stRegisters.SREG.Z = 0;
+        stCPU.pstRAM->stRegisters.SREG.Z = 0;
     }
-    Signed_Flag(pstCPU_);
+    Signed_Flag();
 }
 
 
 //---------------------------------------------------------------------------
-inline void SBIW_Overflow_Flag( AVR_CPU *pstCPU_, uint16_t Rd_, uint16_t Result_)
+inline void SBIW_Overflow_Flag( uint16_t Rd_, uint16_t Result_)
 {
-    pstCPU_->pstRAM->stRegisters.SREG.V =
+    stCPU.pstRAM->stRegisters.SREG.V =
              ((Rd_ & 0x8000 ) == 0x8000) && ((Result_ & 0x8000) == 0);
 
 }
 
 //---------------------------------------------------------------------------
-inline void SBIW_Full_Carry( AVR_CPU *pstCPU_, uint16_t Rd_, uint16_t Result_)
+inline void SBIW_Full_Carry( uint16_t Rd_, uint16_t Result_)
 {
-    pstCPU_->pstRAM->stRegisters.SREG.C =
+    stCPU.pstRAM->stRegisters.SREG.C =
              ((Rd_ & 0x8000 ) == 0) && ((Result_ & 0x8000) == 0x8000);
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_SBIW( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_SBIW( void )
 {
-    uint16_t u16Rd = *pstCPU_->Rd16;
+    uint16_t u16Rd = *stCPU.Rd16;
     uint16_t u16Result;
 
-    //fprintf( stderr, "SBIW: RD=[%4X], K=[%2X]\n", u16Rd, pstCPU_->K );
-    u16Result = u16Rd - pstCPU_->K;
+    //fprintf( stderr, "SBIW: RD=[%4X], K=[%2X]\n", u16Rd, stCPU.K );
+    u16Result = u16Rd - stCPU.K;
 
-    *pstCPU_->Rd16 = u16Result;
+    *stCPU.Rd16 = u16Result;
     //fprintf( stderr, "  Result=[%4X]\n", u16Result );
 
-    SBIW_Full_Carry(pstCPU_, u16Rd, u16Result);
-    SBIW_Overflow_Flag(pstCPU_, u16Rd, u16Result);
-    R16_Negative_Flag(pstCPU_, u16Result);
-    R16_Zero_Flag(pstCPU_, u16Result);
-    Signed_Flag(pstCPU_);
+    SBIW_Full_Carry( u16Rd, u16Result);
+    SBIW_Overflow_Flag( u16Rd, u16Result);
+    R16_Negative_Flag( u16Result);
+    R16_Zero_Flag( u16Result);
+    Signed_Flag();
 
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_AND( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_AND( void )
 {
-    uint8_t u8Rd = *pstCPU_->Rd;
-    uint8_t u8Rr = *pstCPU_->Rr;
+    uint8_t u8Rd = *stCPU.Rd;
+    uint8_t u8Rr = *stCPU.Rr;
     uint8_t u8Result = u8Rd & u8Rr;
 
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     //--Update Status registers;
-    pstCPU_->pstRAM->stRegisters.SREG.V = 0;
-    R8_Negative_Flag( pstCPU_, u8Result );
-    R8_Zero_Flag( pstCPU_, u8Result );
-    Signed_Flag( pstCPU_ );
+    stCPU.pstRAM->stRegisters.SREG.V = 0;
+    R8_Negative_Flag(  u8Result );
+    R8_Zero_Flag(  u8Result );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ANDI( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ANDI( void )
 {
-    uint8_t u8Rd = *pstCPU_->Rd;
-    uint8_t u8Result = u8Rd & (uint8_t)pstCPU_->K;
+    uint8_t u8Rd = *stCPU.Rd;
+    uint8_t u8Result = u8Rd & (uint8_t)stCPU.K;
 
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     //--Update Status registers;
-    pstCPU_->pstRAM->stRegisters.SREG.V = 0;
-    R8_Negative_Flag( pstCPU_, u8Result );
-    R8_Zero_Flag( pstCPU_, u8Result );
-    Signed_Flag( pstCPU_ );
+    stCPU.pstRAM->stRegisters.SREG.V = 0;
+    R8_Negative_Flag(  u8Result );
+    R8_Zero_Flag(  u8Result );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_OR( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_OR( void )
 {
-    uint8_t u8Rd = *pstCPU_->Rd;
-    uint8_t u8Rr = *pstCPU_->Rr;
+    uint8_t u8Rd = *stCPU.Rd;
+    uint8_t u8Rr = *stCPU.Rr;
     uint8_t u8Result = u8Rd | u8Rr;
 
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     //--Update Status registers;
-    pstCPU_->pstRAM->stRegisters.SREG.V = 0;
-    R8_Negative_Flag( pstCPU_, u8Result );
-    R8_Zero_Flag( pstCPU_, u8Result );
-    Signed_Flag( pstCPU_ );
+    stCPU.pstRAM->stRegisters.SREG.V = 0;
+    R8_Negative_Flag(  u8Result );
+    R8_Zero_Flag(  u8Result );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ORI( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ORI( void )
 {
-    uint8_t u8Rd = *pstCPU_->Rd;
-    uint8_t u8Result = u8Rd | (uint8_t)pstCPU_->K;
+    uint8_t u8Rd = *stCPU.Rd;
+    uint8_t u8Result = u8Rd | (uint8_t)stCPU.K;
 
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     //--Update Status registers;
-    pstCPU_->pstRAM->stRegisters.SREG.V = 0;
-    R8_Negative_Flag( pstCPU_, u8Result );
-    R8_Zero_Flag( pstCPU_, u8Result );
-    Signed_Flag( pstCPU_ );
+    stCPU.pstRAM->stRegisters.SREG.V = 0;
+    R8_Negative_Flag(  u8Result );
+    R8_Zero_Flag(  u8Result );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_EOR( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_EOR( void )
 {
-    uint8_t u8Rd = *pstCPU_->Rd;
-    uint8_t u8Rr = *pstCPU_->Rr;
+    uint8_t u8Rd = *stCPU.Rd;
+    uint8_t u8Rr = *stCPU.Rr;
     uint8_t u8Result = u8Rd ^ u8Rr;
 
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     //--Update Status registers;
-    pstCPU_->pstRAM->stRegisters.SREG.V = 0;
-    R8_Negative_Flag( pstCPU_, u8Result );
-    R8_Zero_Flag( pstCPU_, u8Result );
-    Signed_Flag( pstCPU_ );
+    stCPU.pstRAM->stRegisters.SREG.V = 0;
+    R8_Negative_Flag(  u8Result );
+    R8_Zero_Flag(  u8Result );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_COM( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_COM( void )
 {
     // 1's complement.
-    uint8_t u8Result = *pstCPU_->Rd;
+    uint8_t u8Result = *stCPU.Rd;
     u8Result = (0xFF - u8Result);
 
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     //--Update Status registers;
-    pstCPU_->pstRAM->stRegisters.SREG.V = 0;
-    pstCPU_->pstRAM->stRegisters.SREG.C = 1;
-    R8_Negative_Flag( pstCPU_, u8Result );
-    R8_Zero_Flag( pstCPU_, u8Result );
-    Signed_Flag( pstCPU_ );
+    stCPU.pstRAM->stRegisters.SREG.V = 0;
+    stCPU.pstRAM->stRegisters.SREG.C = 1;
+    R8_Negative_Flag(  u8Result );
+    R8_Zero_Flag(  u8Result );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-inline void NEG_Overflow_Flag( AVR_CPU *pstCPU_, uint8_t u8Result_ )
+inline void NEG_Overflow_Flag( uint8_t u8Result_ )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.V = (u8Result_ == 0x80);
+    stCPU.pstRAM->stRegisters.SREG.V = (u8Result_ == 0x80);
 }
 
 //---------------------------------------------------------------------------
-inline void NEG_Carry_Flag( AVR_CPU *pstCPU_ , uint8_t u8Result_ )
+inline void NEG_Carry_Flag( uint8_t u8Result_ )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.C = (u8Result_ != 0x00);
+    stCPU.pstRAM->stRegisters.SREG.C = (u8Result_ != 0x00);
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_NEG( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_NEG( void )
 {
     // 2's complement.
-    uint8_t u8Result = *pstCPU_->Rd;
+    uint8_t u8Result = *stCPU.Rd;
     u8Result = (0 - u8Result);
 
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     //--Update Status registers;
-    NEG_Overflow_Flag( pstCPU_, u8Result );
-    NEG_Carry_Flag( pstCPU_, u8Result );
-    R8_Negative_Flag( pstCPU_, u8Result );
-    R8_Zero_Flag( pstCPU_, u8Result );
-    Signed_Flag( pstCPU_ );
+    NEG_Overflow_Flag(  u8Result );
+    NEG_Carry_Flag(  u8Result );
+    R8_Negative_Flag(  u8Result );
+    R8_Zero_Flag(  u8Result );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_SBR( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_SBR( void )
 {
     // Set Bits in Register
-    uint8_t u8Result = *pstCPU_->Rd;
-    u8Result |= ((uint8_t)pstCPU_->K);
+    uint8_t u8Result = *stCPU.Rd;
+    u8Result |= ((uint8_t)stCPU.K);
 
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     //--Update Status registers;
-    pstCPU_->pstRAM->stRegisters.SREG.V = 0;
-    R8_Negative_Flag( pstCPU_, u8Result );
-    R8_Zero_Flag( pstCPU_, u8Result );
-    Signed_Flag( pstCPU_ );
+    stCPU.pstRAM->stRegisters.SREG.V = 0;
+    R8_Negative_Flag(  u8Result );
+    R8_Zero_Flag(  u8Result );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_CBR( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_CBR( void )
 {
     // Clear Bits in Register
-    uint8_t u8Result = *pstCPU_->Rd;
-    u8Result &= ~((uint8_t)pstCPU_->K);
+    uint8_t u8Result = *stCPU.Rd;
+    u8Result &= ~((uint8_t)stCPU.K);
 
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     //--Update Status registers;
-    pstCPU_->pstRAM->stRegisters.SREG.V = 0;
-    R8_Negative_Flag( pstCPU_, u8Result );
-    R8_Zero_Flag( pstCPU_, u8Result );
-    Signed_Flag( pstCPU_ );
+    stCPU.pstRAM->stRegisters.SREG.V = 0;
+    R8_Negative_Flag(  u8Result );
+    R8_Zero_Flag(  u8Result );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-inline void INC_Overflow_Flag( AVR_CPU *pstCPU_, uint8_t u8Result_ )
+inline void INC_Overflow_Flag( uint8_t u8Result_ )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.V = (u8Result_ == 0x80);
+    stCPU.pstRAM->stRegisters.SREG.V = (u8Result_ == 0x80);
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_INC( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_INC( void )
 {
     uint8_t u8Result;
-    u8Result = *pstCPU_->Rd + 1;
+    u8Result = *stCPU.Rd + 1;
 
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     //--Update Status registers;
-    INC_Overflow_Flag( pstCPU_, u8Result );
-    R8_Negative_Flag( pstCPU_, u8Result );
-    R8_Zero_Flag( pstCPU_, u8Result );
-    Signed_Flag( pstCPU_ );
+    INC_Overflow_Flag(  u8Result );
+    R8_Negative_Flag(  u8Result );
+    R8_Zero_Flag(  u8Result );
+    Signed_Flag( );
 }
 //---------------------------------------------------------------------------
-inline void DEC_Overflow_Flag( AVR_CPU *pstCPU_, uint8_t u8Result_ )
+inline void DEC_Overflow_Flag( uint8_t u8Result_ )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.V = (u8Result_ == 0x7F);
+    stCPU.pstRAM->stRegisters.SREG.V = (u8Result_ == 0x7F);
 }
 //---------------------------------------------------------------------------
-static void AVR_Opcode_DEC( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_DEC( void )
 {   
     uint8_t u8Result;   
-    u8Result = *pstCPU_->Rd - 1;
+    u8Result = *stCPU.Rd - 1;
 
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     //--Update Status registers;
-    DEC_Overflow_Flag( pstCPU_, u8Result );
-    R8_Negative_Flag( pstCPU_, u8Result );
-    R8_Zero_Flag( pstCPU_, u8Result );
-    Signed_Flag( pstCPU_ );
+    DEC_Overflow_Flag(  u8Result );
+    R8_Negative_Flag(  u8Result );
+    R8_Zero_Flag(  u8Result );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_SER( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_SER( void )
 {
-    *pstCPU_->Rd = 0xFF;
+    *stCPU.Rd = 0xFF;
 }
 
 //---------------------------------------------------------------------------
-inline void Mul_Carry_Flag( AVR_CPU *pstCPU_, uint16_t R_ )
+inline void Mul_Carry_Flag( uint16_t R_ )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.C = ((R_  & 0x8000) == 0x8000);
+    stCPU.pstRAM->stRegisters.SREG.C = ((R_  & 0x8000) == 0x8000);
 }
 
 //---------------------------------------------------------------------------
-inline void Mul_Zero_Flag( AVR_CPU *pstCPU_, uint16_t R_ )
+inline void Mul_Zero_Flag( uint16_t R_ )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.Z = (R_ == 0);
+    stCPU.pstRAM->stRegisters.SREG.Z = (R_ == 0);
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_MUL( AVR_CPU *pstCPU_ )
-{
-    uint16_t u16Product;
-    uint16_t u16R1;
-    uint16_t u16R2;
-
-    u16R1 = *pstCPU_->Rd;
-    u16R2 = *pstCPU_->Rr;
-
-    u16Product = u16R1 * u16R2;
-
-    pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r1_0 = u16Product;
-
-    //-- Update Flags --
-    Mul_Zero_Flag(pstCPU_, u16Product);
-    Mul_Carry_Flag(pstCPU_, u16Product);
-}
-
-//---------------------------------------------------------------------------
-static void AVR_Opcode_MULS( AVR_CPU *pstCPU_ )
-{
-    int16_t s16Product;
-    int16_t s16R1;
-    int16_t s16R2;
-
-    s16R1 = (int8_t)*pstCPU_->Rd;
-    s16R2 = (int8_t)*pstCPU_->Rr;
-
-    s16Product = s16R1 * s16R2;
-
-    pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r1_0 = (uint16_t)s16Product;
-
-    //-- Update Flags --
-    Mul_Zero_Flag(pstCPU_, (uint16_t)s16Product);
-    Mul_Carry_Flag(pstCPU_, (uint16_t)s16Product);
-}
-
-//---------------------------------------------------------------------------
-static void AVR_Opcode_MULSU( AVR_CPU *pstCPU_ )
-{
-    int16_t s16Product;
-    int16_t s16R1;
-    uint16_t u16R2;
-
-    s16R1 = (int8_t)*pstCPU_->Rd;
-    u16R2 = *pstCPU_->Rr;
-
-    s16Product = s16R1 * u16R2;
-
-    pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r1_0 = (uint16_t)s16Product;
-
-    //-- Update Flags --
-    Mul_Zero_Flag(pstCPU_, (uint16_t)s16Product);
-    Mul_Carry_Flag(pstCPU_, (uint16_t)s16Product);
-}
-
-//---------------------------------------------------------------------------
-static void AVR_Opcode_FMUL( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_MUL( void )
 {
     uint16_t u16Product;
     uint16_t u16R1;
     uint16_t u16R2;
 
-    u16R1 = *pstCPU_->Rd;
-    u16R2 = *pstCPU_->Rr;
+    u16R1 = *stCPU.Rd;
+    u16R2 = *stCPU.Rr;
 
     u16Product = u16R1 * u16R2;
 
-    pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r1_0 = u16Product << 1;
+    stCPU.pstRAM->stRegisters.CORE_REGISTERS.r1_0 = u16Product;
 
     //-- Update Flags --
-    Mul_Zero_Flag(pstCPU_, u16Product);
-    Mul_Carry_Flag(pstCPU_, u16Product);
+    Mul_Zero_Flag( u16Product);
+    Mul_Carry_Flag( u16Product);
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_FMULS( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_MULS( void )
 {
     int16_t s16Product;
     int16_t s16R1;
     int16_t s16R2;
 
-    s16R1 = (int8_t)*pstCPU_->Rd;
-    s16R2 = (int8_t)*pstCPU_->Rr;
+    s16R1 = (int8_t)*stCPU.Rd;
+    s16R2 = (int8_t)*stCPU.Rr;
 
     s16Product = s16R1 * s16R2;
 
-    pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r1_0 = ((uint16_t)s16Product) << 1;
+    stCPU.pstRAM->stRegisters.CORE_REGISTERS.r1_0 = (uint16_t)s16Product;
 
     //-- Update Flags --
-    Mul_Zero_Flag(pstCPU_, (uint16_t)s16Product);
-    Mul_Carry_Flag(pstCPU_, (uint16_t)s16Product);
+    Mul_Zero_Flag( (uint16_t)s16Product);
+    Mul_Carry_Flag( (uint16_t)s16Product);
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_FMULSU( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_MULSU( void )
 {
     int16_t s16Product;
     int16_t s16R1;
     uint16_t u16R2;
 
-    s16R1 = (int8_t)*pstCPU_->Rd;
-    u16R2 = *pstCPU_->Rr;
+    s16R1 = (int8_t)*stCPU.Rd;
+    u16R2 = *stCPU.Rr;
 
     s16Product = s16R1 * u16R2;
 
-    pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r1_0 = ((uint16_t)s16Product) << 1;
+    stCPU.pstRAM->stRegisters.CORE_REGISTERS.r1_0 = (uint16_t)s16Product;
 
     //-- Update Flags --
-    Mul_Zero_Flag(pstCPU_, (uint16_t)s16Product);
-    Mul_Carry_Flag(pstCPU_, (uint16_t)s16Product);
+    Mul_Zero_Flag( (uint16_t)s16Product);
+    Mul_Carry_Flag( (uint16_t)s16Product);
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_DES( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_FMUL( void )
+{
+    uint16_t u16Product;
+    uint16_t u16R1;
+    uint16_t u16R2;
+
+    u16R1 = *stCPU.Rd;
+    u16R2 = *stCPU.Rr;
+
+    u16Product = u16R1 * u16R2;
+
+    stCPU.pstRAM->stRegisters.CORE_REGISTERS.r1_0 = u16Product << 1;
+
+    //-- Update Flags --
+    Mul_Zero_Flag( u16Product);
+    Mul_Carry_Flag( u16Product);
+}
+
+//---------------------------------------------------------------------------
+static void AVR_Opcode_FMULS( void )
+{
+    int16_t s16Product;
+    int16_t s16R1;
+    int16_t s16R2;
+
+    s16R1 = (int8_t)*stCPU.Rd;
+    s16R2 = (int8_t)*stCPU.Rr;
+
+    s16Product = s16R1 * s16R2;
+
+    stCPU.pstRAM->stRegisters.CORE_REGISTERS.r1_0 = ((uint16_t)s16Product) << 1;
+
+    //-- Update Flags --
+    Mul_Zero_Flag( (uint16_t)s16Product);
+    Mul_Carry_Flag( (uint16_t)s16Product);
+}
+
+//---------------------------------------------------------------------------
+static void AVR_Opcode_FMULSU( void )
+{
+    int16_t s16Product;
+    int16_t s16R1;
+    uint16_t u16R2;
+
+    s16R1 = (int8_t)*stCPU.Rd;
+    u16R2 = *stCPU.Rr;
+
+    s16Product = s16R1 * u16R2;
+
+    stCPU.pstRAM->stRegisters.CORE_REGISTERS.r1_0 = ((uint16_t)s16Product) << 1;
+
+    //-- Update Flags --
+    Mul_Zero_Flag( (uint16_t)s16Product);
+    Mul_Carry_Flag( (uint16_t)s16Product);
+}
+
+//---------------------------------------------------------------------------
+static void AVR_Opcode_DES( void )
 {
     //! ToDo - Implement DES
 }
 
 //---------------------------------------------------------------------------
-static inline Unconditional_Jump( AVR_CPU *pstCPU_, uint16_t u16Addr_ )
+static inline Unconditional_Jump( uint16_t u16Addr_ )
 {
-    pstCPU_->u16PC = u16Addr_;
-    pstCPU_->u16ExtraPC = 0;
+    stCPU.u16PC = u16Addr_;
+    stCPU.u16ExtraPC = 0;
 }
 
 //---------------------------------------------------------------------------
-static inline Relative_Jump( AVR_CPU *pstCPU_, uint16_t u16Offset_ )
+static inline Relative_Jump( uint16_t u16Offset_ )
 {
     // u16Offset_ Will always be 1 or 2, based on the size of the next opcode
     // in a program
 
-    pstCPU_->u16PC += u16Offset_;
-    pstCPU_->u16ExtraPC = 0;
-    pstCPU_->u16ExtraCycles += u16Offset_;
+    stCPU.u16PC += u16Offset_;
+    stCPU.u16ExtraPC = 0;
+    stCPU.u16ExtraCycles += u16Offset_;
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_RJMP( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_RJMP( void )
 {
-    int32_t s32NewPC = (int32_t)pstCPU_->u16PC + (int32_t)pstCPU_->k_s + 1;
+    int32_t s32NewPC = (int32_t)stCPU.u16PC + (int32_t)stCPU.k_s + 1;
 
-    Unconditional_Jump( pstCPU_, (uint16_t)s32NewPC );
+    Unconditional_Jump(  (uint16_t)s32NewPC );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_IJMP( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_IJMP( void )
 {
-    Unconditional_Jump( pstCPU_, pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z );
+    Unconditional_Jump(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_EIJMP( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_EIJMP( void )
 {
     //! ToDo - implement EIND instructions
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_JMP( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_JMP( void )
 {
-    Unconditional_Jump( pstCPU_, (uint16_t)pstCPU_->k );
+    Unconditional_Jump(  (uint16_t)stCPU.k );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_RCALL( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_RCALL( void )
 {
     // Push the next instruction address onto the stack
-    uint16_t u16SP = (((uint16_t)pstCPU_->pstRAM->stRegisters.SPH.r) << 8) |
-                     (((uint16_t)pstCPU_->pstRAM->stRegisters.SPL.r));
+    uint16_t u16SP = (((uint16_t)stCPU.pstRAM->stRegisters.SPH.r) << 8) |
+                     (((uint16_t)stCPU.pstRAM->stRegisters.SPL.r));
 
-    uint16_t u16StoredPC = pstCPU_->u16PC + 1;
+    uint16_t u16StoredPC = stCPU.u16PC + 1;
 
-    Data_Write( pstCPU_, u16SP, (uint8_t)(u16StoredPC & 0x00FF));
-    Data_Write( pstCPU_, u16SP - 1, (uint8_t)(u16StoredPC >> 8));
+    Data_Write(  u16SP, (uint8_t)(u16StoredPC & 0x00FF));
+    Data_Write(  u16SP - 1, (uint8_t)(u16StoredPC >> 8));
 
     // Stack is post-decremented
     u16SP -= 2;
 
     // Set the new PC (relative call)
-    int32_t s32NewPC = (int32_t)pstCPU_->u16PC + (int32_t)pstCPU_->k_s + 1;
+    int32_t s32NewPC = (int32_t)stCPU.u16PC + (int32_t)stCPU.k_s + 1;
     uint16_t u16NewPC = (uint16_t)s32NewPC;
 
     // Store the new SP.
-    pstCPU_->pstRAM->stRegisters.SPH.r = (u16SP >> 8);
-    pstCPU_->pstRAM->stRegisters.SPL.r = (u16SP & 0x00FF);
+    stCPU.pstRAM->stRegisters.SPH.r = (u16SP >> 8);
+    stCPU.pstRAM->stRegisters.SPL.r = (u16SP & 0x00FF);
 
     // Set the new PC
-    Unconditional_Jump( pstCPU_, u16NewPC );
+    Unconditional_Jump(  u16NewPC );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ICALL( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ICALL( void )
 {
     // Push the next instruction address onto the stack
-    uint16_t u16SP = (((uint16_t)pstCPU_->pstRAM->stRegisters.SPH.r) << 8) |
-                     (((uint16_t)pstCPU_->pstRAM->stRegisters.SPL.r));
+    uint16_t u16SP = (((uint16_t)stCPU.pstRAM->stRegisters.SPH.r) << 8) |
+                     (((uint16_t)stCPU.pstRAM->stRegisters.SPL.r));
 
-    uint16_t u16StoredPC = pstCPU_->u16PC + 1;
+    uint16_t u16StoredPC = stCPU.u16PC + 1;
 
-    Data_Write( pstCPU_, u16SP, (uint8_t)(u16StoredPC & 0x00FF));
-    Data_Write( pstCPU_, u16SP - 1, (uint8_t)(u16StoredPC >> 8));
+    Data_Write(  u16SP, (uint8_t)(u16StoredPC & 0x00FF));
+    Data_Write(  u16SP - 1, (uint8_t)(u16StoredPC >> 8));
 
     // Stack is post-decremented
     u16SP -= 2;
 
     // Set the new PC
-    uint16_t u16NewPC = pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z;
+    uint16_t u16NewPC = stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z;
 
     // Store the new SP.
-    pstCPU_->pstRAM->stRegisters.SPH.r = (u16SP >> 8);
-    pstCPU_->pstRAM->stRegisters.SPL.r = (u16SP & 0x00FF);
+    stCPU.pstRAM->stRegisters.SPH.r = (u16SP >> 8);
+    stCPU.pstRAM->stRegisters.SPL.r = (u16SP & 0x00FF);
 
     // Set the new PC
-    Unconditional_Jump( pstCPU_, u16NewPC );
+    Unconditional_Jump(  u16NewPC );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_EICALL( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_EICALL( void )
 {
     //!! ToDo - Implement EIND calling!
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_CALL( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_CALL( void )
 {
     // See ICALL for documentation
-    uint16_t u16SP = (((uint16_t)pstCPU_->pstRAM->stRegisters.SPH.r) << 8) |
-                     (((uint16_t)pstCPU_->pstRAM->stRegisters.SPL.r));
+    uint16_t u16SP = (((uint16_t)stCPU.pstRAM->stRegisters.SPH.r) << 8) |
+                     (((uint16_t)stCPU.pstRAM->stRegisters.SPL.r));
 
-    uint16_t u16StoredPC = pstCPU_->u16PC + 2;
+    uint16_t u16StoredPC = stCPU.u16PC + 2;
 
-    Data_Write( pstCPU_, u16SP, (uint8_t)(u16StoredPC & 0x00FF));
-    Data_Write( pstCPU_, u16SP - 1, (uint8_t)(u16StoredPC >> 8));
+    Data_Write(  u16SP, (uint8_t)(u16StoredPC & 0x00FF));
+    Data_Write(  u16SP - 1, (uint8_t)(u16StoredPC >> 8));
 
     u16SP -= 2;
 
-    uint16_t u16NewPC = pstCPU_->k;
+    uint16_t u16NewPC = stCPU.k;
 
-    pstCPU_->pstRAM->stRegisters.SPH.r = (u16SP >> 8);
-    pstCPU_->pstRAM->stRegisters.SPL.r = (u16SP & 0x00FF);
+    stCPU.pstRAM->stRegisters.SPH.r = (u16SP >> 8);
+    stCPU.pstRAM->stRegisters.SPL.r = (u16SP & 0x00FF);
 
-    Unconditional_Jump( pstCPU_, u16NewPC );
+    Unconditional_Jump(  u16NewPC );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_RET( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_RET( void )
 {
     // Pop the next instruction off of the stack, pre-incrementing
-    uint16_t u16SP = (((uint16_t)pstCPU_->pstRAM->stRegisters.SPH.r) << 8) |
-                     (((uint16_t)pstCPU_->pstRAM->stRegisters.SPL.r));
+    uint16_t u16SP = (((uint16_t)stCPU.pstRAM->stRegisters.SPH.r) << 8) |
+                     (((uint16_t)stCPU.pstRAM->stRegisters.SPL.r));
     u16SP += 2;
 
-    uint16_t u16High = Data_Read( pstCPU_, u16SP - 1 );
-    uint16_t u16Low = Data_Read( pstCPU_, u16SP );
+    uint16_t u16High = Data_Read(  u16SP - 1 );
+    uint16_t u16Low = Data_Read(  u16SP );
     uint16_t u16NewPC = (u16High << 8) | u16Low;
 
-    pstCPU_->pstRAM->stRegisters.SPH.r = (u16SP >> 8);
-    pstCPU_->pstRAM->stRegisters.SPL.r = (u16SP & 0x00FF);
+    stCPU.pstRAM->stRegisters.SPH.r = (u16SP >> 8);
+    stCPU.pstRAM->stRegisters.SPL.r = (u16SP & 0x00FF);
 
     // Set new PC based on address read from stack
-    Unconditional_Jump( pstCPU_, u16NewPC );
+    Unconditional_Jump(  u16NewPC );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_RETI( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_RETI( void )
 {
-    uint16_t u16SP = (((uint16_t)pstCPU_->pstRAM->stRegisters.SPH.r) << 8) |
-                     (((uint16_t)pstCPU_->pstRAM->stRegisters.SPL.r));
+    uint16_t u16SP = (((uint16_t)stCPU.pstRAM->stRegisters.SPH.r) << 8) |
+                     (((uint16_t)stCPU.pstRAM->stRegisters.SPL.r));
     u16SP += 2;
 
-    uint16_t u16High = Data_Read( pstCPU_, u16SP - 1 );
-    uint16_t u16Low = Data_Read( pstCPU_, u16SP );
+    uint16_t u16High = Data_Read(  u16SP - 1 );
+    uint16_t u16Low = Data_Read(  u16SP );
     uint16_t u16NewPC = (u16High << 8) | u16Low;
 
-    pstCPU_->pstRAM->stRegisters.SPH.r = (u16SP >> 8);
-    pstCPU_->pstRAM->stRegisters.SPL.r = (u16SP & 0x00FF);
+    stCPU.pstRAM->stRegisters.SPH.r = (u16SP >> 8);
+    stCPU.pstRAM->stRegisters.SPL.r = (u16SP & 0x00FF);
 
 //-- Enable interrupts
-    pstCPU_->pstRAM->stRegisters.SREG.I = 1;
-    Unconditional_Jump( pstCPU_, u16NewPC );
+    stCPU.pstRAM->stRegisters.SREG.I = 1;
+    Unconditional_Jump(  u16NewPC );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_CPSE( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_CPSE( void )
 {    
-    if (*pstCPU_->Rr == *pstCPU_->Rd)
+    if (*stCPU.Rr == *stCPU.Rd)
     {        
-        uint8_t u8NextOpSize = AVR_Opcode_Size( pstCPU_->pu16ROM[ pstCPU_->u16PC + 1 ] );
-        Relative_Jump( pstCPU_, u8NextOpSize + 1 );
+        uint8_t u8NextOpSize = AVR_Opcode_Size( stCPU.pu16ROM[ stCPU.u16PC + 1 ] );
+        Relative_Jump(  u8NextOpSize + 1 );
     }
 }
 
 //---------------------------------------------------------------------------
-inline void CP_Half_Carry( AVR_CPU *pstCPU_, uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
+inline void CP_Half_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 {
-    pstCPU_->pstRAM->stRegisters.SREG.H =
+    stCPU.pstRAM->stRegisters.SREG.H =
             ( ((~Rd_ & Rr_)    & 0x08 )
             | ((Rr_ & (Result_)) & 0x08 )
             | (((Result_) & ~Rd_) & 0x08) ) != false;
 }
 
 //---------------------------------------------------------------------------
-inline void CP_Full_Carry( AVR_CPU *pstCPU_, uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
+inline void CP_Full_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 {
-    pstCPU_->pstRAM->stRegisters.SREG.C =
+    stCPU.pstRAM->stRegisters.SREG.C =
             ( ((~Rd_ & Rr_)    & 0x80 )
             | ((Rr_ & (Result_)) & 0x80 )
             | (((Result_) & ~Rd_) & 0x80) ) != false;
 }
 
 //---------------------------------------------------------------------------
-inline void CP_Overflow_Flag( AVR_CPU *pstCPU_, uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
+inline void CP_Overflow_Flag( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 {
-    pstCPU_->pstRAM->stRegisters.SREG.V =
+    stCPU.pstRAM->stRegisters.SREG.V =
              ( ((Rd_ & ~Rr_ & ~Result_)  & 0x80 )
              | ((~Rd_ & Rr_ & Result_) & 0x80 ) ) != 0;
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_CP( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_CP( void )
 {
     // Compare
     uint8_t u8Result;
-    uint8_t u8Rd = *pstCPU_->Rd;
-    uint8_t u8Rr  = *pstCPU_->Rr;
+    uint8_t u8Rd = *stCPU.Rd;
+    uint8_t u8Rr  = *stCPU.Rr;
 
     u8Result = u8Rd - u8Rr;
 
     //---
-    CP_Half_Carry( pstCPU_, u8Rd, u8Rr, u8Result );
-    CP_Overflow_Flag( pstCPU_, u8Rd, u8Rr, u8Result );
-    CP_Full_Carry( pstCPU_, u8Rd, u8Rr, u8Result );
+    CP_Half_Carry(  u8Rd, u8Rr, u8Result );
+    CP_Overflow_Flag(  u8Rd, u8Rr, u8Result );
+    CP_Full_Carry(  u8Rd, u8Rr, u8Result );
 
-    R8_Zero_Flag( pstCPU_, u8Result );
-    R8_Negative_Flag( pstCPU_, u8Result );
+    R8_Zero_Flag(  u8Result );
+    R8_Negative_Flag(  u8Result );
 
-    Signed_Flag( pstCPU_ );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_CPC( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_CPC( void )
 {
     // Compare with carry
     uint8_t u8Result;
-    uint8_t u8Rd = *pstCPU_->Rd;
-    uint8_t u8Rr  = *pstCPU_->Rr;
-    uint8_t u8C = (pstCPU_->pstRAM->stRegisters.SREG.C == 1);
+    uint8_t u8Rd = *stCPU.Rd;
+    uint8_t u8Rr  = *stCPU.Rr;
+    uint8_t u8C = (stCPU.pstRAM->stRegisters.SREG.C == 1);
 
     u8Result = u8Rd - u8Rr - u8C;
 
     //---
-    CP_Half_Carry( pstCPU_, u8Rd, u8Rr, u8Result );
-    CP_Overflow_Flag( pstCPU_, u8Rd, u8Rr, u8Result );
-    CP_Full_Carry( pstCPU_, u8Rd, u8Rr, u8Result );
+    CP_Half_Carry(  u8Rd, u8Rr, u8Result );
+    CP_Overflow_Flag(  u8Rd, u8Rr, u8Result );
+    CP_Full_Carry(  u8Rd, u8Rr, u8Result );
 
-    R8_CPC_Zero_Flag( pstCPU_, u8Result );
-    R8_Negative_Flag( pstCPU_, u8Result );
+    R8_CPC_Zero_Flag(  u8Result );
+    R8_Negative_Flag(  u8Result );
 
-    Signed_Flag( pstCPU_ );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_CPI( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_CPI( void )
 {
     // Compare with immediate
     uint8_t u8Result;
-    uint8_t u8Rd = *pstCPU_->Rd;
-    uint8_t u8K  = pstCPU_->K;
+    uint8_t u8Rd = *stCPU.Rd;
+    uint8_t u8K  = stCPU.K;
 
     u8Result = u8Rd - u8K;
 
     //---
-    CP_Half_Carry( pstCPU_, u8Rd, u8K, u8Result );
-    CP_Overflow_Flag( pstCPU_, u8Rd, u8K, u8Result );
-    CP_Full_Carry( pstCPU_, u8Rd, u8K, u8Result );
+    CP_Half_Carry(  u8Rd, u8K, u8Result );
+    CP_Overflow_Flag(  u8Rd, u8K, u8Result );
+    CP_Full_Carry(  u8Rd, u8K, u8Result );
 
-    R8_Zero_Flag( pstCPU_, u8Result );
-    R8_Negative_Flag( pstCPU_, u8Result );
+    R8_Zero_Flag(  u8Result );
+    R8_Negative_Flag(  u8Result );
 
-    Signed_Flag( pstCPU_ );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_SBRC( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_SBRC( void )
 {
     // Skip if Bit in IO register clear    
-    if ((*pstCPU_->Rd & (1 << pstCPU_->b)) == 0)
+    if ((*stCPU.Rd & (1 << stCPU.b)) == 0)
     {
-        uint8_t u8NextOpSize = AVR_Opcode_Size( pstCPU_->pu16ROM[ pstCPU_->u16PC + 1 ] );
-        Relative_Jump( pstCPU_, u8NextOpSize + 1 );
+        uint8_t u8NextOpSize = AVR_Opcode_Size( stCPU.pu16ROM[ stCPU.u16PC + 1 ] );
+        Relative_Jump(  u8NextOpSize + 1 );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_SBRS( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_SBRS( void )
 {
     // Skip if Bit in IO register set
-    if ((*pstCPU_->Rd & (1 << pstCPU_->b)) != 0)
+    if ((*stCPU.Rd & (1 << stCPU.b)) != 0)
     {        
-        uint8_t u8NextOpSize = AVR_Opcode_Size( pstCPU_->pu16ROM[ pstCPU_->u16PC + 1 ] );
-        Relative_Jump( pstCPU_, u8NextOpSize + 1 );
+        uint8_t u8NextOpSize = AVR_Opcode_Size( stCPU.pu16ROM[ stCPU.u16PC + 1 ] );
+        Relative_Jump(  u8NextOpSize + 1 );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_SBIC( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_SBIC( void )
 {
     // Skip if Bit in IO register clear
-    uint8_t u8IOVal = Data_Read( pstCPU_, 32 + pstCPU_->A );
-    if ((u8IOVal & (1 << pstCPU_->b)) == 0)
+    uint8_t u8IOVal = Data_Read(  32 + stCPU.A );
+    if ((u8IOVal & (1 << stCPU.b)) == 0)
     {
-        uint8_t u8NextOpSize = AVR_Opcode_Size( pstCPU_->pu16ROM[ pstCPU_->u16PC + 1 ] );
-        Relative_Jump( pstCPU_, u8NextOpSize + 1 );
+        uint8_t u8NextOpSize = AVR_Opcode_Size( stCPU.pu16ROM[ stCPU.u16PC + 1 ] );
+        Relative_Jump(  u8NextOpSize + 1 );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_SBIS( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_SBIS( void )
 {
     // Skip if Bit in IO register set
-    uint8_t u8IOVal = Data_Read( pstCPU_, 32 + pstCPU_->A );
-    if ((u8IOVal & (1 << pstCPU_->b)) != 0)
+    uint8_t u8IOVal = Data_Read(  32 + stCPU.A );
+    if ((u8IOVal & (1 << stCPU.b)) != 0)
     {
-        uint8_t u8NextOpSize = AVR_Opcode_Size( pstCPU_->pu16ROM[ pstCPU_->u16PC + 1 ] );
-        Relative_Jump( pstCPU_, u8NextOpSize + 1 );
+        uint8_t u8NextOpSize = AVR_Opcode_Size( stCPU.pu16ROM[ stCPU.u16PC + 1 ] );
+        Relative_Jump(  u8NextOpSize + 1 );
     }
 }
 
 //---------------------------------------------------------------------------
-static inline Conditional_Branch( AVR_CPU *pstCPU_ )
+static inline Conditional_Branch( void )
 {
-    pstCPU_->u16PC = (uint16_t)((int16_t)pstCPU_->u16PC + pstCPU_->k_s + 1);
-    pstCPU_->u16ExtraPC = 0;
-    pstCPU_->u16ExtraCycles++;
+    stCPU.u16PC = (uint16_t)((int16_t)stCPU.u16PC + stCPU.k_s + 1);
+    stCPU.u16ExtraPC = 0;
+    stCPU.u16ExtraCycles++;
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRBS( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRBS( void )
 {
-    if (0 != (pstCPU_->pstRAM->stRegisters.SREG.r & (1 << pstCPU_->b)))
+    if (0 != (stCPU.pstRAM->stRegisters.SREG.r & (1 << stCPU.b)))
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRBC( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRBC( void )
 {
-    if (0 == (pstCPU_->pstRAM->stRegisters.SREG.r & (1 << pstCPU_->b)))
+    if (0 == (stCPU.pstRAM->stRegisters.SREG.r & (1 << stCPU.b)))
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BREQ( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BREQ( void )
 {
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.Z)
+    if (1 == stCPU.pstRAM->stRegisters.SREG.Z)
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRNE( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRNE( void )
 {
-    if (0 == pstCPU_->pstRAM->stRegisters.SREG.Z)
+    if (0 == stCPU.pstRAM->stRegisters.SREG.Z)
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRCS( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRCS( void )
 {
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.C)
+    if (1 == stCPU.pstRAM->stRegisters.SREG.C)
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRCC( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRCC( void )
 {
-    if (0 == pstCPU_->pstRAM->stRegisters.SREG.C)
+    if (0 == stCPU.pstRAM->stRegisters.SREG.C)
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRSH( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRSH( void )
 {
-    if (0 == pstCPU_->pstRAM->stRegisters.SREG.C)
+    if (0 == stCPU.pstRAM->stRegisters.SREG.C)
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRLO( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRLO( void )
 {
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.C)
+    if (1 == stCPU.pstRAM->stRegisters.SREG.C)
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRMI( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRMI( void )
 {
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.N)
+    if (1 == stCPU.pstRAM->stRegisters.SREG.N)
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRPL( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRPL( void )
 {
-    if (0 == pstCPU_->pstRAM->stRegisters.SREG.N)
+    if (0 == stCPU.pstRAM->stRegisters.SREG.N)
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRGE( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRGE( void )
 {
-    if (0 == pstCPU_->pstRAM->stRegisters.SREG.S)
+    if (0 == stCPU.pstRAM->stRegisters.SREG.S)
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRLT( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRLT( void )
 {
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.S)
+    if (1 == stCPU.pstRAM->stRegisters.SREG.S)
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRHS( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRHS( void )
 {
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.H)
+    if (1 == stCPU.pstRAM->stRegisters.SREG.H)
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRHC( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRHC( void )
 {
-    if (0 == pstCPU_->pstRAM->stRegisters.SREG.H)
+    if (0 == stCPU.pstRAM->stRegisters.SREG.H)
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRTS( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRTS( void )
 {
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.T)
+    if (1 == stCPU.pstRAM->stRegisters.SREG.T)
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRTC( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRTC( void )
 {
-    if (0 == pstCPU_->pstRAM->stRegisters.SREG.T)
+    if (0 == stCPU.pstRAM->stRegisters.SREG.T)
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRVS( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRVS( void )
 {
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.V)
+    if (1 == stCPU.pstRAM->stRegisters.SREG.V)
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRVC( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRVC( void )
 {
-    if (0 == pstCPU_->pstRAM->stRegisters.SREG.V)
+    if (0 == stCPU.pstRAM->stRegisters.SREG.V)
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRIE( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRIE( void )
 {
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.I)
+    if (1 == stCPU.pstRAM->stRegisters.SREG.I)
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BRID( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BRID( void )
 {
-    if (0 == pstCPU_->pstRAM->stRegisters.SREG.I)
+    if (0 == stCPU.pstRAM->stRegisters.SREG.I)
     {
-        Conditional_Branch( pstCPU_ );
+        Conditional_Branch( );
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_MOV( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_MOV( void )
 {
-    *pstCPU_->Rd = *pstCPU_->Rr;
+    *stCPU.Rd = *stCPU.Rr;
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_MOVW( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_MOVW( void )
 {
-    *pstCPU_->Rd16 = *pstCPU_->Rr16;
+    *stCPU.Rd16 = *stCPU.Rr16;
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LDI( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LDI( void )
 {
-    *pstCPU_->Rd = pstCPU_->K;
+    *stCPU.Rd = stCPU.K;
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LDS( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LDS( void )
 {
-    *pstCPU_->Rd = Data_Read( pstCPU_, pstCPU_->K );
+    *stCPU.Rd = Data_Read(  stCPU.K );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LD_X_Indirect( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LD_X_Indirect( void )
 {
-    *pstCPU_->Rd =
-            Data_Read( pstCPU_, pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.X );
+    *stCPU.Rd =
+            Data_Read(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.X );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LD_X_Indirect_Postinc( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LD_X_Indirect_Postinc( void )
 {
-    *pstCPU_->Rd =
-        Data_Read( pstCPU_, pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.X++ );
+    *stCPU.Rd =
+        Data_Read(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.X++ );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LD_X_Indirect_Predec( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LD_X_Indirect_Predec( void )
 {
-    *pstCPU_->Rd =
-        Data_Read( pstCPU_, --pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.X );
+    *stCPU.Rd =
+        Data_Read(  --stCPU.pstRAM->stRegisters.CORE_REGISTERS.X );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LD_Y_Indirect( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LD_Y_Indirect( void )
 {
-    *pstCPU_->Rd =
-        Data_Read( pstCPU_, pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Y );
+    *stCPU.Rd =
+        Data_Read(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Y );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LD_Y_Indirect_Postinc( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LD_Y_Indirect_Postinc( void )
 {
-    *pstCPU_->Rd =
-        Data_Read( pstCPU_, pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Y++ );
+    *stCPU.Rd =
+        Data_Read(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Y++ );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LD_Y_Indirect_Predec( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LD_Y_Indirect_Predec( void )
 {
-    *pstCPU_->Rd =
-        Data_Read( pstCPU_, --pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Y );
+    *stCPU.Rd =
+        Data_Read(  --stCPU.pstRAM->stRegisters.CORE_REGISTERS.Y );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LDD_Y( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LDD_Y( void )
 {
-    *pstCPU_->Rd =
-        Data_Read( pstCPU_, pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Y + pstCPU_->q );
+    *stCPU.Rd =
+        Data_Read(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Y + stCPU.q );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LD_Z_Indirect( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LD_Z_Indirect( void )
 {
-    *pstCPU_->Rd =
-        Data_Read( pstCPU_, pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z );
+    *stCPU.Rd =
+        Data_Read(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LD_Z_Indirect_Postinc( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LD_Z_Indirect_Postinc( void )
 {
-    *pstCPU_->Rd =
-        Data_Read( pstCPU_, pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z++ );
+    *stCPU.Rd =
+        Data_Read(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z++ );
 
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LD_Z_Indirect_Predec( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LD_Z_Indirect_Predec( void )
 {
-    *pstCPU_->Rd =
-        Data_Read( pstCPU_, --pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z );
+    *stCPU.Rd =
+        Data_Read(  --stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LDD_Z( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LDD_Z( void )
 {
-    *pstCPU_->Rd =
-        Data_Read( pstCPU_, pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z + pstCPU_->q );
+    *stCPU.Rd =
+        Data_Read(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z + stCPU.q );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_STS( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_STS( void )
 {    
-    Data_Write( pstCPU_, pstCPU_->K, *pstCPU_->Rd );
+    Data_Write(  stCPU.K, *stCPU.Rd );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ST_X_Indirect( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ST_X_Indirect( void )
 {
-    Data_Write( pstCPU_, pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.X, *pstCPU_->Rd );
+    Data_Write(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.X, *stCPU.Rd );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ST_X_Indirect_Postinc( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ST_X_Indirect_Postinc( void )
 {
-    Data_Write( pstCPU_,  pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.X++, *pstCPU_->Rd );
+    Data_Write(   stCPU.pstRAM->stRegisters.CORE_REGISTERS.X++, *stCPU.Rd );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ST_X_Indirect_Predec( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ST_X_Indirect_Predec( void )
 {
-    Data_Write( pstCPU_, --pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.X, *pstCPU_->Rd );
+    Data_Write(  --stCPU.pstRAM->stRegisters.CORE_REGISTERS.X, *stCPU.Rd );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ST_Y_Indirect( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ST_Y_Indirect( void )
 {
-    Data_Write( pstCPU_, pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Y, *pstCPU_->Rd );
+    Data_Write(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Y, *stCPU.Rd );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ST_Y_Indirect_Postinc( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ST_Y_Indirect_Postinc( void )
 {
-    Data_Write( pstCPU_, pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Y++, *pstCPU_->Rd );
+    Data_Write(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Y++, *stCPU.Rd );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ST_Y_Indirect_Predec( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ST_Y_Indirect_Predec( void )
 {
-    Data_Write( pstCPU_, --pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Y, *pstCPU_->Rd );
+    Data_Write(  --stCPU.pstRAM->stRegisters.CORE_REGISTERS.Y, *stCPU.Rd );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_STD_Y( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_STD_Y( void )
 {
-    Data_Write( pstCPU_, pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Y + pstCPU_->q, *pstCPU_->Rd );
+    Data_Write(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Y + stCPU.q, *stCPU.Rd );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ST_Z_Indirect( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ST_Z_Indirect( void )
 {
-    Data_Write( pstCPU_, pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z, *pstCPU_->Rd );
+    Data_Write(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z, *stCPU.Rd );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ST_Z_Indirect_Postinc( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ST_Z_Indirect_Postinc( void )
 {
-    Data_Write( pstCPU_, pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z++ , *pstCPU_->Rd );
+    Data_Write(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z++ , *stCPU.Rd );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ST_Z_Indirect_Predec( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ST_Z_Indirect_Predec( void )
 {
-    Data_Write( pstCPU_, --pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z , *pstCPU_->Rd );
+    Data_Write(  --stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z , *stCPU.Rd );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_STD_Z( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_STD_Z( void )
 {    
-    Data_Write( pstCPU_, pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z + pstCPU_->q, *pstCPU_->Rd );
+    Data_Write(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z + stCPU.q, *stCPU.Rd );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LPM( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LPM( void )
 {
     uint8_t u8Temp;
-    if (pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z & 0x0001)
+    if (stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z & 0x0001)
     {
-        u8Temp = (uint8_t)(pstCPU_->pu16ROM[ pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] >> 8);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] >> 8);
     }
     else
     {
-        u8Temp = (uint8_t)(pstCPU_->pu16ROM[ pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] & 0x00FF);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] & 0x00FF);
     }
 
-    pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r0 = u8Temp;
+    stCPU.pstRAM->stRegisters.CORE_REGISTERS.r0 = u8Temp;
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LPM_Z( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LPM_Z( void )
 {
     uint8_t u8Temp;
-    if (pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z & 0x0001)
+    if (stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z & 0x0001)
     {
-        u8Temp = (uint8_t)(pstCPU_->pu16ROM[ pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] >> 8);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] >> 8);
     }
     else
     {
-        u8Temp = (uint8_t)(pstCPU_->pu16ROM[ pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] & 0x00FF);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] & 0x00FF);
     }
 
-    *pstCPU_->Rd = u8Temp;
+    *stCPU.Rd = u8Temp;
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LPM_Z_Postinc( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LPM_Z_Postinc( void )
 {
     uint8_t u8Temp;
-    if (pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z & 0x0001)
+    if (stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z & 0x0001)
     {
-        u8Temp = (uint8_t)(pstCPU_->pu16ROM[ pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] >> 8);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] >> 8);
     }
     else
     {
-        u8Temp = (uint8_t)(pstCPU_->pu16ROM[ pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] & 0x00FF);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] & 0x00FF);
     }
 
-    *pstCPU_->Rd = u8Temp;
-    pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z++;
+    *stCPU.Rd = u8Temp;
+    stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z++;
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ELPM( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ELPM( void )
 {
     //!! ToDo - Add in RAMPZ register.
     uint8_t u8Temp;
-    if (pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z & 0x0001)
+    if (stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z & 0x0001)
     {
-        u8Temp = (uint8_t)(pstCPU_->pu16ROM[ pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] >> 8);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] >> 8);
     }
     else
     {
-        u8Temp = (uint8_t)(pstCPU_->pu16ROM[ pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] & 0x00FF);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] & 0x00FF);
     }
 
-    pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r0 = u8Temp;
+    stCPU.pstRAM->stRegisters.CORE_REGISTERS.r0 = u8Temp;
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ELPM_Z( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ELPM_Z( void )
 {
     uint8_t u8Temp;
-    if (pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z & 0x0001)
+    if (stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z & 0x0001)
     {
-        u8Temp = (uint8_t)(pstCPU_->pu16ROM[ pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] >> 8);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] >> 8);
     }
     else
     {
-        u8Temp = (uint8_t)(pstCPU_->pu16ROM[ pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] & 0x00FF);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] & 0x00FF);
     }
 
-    *pstCPU_->Rd = u8Temp;
+    *stCPU.Rd = u8Temp;
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ELPM_Z_Postinc( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ELPM_Z_Postinc( void )
 {
     uint8_t u8Temp;
-    if (pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z & 0x0001)
+    if (stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z & 0x0001)
     {
-        u8Temp = (uint8_t)(pstCPU_->pu16ROM[ pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] >> 8);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] >> 8);
     }
     else
     {
-        u8Temp = (uint8_t)(pstCPU_->pu16ROM[ pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] & 0x00FF);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] & 0x00FF);
     }
 
-    *pstCPU_->Rd = u8Temp;
+    *stCPU.Rd = u8Temp;
 
-    pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z++;
+    stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z++;
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_SPM( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_SPM( void )
 {
     //!! Implment later...
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_SPM_Z_Postinc2( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_SPM_Z_Postinc2( void )
 {
     //!! Implement later...
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_IN( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_IN( void )
 {    
-    *pstCPU_->Rd = Data_Read( pstCPU_, 32 + pstCPU_->A );
+    *stCPU.Rd = Data_Read(  32 + stCPU.A );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_OUT( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_OUT( void )
 {         
-     Data_Write( pstCPU_, 32 + pstCPU_->A , *pstCPU_->Rd );
+     Data_Write(  32 + stCPU.A , *stCPU.Rd );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_PUSH( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_PUSH( void )
 {    
-    uint16_t u16SP = (pstCPU_->pstRAM->stRegisters.SPL.r) |
-                     ((uint16_t)(pstCPU_->pstRAM->stRegisters.SPH.r) << 8);
+    uint16_t u16SP = (stCPU.pstRAM->stRegisters.SPL.r) |
+                     ((uint16_t)(stCPU.pstRAM->stRegisters.SPH.r) << 8);
 
     // Store contents from SP to destination register
-    Data_Write( pstCPU_, u16SP, *pstCPU_->Rd );
+    Data_Write(  u16SP, *stCPU.Rd );
 
     // Postdecrement the SP
     u16SP--;
 
     // Update the SP registers
-    pstCPU_->pstRAM->stRegisters.SPH.r = (uint8_t)(u16SP >> 8);
-    pstCPU_->pstRAM->stRegisters.SPL.r = (uint8_t)(u16SP & 0x00FF);
+    stCPU.pstRAM->stRegisters.SPH.r = (uint8_t)(u16SP >> 8);
+    stCPU.pstRAM->stRegisters.SPL.r = (uint8_t)(u16SP & 0x00FF);
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_POP( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_POP( void )
 {
     // Preincrement the SP
-    uint16_t u16SP = (pstCPU_->pstRAM->stRegisters.SPL.r) |
-                     ((uint16_t)(pstCPU_->pstRAM->stRegisters.SPH.r) << 8);
+    uint16_t u16SP = (stCPU.pstRAM->stRegisters.SPL.r) |
+                     ((uint16_t)(stCPU.pstRAM->stRegisters.SPH.r) << 8);
     u16SP++;
 
     // Load contents from SP to destination register
-    *pstCPU_->Rd = Data_Read( pstCPU_, u16SP );
+    *stCPU.Rd = Data_Read(  u16SP );
 
     // Update the SP registers
-    pstCPU_->pstRAM->stRegisters.SPH.r = (uint8_t)(u16SP >> 8);
-    pstCPU_->pstRAM->stRegisters.SPL.r = (uint8_t)(u16SP & 0x00FF);
+    stCPU.pstRAM->stRegisters.SPH.r = (uint8_t)(u16SP >> 8);
+    stCPU.pstRAM->stRegisters.SPL.r = (uint8_t)(u16SP & 0x00FF);
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_XCH( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_XCH( void )
 {
     uint8_t u8Z;
     uint8_t u8Temp;
-    uint16_t u16Addr = pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z;
+    uint16_t u16Addr = stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z;
 
-    u8Z = Data_Read( pstCPU_, u16Addr );
-    u8Temp = *pstCPU_->Rd;
+    u8Z = Data_Read(  u16Addr );
+    u8Temp = *stCPU.Rd;
 
-    *pstCPU_->Rd = u8Z;
-    Data_Write( pstCPU_, u16Addr, u8Temp );
+    *stCPU.Rd = u8Z;
+    Data_Write(  u16Addr, u8Temp );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LAS( AVR_CPU *pstCPU_ )
-{
-    uint8_t u8Z;
-    uint8_t u8Temp;
-
-    uint16_t u16Addr = pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z;
-
-    u8Z = Data_Read( pstCPU_, u16Addr );
-    u8Temp = *pstCPU_->Rd | u8Z;
-
-    *pstCPU_->Rd = u8Z;    
-    Data_Write( pstCPU_, u16Addr, u8Temp );
-}
-
-//---------------------------------------------------------------------------
-static void AVR_Opcode_LAC( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LAS( void )
 {
     uint8_t u8Z;
     uint8_t u8Temp;
 
-    uint16_t u16Addr = pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z;
+    uint16_t u16Addr = stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z;
 
-    u8Z = Data_Read( pstCPU_, u16Addr );    
-    u8Temp = *pstCPU_->Rd & ~(u8Z);
-    *pstCPU_->Rd = u8Z;
+    u8Z = Data_Read(  u16Addr );
+    u8Temp = *stCPU.Rd | u8Z;
 
-    Data_Write( pstCPU_, u16Addr, u8Temp );
+    *stCPU.Rd = u8Z;    
+    Data_Write(  u16Addr, u8Temp );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LAT( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LAC( void )
 {
     uint8_t u8Z;
     uint8_t u8Temp;
 
-    uint16_t u16Addr = pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.Z;
+    uint16_t u16Addr = stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z;
 
-    u8Z = Data_Read( pstCPU_, u16Addr );
-    u8Temp = *pstCPU_->Rd ^ u8Z;
-    *pstCPU_->Rd = u8Z;
+    u8Z = Data_Read(  u16Addr );
+    u8Temp = *stCPU.Rd & ~(u8Z);
+    *stCPU.Rd = u8Z;
 
-    Data_Write( pstCPU_, u16Addr, u8Temp );
+    Data_Write(  u16Addr, u8Temp );
 }
 
 //---------------------------------------------------------------------------
-inline void LSL_HalfCarry_Flag( AVR_CPU *pstCPU_, uint8_t R_ )
+static void AVR_Opcode_LAT( void )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.H = ((R_ & 0x08) == 0x08);
+    uint8_t u8Z;
+    uint8_t u8Temp;
+
+    uint16_t u16Addr = stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z;
+
+    u8Z = Data_Read(  u16Addr );
+    u8Temp = *stCPU.Rd ^ u8Z;
+    *stCPU.Rd = u8Z;
+
+    Data_Write(  u16Addr, u8Temp );
 }
 
 //---------------------------------------------------------------------------
-inline void Left_Carry_Flag( AVR_CPU *pstCPU_, uint8_t R_  )
+inline void LSL_HalfCarry_Flag( uint8_t R_ )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.C = ((R_ & 0x80) == 0x80);
+    stCPU.pstRAM->stRegisters.SREG.H = ((R_ & 0x08) == 0x08);
 }
 
 //---------------------------------------------------------------------------
-inline void Rotate_Overflow_Flag( AVR_CPU *pstCPU_  )
+inline void Left_Carry_Flag( uint8_t R_  )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.V = ( pstCPU_->pstRAM->stRegisters.SREG.N ^ pstCPU_->pstRAM->stRegisters.SREG.C );
+    stCPU.pstRAM->stRegisters.SREG.C = ((R_ & 0x80) == 0x80);
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LSL( AVR_CPU *pstCPU_ )
+inline void Rotate_Overflow_Flag(   )
+{
+    stCPU.pstRAM->stRegisters.SREG.V = ( stCPU.pstRAM->stRegisters.SREG.N ^ stCPU.pstRAM->stRegisters.SREG.C );
+}
+
+//---------------------------------------------------------------------------
+static void AVR_Opcode_LSL( void )
 {
     // Logical shift left
     uint8_t u8Result = 0;
-    uint8_t u8Temp = *pstCPU_->Rd;
+    uint8_t u8Temp = *stCPU.Rd;
 
     u8Result = (u8Temp << 1);
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     // ---- Update flags ----
-    LSL_HalfCarry_Flag( pstCPU_, u8Result);
-    Left_Carry_Flag(pstCPU_, u8Temp);
+    LSL_HalfCarry_Flag(  u8Result);
+    Left_Carry_Flag( u8Temp);
 
-    R8_Negative_Flag( pstCPU_, u8Result );
-    R8_Zero_Flag( pstCPU_, u8Result );
-    Rotate_Overflow_Flag( pstCPU_ );
-    Signed_Flag( pstCPU_ );
+    R8_Negative_Flag(  u8Result );
+    R8_Zero_Flag(  u8Result );
+    Rotate_Overflow_Flag( );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-inline void Right_Carry_Flag( AVR_CPU *pstCPU_, uint8_t R_  )
+inline void Right_Carry_Flag( uint8_t R_  )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.C = ((R_ & 0x01) == 0x01);
+    stCPU.pstRAM->stRegisters.SREG.C = ((R_ & 0x01) == 0x01);
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_LSR( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_LSR( void )
 {
     // Logical shift left
     uint8_t u8Result = 0;
-    uint8_t u8Temp = *pstCPU_->Rd;
+    uint8_t u8Temp = *stCPU.Rd;
 
     u8Result = (u8Temp >> 1);
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     // ---- Update flags ----
-    Right_Carry_Flag( pstCPU_, u8Temp );
-    pstCPU_->pstRAM->stRegisters.SREG.N = 0;
-    R8_Zero_Flag( pstCPU_, u8Result );
-    Rotate_Overflow_Flag( pstCPU_ );
-    Signed_Flag( pstCPU_ );
+    Right_Carry_Flag(  u8Temp );
+    stCPU.pstRAM->stRegisters.SREG.N = 0;
+    R8_Zero_Flag(  u8Result );
+    Rotate_Overflow_Flag( );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ROL( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ROL( void )
 {
     // Rotate left through carry
     uint8_t u8Result = 0;
-    uint8_t u8Temp = *pstCPU_->Rd;
+    uint8_t u8Temp = *stCPU.Rd;
 
     u8Result = (u8Temp << 1);
-    if (pstCPU_->pstRAM->stRegisters.SREG.C)
+    if (stCPU.pstRAM->stRegisters.SREG.C)
     {
         u8Result |= 0x01;
     }
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     // ---- Update flags ----
-    Left_Carry_Flag( pstCPU_, u8Temp );
-    R8_Negative_Flag( pstCPU_, u8Result );
-    R8_Zero_Flag( pstCPU_, u8Result );
-    Rotate_Overflow_Flag( pstCPU_ );
-    Signed_Flag( pstCPU_ );
+    Left_Carry_Flag(  u8Temp );
+    R8_Negative_Flag(  u8Result );
+    R8_Zero_Flag(  u8Result );
+    Rotate_Overflow_Flag( );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ROR( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ROR( void )
 {
     // Rotate right through carry
     uint8_t u8Result = 0;
-    uint8_t u8Temp = *pstCPU_->Rd;
+    uint8_t u8Temp = *stCPU.Rd;
 
     u8Result = (u8Temp >> 1);
-    if (pstCPU_->pstRAM->stRegisters.SREG.C)
+    if (stCPU.pstRAM->stRegisters.SREG.C)
     {
         u8Result |= 0x80;
     }
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     // ---- Update flags ----
-    Right_Carry_Flag( pstCPU_, u8Temp );
-    R8_Negative_Flag( pstCPU_, u8Result );
-    R8_Zero_Flag( pstCPU_, u8Result );
-    Rotate_Overflow_Flag( pstCPU_ );
-    Signed_Flag( pstCPU_ );
+    Right_Carry_Flag(  u8Temp );
+    R8_Negative_Flag(  u8Result );
+    R8_Zero_Flag(  u8Result );
+    Rotate_Overflow_Flag( );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_ASR( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_ASR( void )
 {
     // Shift all bits to the right, keeping sign bit intact
     uint8_t u8Result;
-    uint8_t u8Temp = *pstCPU_->Rd;
+    uint8_t u8Temp = *stCPU.Rd;
     u8Result = (u8Temp & 0x80) | (u8Temp >> 1);
-    *pstCPU_->Rd = u8Result;
+    *stCPU.Rd = u8Result;
 
     // ---- Update flags ----
-    Right_Carry_Flag( pstCPU_, u8Temp );
-    R8_Negative_Flag( pstCPU_, u8Result );
-    R8_Zero_Flag( pstCPU_, u8Result );
-    Rotate_Overflow_Flag( pstCPU_ );
-    Signed_Flag( pstCPU_ );
+    Right_Carry_Flag(  u8Temp );
+    R8_Negative_Flag(  u8Result );
+    R8_Zero_Flag(  u8Result );
+    Rotate_Overflow_Flag( );
+    Signed_Flag( );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_SWAP( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_SWAP( void )
 {
     uint8_t u8temp;
-    u8temp = ((*pstCPU_->Rd) >> 4) |
-             ((*pstCPU_->Rd) << 4) ;
+    u8temp = ((*stCPU.Rd) >> 4) |
+             ((*stCPU.Rd) << 4) ;
 
-    *pstCPU_->Rd = u8temp;
+    *stCPU.Rd = u8temp;
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BSET( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BSET( void )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.r |= (1 << pstCPU_->b);
+    stCPU.pstRAM->stRegisters.SREG.r |= (1 << stCPU.b);
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BCLR( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BCLR( void )
 {
-    pstCPU_->pstRAM->stRegisters.SREG.r &= ~(1 << pstCPU_->b);
+    stCPU.pstRAM->stRegisters.SREG.r &= ~(1 << stCPU.b);
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_SBI( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_SBI( void )
 {
-    uint8_t u8Temp = Data_Read( pstCPU_, pstCPU_->A + 32 );
-    u8Temp |= (1 << pstCPU_->b);
-    Data_Write( pstCPU_, pstCPU_->A + 32, u8Temp );
+    uint8_t u8Temp = Data_Read(  stCPU.A + 32 );
+    u8Temp |= (1 << stCPU.b);
+    Data_Write(  stCPU.A + 32, u8Temp );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_CBI( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_CBI( void )
 {
-    uint8_t u8Temp = Data_Read( pstCPU_, pstCPU_->A + 32 );
-    u8Temp &= ~(1 << pstCPU_->b);
-    Data_Write( pstCPU_, pstCPU_->A + 32, u8Temp );
+    uint8_t u8Temp = Data_Read(  stCPU.A + 32 );
+    u8Temp &= ~(1 << stCPU.b);
+    Data_Write(  stCPU.A + 32, u8Temp );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BST( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BST( void )
 {
-    if ((*pstCPU_->Rd) & (1 << pstCPU_->b))
+    if ((*stCPU.Rd) & (1 << stCPU.b))
     {
-        pstCPU_->pstRAM->stRegisters.SREG.T = 1;
+        stCPU.pstRAM->stRegisters.SREG.T = 1;
     }
     else
     {
-        pstCPU_->pstRAM->stRegisters.SREG.T = 0;
+        stCPU.pstRAM->stRegisters.SREG.T = 0;
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BLD( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BLD( void )
 {
-    if (pstCPU_->pstRAM->stRegisters.SREG.T)
+    if (stCPU.pstRAM->stRegisters.SREG.T)
     {
-        *(pstCPU_->Rd) |= (1 << pstCPU_->b);
+        *(stCPU.Rd) |= (1 << stCPU.b);
     }
     else
     {
-        *(pstCPU_->Rd) &= ~(1 << pstCPU_->b);
+        *(stCPU.Rd) &= ~(1 << stCPU.b);
     }
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_BREAK( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_BREAK( void )
 {
     // Unimplemented - since this requires debugging HW...
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_SLEEP( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_SLEEP( void )
 {    
-    pstCPU_->bAsleep = true;
+    stCPU.bAsleep = true;
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Opcode_WDR( AVR_CPU *pstCPU_ )
+static void AVR_Opcode_WDR( void )
 {
-    pstCPU_->u32WDTCount = 0;   // Reset watchdog timer counter
+    stCPU.u32WDTCount = 0;   // Reset watchdog timer counter
 }
 
 //---------------------------------------------------------------------------
@@ -2018,8 +2018,8 @@ AVR_Opcode AVR_Opcode_Function( uint16_t OP_ )
 }
 
 //---------------------------------------------------------------------------
-void AVR_RunOpcode( AVR_CPU *pstCPU_,  uint16_t OP_ )
+void AVR_RunOpcode(  uint16_t OP_ )
 {
     AVR_Opcode myOpcode = AVR_Opcode_Function( OP_);
-    myOpcode( pstCPU_ );
+    myOpcode( );
 }

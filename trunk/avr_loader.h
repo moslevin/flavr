@@ -32,6 +32,6 @@
  * \param szFilePath_ Pointer to the hexfile path
  * \return true if the hex file load operation succeeded, false otherwise
  */
-bool AVR_Load_HEX( AVR_CPU *pstCPU_, const char *szFilePath_);
+bool AVR_Load_HEX( const char *szFilePath_);
 
 #endif

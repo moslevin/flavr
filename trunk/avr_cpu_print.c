@@ -34,18 +34,18 @@
 #define ROM_DISPLAY_SPAN        (8)
 
 //---------------------------------------------------------------------------
-void print_core_regs( AVR_CPU *pstCPU_ )
+void print_core_regs( void )
 {
     uint8_t i;
     for (i = 0; i < 32; i++)
     {
-        PRINT_FUNC( "[R%02d] = 0x%02X\n", i, pstCPU_->pstRAM->stRegisters.CORE_REGISTERS.r[i] );
+        PRINT_FUNC( "[R%02d] = 0x%02X\n", i, stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[i] );
     }
-    PRINT_FUNC("[SP]  = 0x%02X%02X\n", (uint8_t)pstCPU_->pstRAM->stRegisters.SPH.r, (uint8_t)pstCPU_->pstRAM->stRegisters.SPL.r );
-    PRINT_FUNC("[PC]  = 0x%04X\n", (uint16_t)pstCPU_->u16PC );
-    PRINT_FUNC("[SREG]= 0x%02X   [", pstCPU_->pstRAM->stRegisters.SREG.r );
+    PRINT_FUNC("[SP]  = 0x%02X%02X\n", (uint8_t)stCPU.pstRAM->stRegisters.SPH.r, (uint8_t)stCPU.pstRAM->stRegisters.SPL.r );
+    PRINT_FUNC("[PC]  = 0x%04X\n", (uint16_t)stCPU.u16PC );
+    PRINT_FUNC("[SREG]= 0x%02X   [", stCPU.pstRAM->stRegisters.SREG.r );
 
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.I)
+    if (1 == stCPU.pstRAM->stRegisters.SREG.I)
     {
         PRINT_FUNC("I");
     }
@@ -53,7 +53,7 @@ void print_core_regs( AVR_CPU *pstCPU_ )
     {
         PRINT_FUNC("-");
     }
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.T)
+    if (1 == stCPU.pstRAM->stRegisters.SREG.T)
     {
         PRINT_FUNC("T");
     }
@@ -61,7 +61,7 @@ void print_core_regs( AVR_CPU *pstCPU_ )
     {
         PRINT_FUNC("-");
     }
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.H)
+    if (1 == stCPU.pstRAM->stRegisters.SREG.H)
     {
         PRINT_FUNC("H");
     }
@@ -69,7 +69,7 @@ void print_core_regs( AVR_CPU *pstCPU_ )
     {
         PRINT_FUNC("-");
     }
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.S)
+    if (1 == stCPU.pstRAM->stRegisters.SREG.S)
     {
         PRINT_FUNC("S");
     }
@@ -77,7 +77,7 @@ void print_core_regs( AVR_CPU *pstCPU_ )
     {
         PRINT_FUNC("-");
     }
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.V)
+    if (1 == stCPU.pstRAM->stRegisters.SREG.V)
     {
         PRINT_FUNC("V");
     }
@@ -85,7 +85,7 @@ void print_core_regs( AVR_CPU *pstCPU_ )
     {
         PRINT_FUNC("-");
     }
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.N)
+    if (1 == stCPU.pstRAM->stRegisters.SREG.N)
     {
         PRINT_FUNC("N");
     }
@@ -93,7 +93,7 @@ void print_core_regs( AVR_CPU *pstCPU_ )
     {
         PRINT_FUNC("-");
     }
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.Z)
+    if (1 == stCPU.pstRAM->stRegisters.SREG.Z)
     {
         PRINT_FUNC("Z");
     }
@@ -101,7 +101,7 @@ void print_core_regs( AVR_CPU *pstCPU_ )
     {
         PRINT_FUNC("-");
     }
-    if (1 == pstCPU_->pstRAM->stRegisters.SREG.C)
+    if (1 == stCPU.pstRAM->stRegisters.SREG.C)
     {
         PRINT_FUNC("C");
     }
@@ -113,19 +113,19 @@ void print_core_regs( AVR_CPU *pstCPU_ )
 }
 
 //---------------------------------------------------------------------------
-void print_io_reg( AVR_CPU *pstCPU_, uint8_t u8Addr_ )
+void print_io_reg( uint8_t u8Addr_ )
 {
-    PRINT_FUNC( "[IO%02X]= 0x%02X\n", u8Addr_, pstCPU_->pstRAM->au8RAM[u8Addr_] );
+    PRINT_FUNC( "[IO%02X]= 0x%02X\n", u8Addr_, stCPU.pstRAM->au8RAM[u8Addr_] );
 }
 
 //---------------------------------------------------------------------------
-void print_io_reg_with_name( AVR_CPU *pstCPU_, uint8_t u8Addr_, const char *szName_ )
+void print_io_reg_with_name( uint8_t u8Addr_, const char *szName_ )
 {
-    PRINT_FUNC( "[%s]= 0x%02X\n", szName_, pstCPU_->pstRAM->au8RAM[u8Addr_] );
+    PRINT_FUNC( "[%s]= 0x%02X\n", szName_, stCPU.pstRAM->au8RAM[u8Addr_] );
 }
 
 //---------------------------------------------------------------------------
-void print_ram( AVR_CPU *pstCPU_, uint16_t u16Start_, uint16_t u16Span_ )
+void print_ram( uint16_t u16Start_, uint16_t u16Span_ )
 {
     uint16_t i, j;
 
@@ -146,7 +146,7 @@ void print_ram( AVR_CPU *pstCPU_, uint16_t u16Start_, uint16_t u16Span_ )
         PRINT_FUNC( "|" );
         for (i = 0; i < j; i++)
         {
-            uint8_t u8Char = pstCPU_->pstRAM->au8RAM[u16Start_ + i];
+            uint8_t u8Char = stCPU.pstRAM->au8RAM[u16Start_ + i];
             if (u8Char < 32)
             {
                 u8Char = '.';
@@ -165,7 +165,7 @@ void print_ram( AVR_CPU *pstCPU_, uint16_t u16Start_, uint16_t u16Span_ )
         PRINT_FUNC( "|" );
         for (i = 0; i < j; i++)
         {
-            PRINT_FUNC( " %02X", pstCPU_->pstRAM->au8RAM[u16Start_ + i]);
+            PRINT_FUNC( " %02X", stCPU.pstRAM->au8RAM[u16Start_ + i]);
         }
 
         if (u16Span_ < RAM_DISPLAY_SPAN)
@@ -182,7 +182,7 @@ void print_ram( AVR_CPU *pstCPU_, uint16_t u16Start_, uint16_t u16Span_ )
 }
 
 //---------------------------------------------------------------------------
-void print_rom( AVR_CPU *pstCPU_, uint16_t u16Start_, uint16_t u16Span_ )
+void print_rom( uint16_t u16Start_, uint16_t u16Span_ )
 {
     uint16_t i, j;
 
@@ -203,7 +203,7 @@ void print_rom( AVR_CPU *pstCPU_, uint16_t u16Start_, uint16_t u16Span_ )
         PRINT_FUNC( "|" );
         for (i = 0; i < j; i++)
         {
-            uint16_t u16Val = pstCPU_->pu16ROM[u16Start_ + i];
+            uint16_t u16Val = stCPU.pu16ROM[u16Start_ + i];
             uint8_t u8High = u16Val >> 8;
             uint8_t u8Low = u16Val & 0x00FF;
 
@@ -229,7 +229,7 @@ void print_rom( AVR_CPU *pstCPU_, uint16_t u16Start_, uint16_t u16Span_ )
         PRINT_FUNC( "|" );
         for (i = 0; i < j; i++)
         {
-            PRINT_FUNC( " %04X", pstCPU_->pu16ROM[u16Start_ + i]);
+            PRINT_FUNC( " %04X", stCPU.pu16ROM[u16Start_ + i]);
         }
 
         if (u16Span_ < ROM_DISPLAY_SPAN)

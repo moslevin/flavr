@@ -38,22 +38,22 @@ void TraceBuffer_Init( TraceBuffer_t *pstTraceBuffer_ )
 }
 
 //---------------------------------------------------------------------------
-void TraceBuffer_StoreFromCPU( TraceBuffer_t *pstTraceBuffer_, AVR_CPU *pstCPU_ )
+void TraceBuffer_StoreFromCPU( TraceBuffer_t *pstTraceBuffer_  )
 {
     TraceElement_t *pstTraceElement = &pstTraceBuffer_->astTraceStep[ pstTraceBuffer_->u32Index ];
 
     // Manually copy over whatever elements we need to
-    pstTraceElement->u64Counter    = pstCPU_->u64InstructionCount;
-    pstTraceElement->u64CycleCount = pstCPU_->u64CycleCount;
-    pstTraceElement->u16PC         = pstCPU_->u16PC;
-    pstTraceElement->u16SP         = ((uint16_t)(pstCPU_->pstRAM->stRegisters.SPH.r) << 8) |
-                                      (uint16_t)(pstCPU_->pstRAM->stRegisters.SPL.r);
+    pstTraceElement->u64Counter    = stCPU.u64InstructionCount;
+    pstTraceElement->u64CycleCount = stCPU.u64CycleCount;
+    pstTraceElement->u16PC         = stCPU.u16PC;
+    pstTraceElement->u16SP         = ((uint16_t)(stCPU.pstRAM->stRegisters.SPH.r) << 8) |
+                                      (uint16_t)(stCPU.pstRAM->stRegisters.SPL.r);
 
-    pstTraceElement->u16OpCode     = pstCPU_->pu16ROM[ pstCPU_->u16PC ];
-    pstTraceElement->u8SR          = pstCPU_->pstRAM->stRegisters.SREG.r;
+    pstTraceElement->u16OpCode     = stCPU.pu16ROM[ stCPU.u16PC ];
+    pstTraceElement->u8SR          = stCPU.pstRAM->stRegisters.SREG.r;
 
     // Memcpy the core registers in one chunk
-    memcpy(&(pstTraceElement->stCoreRegs), &(pstCPU_->pstRAM->stRegisters.CORE_REGISTERS), sizeof(pstTraceElement->stCoreRegs));
+    memcpy(&(pstTraceElement->stCoreRegs), &(stCPU.pstRAM->stRegisters.CORE_REGISTERS), sizeof(pstTraceElement->stCoreRegs));
 
     // Update the index of the write buffer
     pstTraceBuffer_->u32Index++;
@@ -72,21 +72,21 @@ void TraceBuffer_LoadElement( TraceBuffer_t *pstTraceBuffer_, TraceElement_t *ps
 }
 
 //---------------------------------------------------------------------------
-void TraceBuffer_PrintElement( TraceElement_t *pstElement_, TracePrintFormat_t eFormat_, AVR_CPU *pstCPU_ )
+void TraceBuffer_PrintElement( TraceElement_t *pstElement_, TracePrintFormat_t eFormat_  )
 {
     printf( "[%08d] 0x%04X:0x%04X: ",
             pstElement_->u64Counter, pstElement_->u16PC, pstElement_->u16OpCode );
     if (eFormat_ & TRACE_PRINT_DISASSEMBLY)
     {
-        uint16_t u16TempPC = pstCPU_->u16PC;
-        pstCPU_->u16PC = pstElement_->u16PC;
+        uint16_t u16TempPC = stCPU.u16PC;
+        stCPU.u16PC = pstElement_->u16PC;
 
         AVR_Opcode pfOp = AVR_Disasm_Function( pstElement_->u16OpCode );
 
-        AVR_Decode( pstCPU_, pstElement_->u16OpCode );
-        pfOp( pstCPU_ );
+        AVR_Decode( pstElement_->u16OpCode );
+        pfOp(  );
 
-        pstCPU_->u16PC = u16TempPC;
+        stCPU.u16PC = u16TempPC;
     }
 
     if (eFormat_ & TRACE_PRINT_COMPACT)
@@ -115,15 +115,15 @@ void TraceBuffer_PrintElement( TraceElement_t *pstElement_, TracePrintFormat_t e
 }
 
 //---------------------------------------------------------------------------
-void TraceBuffer_Print( TraceBuffer_t *pstTraceBuffer_, TracePrintFormat_t eFormat_, AVR_CPU *pstCPU_ )
+void TraceBuffer_Print( TraceBuffer_t *pstTraceBuffer_, TracePrintFormat_t eFormat_ )
 {
     int i;
     for (i = pstTraceBuffer_->u32Index; i < CONFIG_TRACEBUFFER_SIZE; i++)
     {
-        TraceBuffer_PrintElement(&pstTraceBuffer_->astTraceStep[i], eFormat_, pstCPU_ );
+        TraceBuffer_PrintElement(&pstTraceBuffer_->astTraceStep[i], eFormat_ );
     }
     for (i = 0; i < pstTraceBuffer_->u32Index; i++)
     {
-        TraceBuffer_PrintElement(&pstTraceBuffer_->astTraceStep[i], eFormat_, pstCPU_ );
+        TraceBuffer_PrintElement(&pstTraceBuffer_->astTraceStep[i], eFormat_ );
     }
 }

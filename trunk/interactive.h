@@ -52,6 +52,6 @@ void Interactive_Set( void );
  * \param pstCPU_ Pointer to the CPU object to debug interactively
  * \param pstTrace_ Pointer to the tracebuffer object
  */
-void Interactive_Init( AVR_CPU *pstCPU_, TraceBuffer_t *pstTrace_);
+void Interactive_Init( TraceBuffer_t *pstTrace_);
 
 #endif

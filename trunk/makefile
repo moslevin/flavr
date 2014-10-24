@@ -21,7 +21,8 @@ SRC_LIST_EMULATOR=\
 	mega_eint.c \
 	mega_timer16.c \
 	mega_timer8.c \
-	flavr.c
+	flavr.c \
+	variant.c
 
 printlist:
 	echo $(SRC_LIST_DISASM)

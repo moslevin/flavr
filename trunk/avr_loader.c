@@ -30,7 +30,7 @@
 #include "intel_hex.h"
 
 //---------------------------------------------------------------------------
-static void AVR_Copy_Record( AVR_CPU *pstCPU_, HEX_Record_t *pstHex_)
+static void AVR_Copy_Record( HEX_Record_t *pstHex_)
 {
     uint16_t u16Data;
     uint16_t i;
@@ -40,22 +40,16 @@ static void AVR_Copy_Record( AVR_CPU *pstCPU_, HEX_Record_t *pstHex_)
         u16Data <<= 8;
         u16Data |= pstHex_->u8Data[i];
 
-        pstCPU_->pu16ROM[(pstHex_->u16Address + i) >> 1] = u16Data;
+        stCPU.pu16ROM[(pstHex_->u16Address + i) >> 1] = u16Data;
     }
 }
 
 //---------------------------------------------------------------------------
-bool AVR_Load_HEX( AVR_CPU *pstCPU_, const char *szFilePath_)
+bool AVR_Load_HEX( const char *szFilePath_)
 {
     HEX_Record_t stRecord;
     uint32_t u32Addr = 0;
     int fd = -1;
-
-    if (!pstCPU_)
-    {
-        fprintf(stderr, "CPU Not Specified\n");
-        return false;
-    }
 
     if (!szFilePath_)
     {
@@ -82,7 +76,7 @@ bool AVR_Load_HEX( AVR_CPU *pstCPU_, const char *szFilePath_)
         }
         if (RECORD_DATA == stRecord.u8RecordType)
         {
-            AVR_Copy_Record(pstCPU_, &stRecord);
+            AVR_Copy_Record(&stRecord);
         }
     }
 
