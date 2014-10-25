@@ -153,7 +153,11 @@ void add_plugins(void)
     CPU_AddPeriph(&stEINT_a);
     CPU_AddPeriph(&stEINT_b);
     CPU_AddPeriph(&stTimer16);
+    CPU_AddPeriph(&stTimer16a);
+    CPU_AddPeriph(&stTimer16b);
+    CPU_AddPeriph(&stTimer8);
     CPU_AddPeriph(&stTimer8a);
+    CPU_AddPeriph(&stTimer8b);
 }
 
 //---------------------------------------------------------------------------

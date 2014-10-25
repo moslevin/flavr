@@ -247,30 +247,17 @@ static void EINT_Clock(void *context_ )
     if (bSetINT0)
     {
         stCPU.pstRAM->stRegisters.EIFR.INTF0 = 1;
+        AVR_InterruptCandidate(0x01);
     }
     if (bSetINT1)
     {
         stCPU.pstRAM->stRegisters.EIFR.INTF1 = 1;
+        AVR_InterruptCandidate(0x02);
+
     }
     // Update locally-cached copy of previous INT0/INT1 pin status.
     ucLastINT0 = stCPU.pstRAM->stRegisters.PORTD.PORT2;
     ucLastINT1 = stCPU.pstRAM->stRegisters.PORTD.PORT3;
-
-    if (stCPU.pstRAM->stRegisters.SREG.I == 1)
-    {
-        // If we have pending interrupts, and global interrupts are enabled, tell the CPU to
-        // execute the interrupt when it gets the chance.  Note that since interrupts can take a
-        // long time to be acknowledged (based on the system), these flags are set each cycle
-        // until acknowledged.
-        if (stCPU.pstRAM->stRegisters.EIFR.INTF0 == 1)
-        {
-            AVR_InterruptCandidate(0x01);
-        }
-        if (stCPU.pstRAM->stRegisters.EIFR.INTF1 == 1)
-        {
-            AVR_InterruptCandidate(0x02);
-        }
-    }
 }
 
 //---------------------------------------------------------------------------

@@ -54,10 +54,18 @@ void AVR_InterruptCandidate( uint8_t u8Vector_ )
 }
 
 //---------------------------------------------------------------------------
+void AVR_ClearCandidate( uint8_t u8Vector_ )
+{
+    stCPU.u32IntFlags &= ~(1 << u8Vector_ );
+    AVR_NextInterrupt();
+}
+
+
+//---------------------------------------------------------------------------
 void AVR_Interrupt( void )
 {
     // First - check to see if there's an interrupt pending.
-    if (stCPU.u8IntPriority == 255)
+    if (stCPU.u8IntPriority == 255 || stCPU.pstRAM->stRegisters.SREG.I == 0)
     {
         return; // no interrupt pending
     }
