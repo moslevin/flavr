@@ -23,6 +23,8 @@
 
 #include "avr_peripheral.h"
 
+extern AVRPeripheral stTimer8;
 extern AVRPeripheral stTimer8a;
+extern AVRPeripheral stTimer8b;
 
 #endif //__MEGA_EINT_H__

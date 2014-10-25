@@ -39,6 +39,14 @@ void AVR_InterruptCandidate( uint8_t u8Vector_ );
 
 //---------------------------------------------------------------------------
 /*!
+ * \brief AVR_ClearCandidate
+ *
+ * \param u8Vector_ Vector to clear pending interrupt for.
+ */
+void AVR_ClearCandidate( uint8_t u8Vector_ );
+
+//---------------------------------------------------------------------------
+/*!
  * \brief AVR_Interrupt
  *
  * Entrypoint for CPU interrupts.  Stop executing the currently-executing

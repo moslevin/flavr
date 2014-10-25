@@ -24,5 +24,7 @@
 #include "avr_peripheral.h"
 
 extern AVRPeripheral stTimer16;
+extern AVRPeripheral stTimer16a;
+extern AVRPeripheral stTimer16b;
 
 #endif //__MEGA_EINT_H__

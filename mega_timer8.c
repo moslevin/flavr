@@ -236,6 +236,54 @@ static void OCR0B_Write( uint8_t ucAddr_, uint8_t ucValue_)
 }
 
 //---------------------------------------------------------------------------
+static void Timer8_IntFlagUpdate(void)
+{
+    if (stCPU.pstRAM->stRegisters.TIMSK0.TOIE0 == 1)
+    {
+        if (stCPU.pstRAM->stRegisters.TIFR0.TOV0 == 1)
+        {
+            DEBUG_PRINT(" TOV0 Interrupt Candidate\n" );
+            AVR_InterruptCandidate(0x10);
+        }
+        else
+        {
+            AVR_ClearCandidate(0x10);
+        }
+    }
+    if (stCPU.pstRAM->stRegisters.TIMSK0.OCIE0A == 1)
+    {
+        if (stCPU.pstRAM->stRegisters.TIFR0.OCF0A == 1)
+        {
+            DEBUG_PRINT(" OCF0A Interrupt Candidate\n" );
+            AVR_InterruptCandidate(0x0E);
+        }
+        else
+        {
+            AVR_ClearCandidate(0x0E);
+        }
+    }
+    if (stCPU.pstRAM->stRegisters.TIMSK0.OCIE0B == 1)
+    {
+        if (stCPU.pstRAM->stRegisters.TIFR0.OCF0B == 1)
+        {
+            DEBUG_PRINT(" OCF0B Interrupt Candidate\n" );
+            AVR_InterruptCandidate(0x0F);
+        }
+        else
+        {
+            AVR_ClearCandidate(0x0F);
+        }
+    }
+}
+
+//--------------------------------------------------------------------------
+static void Timer8b_Write(void *context_, uint8_t ucAddr_, uint8_t ucValue_ )
+{
+    stCPU.pstRAM->au8RAM[ucAddr_] = ucValue_;
+    Timer8_IntFlagUpdate();
+}
+
+//--------------------------------------------------------------------------
 static void Timer8_Write(void *context_, uint8_t ucAddr_, uint8_t ucValue_ )
 {
     DEBUG_PRINT("Timer8_Write: %d=%d\n", ucAddr_, ucValue_);
@@ -310,6 +358,7 @@ static void Timer8_Clock(void *context_ )
         bool bOVF   = false;
         bool bCTCA  = false;
         bool bCTCB  = false;
+        bool bIntr  = false;
 
         switch (eWGM)
         {
@@ -351,39 +400,30 @@ static void Timer8_Clock(void *context_ )
         {
             DEBUG_PRINT(" TOV0 Set\n" );
             stCPU.pstRAM->stRegisters.TIFR0.TOV0 = 1;
-
-            if (stCPU.pstRAM->stRegisters.TIMSK0.TOIE0 == 1)
-            {
-                DEBUG_PRINT(" TOV0 Interrupt Candidate\n" );
-                AVR_InterruptCandidate(0x10);
-            }
+            bIntr = true;
         }
         if (bCTCA)
         {
             DEBUG_PRINT(" OCF0A Set\n" );
             stCPU.pstRAM->stRegisters.TIFR0.OCF0A = 1;
-            if (stCPU.pstRAM->stRegisters.TIMSK0.OCIE0A == 1)
-            {
-                DEBUG_PRINT(" OCF0A Interrupt Candidate\n" );
-                AVR_InterruptCandidate(0x0E);
-            }
+            bIntr = true;
         }
         if (bCTCB)
         {
             DEBUG_PRINT(" OCF0B Set\n" );
             stCPU.pstRAM->stRegisters.TIFR0.OCF0B = 1;
-            if (stCPU.pstRAM->stRegisters.TIMSK0.OCIE0B == 1)
-            {
-                DEBUG_PRINT(" OCF0B Interrupt Candidate\n" );
-                AVR_InterruptCandidate(0x0F);
-            }
+            bIntr = true;
         }
 
+        if (bIntr)
+        {
+            Timer8_IntFlagUpdate();
+        }
     }
 }
 
 //---------------------------------------------------------------------------
-AVRPeripheral stTimer8a =
+AVRPeripheral stTimer8 =
 {
     Timer8_Init,
     Timer8_Read,
@@ -392,4 +432,29 @@ AVRPeripheral stTimer8a =
     0,
     0x44,
     0x48
+};
+
+
+//---------------------------------------------------------------------------
+AVRPeripheral stTimer8a =
+{
+    0,
+    0,
+    Timer8b_Write,
+    0,
+    0,
+    0x35,
+    0x35
+};
+
+//---------------------------------------------------------------------------
+AVRPeripheral stTimer8b =
+{
+    0,
+    0,
+    Timer8b_Write,
+    0,
+    0,
+    0x6E,
+    0x6E
 };

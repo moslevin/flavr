@@ -332,6 +332,70 @@ static void OCR1BH_Write( uint8_t ucAddr_, uint8_t ucValue_)
 }
 
 //---------------------------------------------------------------------------
+static void Timer16_IntFlagUpdate(void)
+{
+    if (stCPU.pstRAM->stRegisters.TIMSK1.TOIE1 == 1)
+    {
+        if (stCPU.pstRAM->stRegisters.TIFR1.TOV1 == 1)
+        {
+            DEBUG_PRINT(" TOV1 Interrupt Candidate\n" );
+            AVR_InterruptCandidate(0x0D);
+        }
+        else
+        {
+            AVR_ClearCandidate(0x0D);
+        }
+    }
+
+    if (stCPU.pstRAM->stRegisters.TIMSK1.OCIE1A == 1)
+    {
+        if (stCPU.pstRAM->stRegisters.TIFR1.OCF1A == 1)
+        {
+            DEBUG_PRINT(" OCF1A Interrupt Candidate\n" );
+            AVR_InterruptCandidate(0x0B);
+        }
+        else
+        {
+            AVR_ClearCandidate(0x0B);
+        }
+    }
+
+    if (stCPU.pstRAM->stRegisters.TIMSK1.OCIE1B == 1)
+    {
+        if (stCPU.pstRAM->stRegisters.TIFR1.OCF1B == 1)
+        {
+            DEBUG_PRINT(" OCF1B Interrupt Candidate\n" );
+            AVR_InterruptCandidate(0x0C);
+        }
+        else
+        {
+            AVR_ClearCandidate(0x0C);
+        }
+    }
+
+    if (stCPU.pstRAM->stRegisters.TIMSK1.ICIE1 == 1)
+    {
+        if (stCPU.pstRAM->stRegisters.TIFR1.ICF1 == 1)
+        {
+            DEBUG_PRINT(" ICF1 Interrupt Candidate\n" );
+            AVR_InterruptCandidate(0x0A);
+        }
+        else
+        {
+            AVR_ClearCandidate(0x0A);
+        }
+    }
+}
+
+//---------------------------------------------------------------------------
+// TIFR & TMSK
+static void Timer16b_Write(void *context_, uint8_t ucAddr_, uint8_t ucValue_ )
+{
+    stCPU.pstRAM->au8RAM[ucAddr_] = ucValue_;
+    Timer16_IntFlagUpdate();
+}
+
+//---------------------------------------------------------------------------
 static void Timer16_Write(void *context_, uint8_t ucAddr_, uint8_t ucValue_ )
 {
     switch (ucAddr_)
@@ -426,6 +490,7 @@ static void Timer16_Clock(void *context_ )
         bool bCTCA  = false;
         bool bCTCB  = false;
         bool bICR   = false;
+        bool bIntr  = false;
 
         //DEBUG_PRINT( " WGM Mode %d\n", eWGM );
         switch (eWGM)
@@ -479,51 +544,30 @@ static void Timer16_Clock(void *context_ )
         {
             DEBUG_PRINT(" TOV1 Set\n" );
             stCPU.pstRAM->stRegisters.TIFR1.TOV1 = 1;
+            bIntr = true;
         }
         if (bCTCA)
         {
             DEBUG_PRINT(" OCF1A Set\n" );
             stCPU.pstRAM->stRegisters.TIFR1.OCF1A = 1;
+            bIntr = true;
         }
         if (bCTCB)
         {
             DEBUG_PRINT(" OCF1B Set\n" );
             stCPU.pstRAM->stRegisters.TIFR1.OCF1B = 1;
+            bIntr = true;
         }
         if (bICR)
         {
             DEBUG_PRINT(" ICF1 Set\n" );
             stCPU.pstRAM->stRegisters.TIFR1.ICF1 = 1;
+            bIntr = true;
         }
 
-        // Check interrupt status to see whether or not any of the pending interrupts
-        // should be armed as a candidate this clock cycle
-        if (stCPU.pstRAM->stRegisters.SREG.I)
+        if (bIntr)
         {
-            if ((stCPU.pstRAM->stRegisters.TIFR1.TOV1 == 1) &&
-                (stCPU.pstRAM->stRegisters.TIMSK1.TOIE1 == 1))
-            {
-                DEBUG_PRINT(" TOV1 Interrupt Candidate\n" );
-                AVR_InterruptCandidate(0x0D);
-            }
-            if ((stCPU.pstRAM->stRegisters.TIFR1.OCF1A == 1) &&
-                (stCPU.pstRAM->stRegisters.TIMSK1.OCIE1A == 1))
-            {
-                DEBUG_PRINT(" OCF1A Interrupt Candidate\n" );
-                AVR_InterruptCandidate(0x0B);
-            }
-            if ((stCPU.pstRAM->stRegisters.TIFR1.OCF1B == 1) &&
-                (stCPU.pstRAM->stRegisters.TIMSK1.OCIE1B == 1))
-            {
-                DEBUG_PRINT(" OCF1B Interrupt Candidate\n" );
-                AVR_InterruptCandidate(0x0C);
-            }
-            if ((stCPU.pstRAM->stRegisters.TIFR1.ICF1 == 1) &&
-                (stCPU.pstRAM->stRegisters.TIMSK1.ICIE1 == 1))
-            {
-                DEBUG_PRINT(" ICF1 Interrupt Candidate\n" );
-                AVR_InterruptCandidate(0x0A);
-            }
+            Timer16_IntFlagUpdate();
         }
     }
 }
@@ -538,4 +582,28 @@ AVRPeripheral stTimer16 =
     0,
     0x80,
     0x8B
+};
+
+//---------------------------------------------------------------------------
+AVRPeripheral stTimer16a =
+{
+    0,
+    0,
+    Timer16b_Write,
+    0,
+    0,
+    0x36,
+    0x36
+};
+
+//---------------------------------------------------------------------------
+AVRPeripheral stTimer16b =
+{
+    0,
+    0,
+    Timer16b_Write,
+    0,
+    0,
+    0x6F,
+    0x6F
 };
