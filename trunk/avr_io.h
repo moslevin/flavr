@@ -2,7 +2,7 @@
  *     (     (                      (     |
  *    )\ )  )\ )    (              )\ )   |
  *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
- *    /(_)) /(_))((((_)()\  )\  /(_))  | -- [ Litle ] -------------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))     | -- [ Litle ] -------------------
  *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
  *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
  *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
@@ -51,7 +51,7 @@ typedef struct _IOClockList
 //---------------------------------------------------------------------------
 /*!
  * \brief IO_AddReader
- * \param pstCPU_
+ *
  * \param pstPeriph_
  * \param addr_
  */
@@ -60,7 +60,7 @@ void IO_AddReader(  AVRPeripheral *pstPeriph_, uint8_t addr_);
 //--------------------------------------------------------------------------
 /*!
  * \brief IO_AddWriter
- * \param pstCPU_
+ *
  * \param pstPeriph_
  * \param addr_
  */
@@ -69,7 +69,7 @@ void IO_AddWriter(  AVRPeripheral *pstPeriph_, uint8_t addr_);
 //--------------------------------------------------------------------------
 /*!
  * \brief IO_AddClocker
- * \param pstCPU_
+ *
  * \param pstPeriph_
  */
 void IO_AddClocker(  AVRPeripheral *pstPeriph_ );
@@ -77,7 +77,7 @@ void IO_AddClocker(  AVRPeripheral *pstPeriph_ );
 //--------------------------------------------------------------------------
 /*!
  * \brief IO_Write
- * \param pstCPU_
+ *
  * \param addr_
  * \param value_
  */
@@ -86,7 +86,7 @@ void IO_Write(  uint8_t addr_, uint8_t value_ );
 //---------------------------------------------------------------------------
 /*!
  * \brief IO_Read
- * \param pstCPU_
+ *
  * \param addr_
  * \param value_
  */
@@ -95,7 +95,7 @@ void IO_Read(  uint8_t addr_, uint8_t *value_ );
 //---------------------------------------------------------------------------
 /*!
  * \brief IO_Clock
- * \param pstCPU_
+ *
  */
 void IO_Clock( void );
 

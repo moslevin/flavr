@@ -2,7 +2,7 @@
  *     (     (                      (     |
  *    )\ )  )\ )    (              )\ )   |
  *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
- *    /(_)) /(_))((((_)()\  )\  /(_))  | -- [ Litle ] -------------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))     | -- [ Litle ] -------------------
  *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
  *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
  *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
@@ -47,7 +47,6 @@ AVR_Decoder AVR_Decoder_Function( uint16_t OP_ );
  * Decode a specified instruction into the internal registers of the specified
  * CPU object.  Opcodes must be decoded before they can be executed.
  *
- * \param pstCPU_ Pointer to the CPU object with which to decode the instruction
  * \param OP_ Opcode to decode
  */
 void AVR_Decode( uint16_t OP_ );

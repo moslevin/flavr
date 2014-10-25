@@ -2,7 +2,7 @@
  *     (     (                      (     |
  *    )\ )  )\ )    (              )\ )   |
  *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
- *    /(_)) /(_))((((_)()\  )\  /(_))  | -- [ Litle ] -------------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))     | -- [ Litle ] -------------------
  *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
  *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
  *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
@@ -29,14 +29,12 @@
 //---------------------------------------------------------------------------
 /*!
  * \brief print_core_regs
- * \param pstCPU_
  */
 void print_core_regs( void );
 
 //---------------------------------------------------------------------------
 /*!
  * \brief print_io_reg
- * \param pstCPU_
  * \param u8Addr_
  */
 void print_io_reg( uint8_t u8Addr_ );
@@ -44,7 +42,6 @@ void print_io_reg( uint8_t u8Addr_ );
 //---------------------------------------------------------------------------
 /*!
  * \brief print_io_reg_with_name
- * \param pstCPU_
  * \param u8Addr_
  * \param szName_
  */
@@ -53,7 +50,6 @@ void print_io_reg_with_name( uint8_t u8Addr_, const char *szName_ );
 //---------------------------------------------------------------------------
 /*!
  * \brief print_ram
- * \param pstCPU_
  * \param u16Start_
  * \param u16Span_
  */
@@ -62,7 +58,6 @@ void print_ram( uint16_t u16Start_, uint16_t u16Span_ );
 //---------------------------------------------------------------------------
 /*!
  * \brief print_rom
- * \param pstCPU_
  * \param u16Start_
  * \param u16Span_
  */

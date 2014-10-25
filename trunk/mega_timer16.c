@@ -2,7 +2,7 @@
  *     (     (                      (     |
  *    )\ )  )\ )    (              )\ )   |
  *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
- *    /(_)) /(_))((((_)(   )\  )\  /(_))  | -- [ Litle ] -------------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))     | -- [ Litle ] -------------------
  *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
  *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
  *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
@@ -90,7 +90,7 @@ static uint8_t  u8Temp;  // The 8-bit temporary register used in 16-bit register
 static uint16_t u8Count; // Internal 16-bit count register
 
 //---------------------------------------------------------------------------
-static void TCNT1_Increment( )
+static void TCNT1_Increment()
 {
     uint16_t u16NewVal = 0;
 
@@ -103,7 +103,7 @@ static void TCNT1_Increment( )
 }
 
 //---------------------------------------------------------------------------
-static uint16_t TCNT1_Read( )
+static uint16_t TCNT1_Read()
 {
     uint16_t u16Ret = 0;
 
@@ -113,14 +113,14 @@ static uint16_t TCNT1_Read( )
 }
 
 //---------------------------------------------------------------------------
-static void TCNT1_Clear( )
+static void TCNT1_Clear()
 {
     stCPU.pstRAM->stRegisters.TCNT1H = 0;
     stCPU.pstRAM->stRegisters.TCNT1L = 0;
 }
 
 //---------------------------------------------------------------------------
-static uint16_t OCR1A_Read( )
+static uint16_t OCR1A_Read()
 {
     uint16_t u16Ret = 0;
 
@@ -130,7 +130,7 @@ static uint16_t OCR1A_Read( )
 }
 
 //---------------------------------------------------------------------------
-static uint16_t OCR1B_Read( )
+static uint16_t OCR1B_Read()
 {
     uint16_t u16Ret = 0;
 
@@ -140,7 +140,7 @@ static uint16_t OCR1B_Read( )
 }
 
 //---------------------------------------------------------------------------
-static uint16_t ICR1_Read( )
+static uint16_t ICR1_Read()
 {
     uint16_t u16Ret = 0;
 
@@ -188,6 +188,10 @@ static void IC1_Ack(  uint8_t ucVector_)
 //---------------------------------------------------------------------------
 static void COMP1A_Ack(  uint8_t ucVector_)
 {
+    static uint64_t lastcycles = 0;
+   // printf("COMP1A - Ack'd: %d delta\n", stCPU.u64CycleCount - lastcycles);
+    lastcycles = stCPU.u64CycleCount;
+
     stCPU.pstRAM->stRegisters.TIFR1.OCF1A = 0;
 }
 
@@ -544,7 +548,7 @@ static void Timer16_Clock(void *context_ )
         {
             DEBUG_PRINT(" TOV1 Set\n" );
             stCPU.pstRAM->stRegisters.TIFR1.TOV1 = 1;
-            bIntr = true;
+            bIntr = true;            
         }
         if (bCTCA)
         {

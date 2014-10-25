@@ -2,7 +2,7 @@
  *     (     (                      (     |
  *    )\ )  )\ )    (              )\ )   |
  *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
- *    /(_)) /(_))((((_)()\  )\  /(_))  | -- [ Litle ] -------------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))     | -- [ Litle ] -------------------
  *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
  *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
  *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
@@ -28,7 +28,7 @@
 /*!
  * \brief AVR_Load_HEX Load a hex file, specified by path, into the flash
  *        memory of the specified CPU object
- * \param pstCPU_ CPU Object to be loaded with program content
+ *
  * \param szFilePath_ Pointer to the hexfile path
  * \return true if the hex file load operation succeeded, false otherwise
  */

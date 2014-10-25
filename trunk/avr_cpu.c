@@ -2,7 +2,7 @@
  *     (     (                      (     |
  *    )\ )  )\ )    (              )\ )   |
  *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
- *    /(_)) /(_))((((_)(   )\  )\  /(_))  | -- [ Litle ] -------------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))     | -- [ Litle ] -------------------
  *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
  *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
  *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
@@ -127,7 +127,7 @@ void CPU_RunCycle( void )
     if (!stCPU.bAsleep)
     {
 
-        OP = CPU_Fetch(  );
+        OP = CPU_Fetch();
 
         // From the first word fetched, figure out how big this opcode is
         // (either 16 or 32-bit)
@@ -159,7 +159,7 @@ void CPU_RunCycle( void )
         // phase of the instruction cycle.
         while (stCPU.u16ExtraCycles--)
         {
-            CPU_PeripheralCycle(  );
+            CPU_PeripheralCycle();
         }
 
         // Increment the "total executed instruction counter"
@@ -170,13 +170,13 @@ void CPU_RunCycle( void )
     {
         // CPU is asleep, just NOP and wait until we hit an interrupt.
         stCPU.u64CycleCount++;
-        CPU_PeripheralCycle(  );
+        CPU_PeripheralCycle();
     }
 
     // Check to see if there are any pending interrupts - if so, vector
     // to the appropriate location.  This has no effect if no interrupts
     // are pending
-    AVR_Interrupt(  );
+    AVR_Interrupt();
 }
 
 

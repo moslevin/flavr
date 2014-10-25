@@ -2,7 +2,7 @@
  *     (     (                      (     |
  *    )\ )  )\ )    (              )\ )   |
  *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
- *    /(_)) /(_))((((_)()\  )\  /(_))  | -- [ Litle ] -------------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))     | -- [ Litle ] -------------------
  *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
  *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
  *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
@@ -49,7 +49,6 @@ void Interactive_Set( void );
  * Initialize the interactive debugger session for the given CPU struct and
  * associated debug data
  *
- * \param pstCPU_ Pointer to the CPU object to debug interactively
  * \param pstTrace_ Pointer to the tracebuffer object
  */
 void Interactive_Init( TraceBuffer_t *pstTrace_);

@@ -2,7 +2,7 @@
  *     (     (                      (     |
  *    )\ )  )\ )    (              )\ )   |
  *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
- *    /(_)) /(_))((((_)()\  )\  /(_))  | -- [ Litle ] -------------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))     | -- [ Litle ] -------------------
  *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
  *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
  *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
@@ -73,7 +73,6 @@ void TraceBuffer_Init( TraceBuffer_t *pstTraceBuffer_ );
  *
  * \param pstTraceBuffer_ Pointer to the tracebuffer to store into
  *
- * \param pstCPU_ Pointer to an AVR CPU struct from which to store the trace data
  */
 void TraceBuffer_StoreFromCPU( TraceBuffer_t *pstTraceBuffer_ );
 
