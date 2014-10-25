@@ -2,7 +2,7 @@
  *     (     (                      (     |
  *    )\ )  )\ )    (              )\ )   |
  *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
- *    /(_)) /(_))((((_)(   )\  )\  /(_))  | -- [ Litle ] -------------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))  | -- [ Litle ] -------------------
  *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
  *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
  *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
@@ -168,7 +168,7 @@ static void AVR_Decoder_JMP_CALL_22( uint16_t OP_)
 
     // These are 2-cycle instructions.  Clock the CPU here, since we're fetching
     // the second word of data for this opcode here.
-    IO_Clock(  );
+    IO_Clock();
 }
 //---------------------------------------------------------------------------
 static void AVR_Decoder_ADIW_SBIW_6( uint16_t OP_)

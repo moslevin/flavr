@@ -2,7 +2,7 @@
  *     (     (                      (     |
  *    )\ )  )\ )    (              )\ )   |
  *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
- *    /(_)) /(_))((((_)(   )\  )\  /(_))  | -- [ Litle ] -------------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))  | -- [ Litle ] -------------------
  *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
  *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
  *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
@@ -38,9 +38,6 @@
 #include "avr_periphregs.h"
 #include "avr_interrupt.h"
 
-
-
-
 #if 1
 #define DEBUG_PRINT(...)
 #else
@@ -61,13 +58,13 @@ static uint32_t u32TxTicksRemaining = 0;
 static uint32_t u32RxTicksRemaining = 0;
 
 //---------------------------------------------------------------------------
-static void Echo_Tx(   )
+static void Echo_Tx()
 {
     printf("%c", TSR);
 }
 
 //---------------------------------------------------------------------------
-static void Echo_Rx(   )
+static void Echo_Rx()
 {
     printf("%c", RSR);
 }
@@ -105,13 +102,13 @@ static bool UART_IsRxIntEnabled( void )
 }
 
 //---------------------------------------------------------------------------
-static bool UART_IsDoubleSpeed(   )
+static bool UART_IsDoubleSpeed()
 {
     return (stCPU.pstRAM->stRegisters.UCSR0A.U2X0 == 1);
 }
 
 //---------------------------------------------------------------------------
-static void UART_SetDoubleSpeed(   )
+static void UART_SetDoubleSpeed()
 {
     stCPU.pstRAM->stRegisters.UCSR0A.U2X0 = 1;
 }
@@ -190,7 +187,7 @@ static void UART_Read(void *context_, uint8_t ucAddr_, uint8_t *pucValue_ )
 }
 
 //---------------------------------------------------------------------------
-static void UART_WriteBaudReg( )
+static void UART_WriteBaudReg()
 {
     DEBUG_PRINT( "WriteBaud\n");
     uint16_t u16Baud =  (uint16_t)(stCPU.pstRAM->stRegisters.UBRR0L) |
@@ -200,7 +197,7 @@ static void UART_WriteBaudReg( )
 }
 
 //---------------------------------------------------------------------------
-static void UART_WriteDataReg( )
+static void UART_WriteDataReg()
 {
     DEBUG_PRINT("UART Write UDR...\n");
     if (UART_IsTxEnabled())
@@ -225,7 +222,7 @@ static void UART_WriteDataReg( )
             bUDR_Empty = true;
             UART_SetEmpty();
 
-            if (UART_IsDREIntEnabled(  ))
+            if (UART_IsDREIntEnabled())
             {
                 DEBUG_PRINT("DRE Interrupt\n");
                 AVR_InterruptCandidate( 0x13 );
@@ -264,9 +261,9 @@ static void UART_WriteUCSR0A( uint8_t u8Value_)
 static void UART_UpdateInterruptFlags(void)
 {
     //DEBUG_PRINT("Check UART Interrupts\n");
-    if (UART_IsTxIntEnabled(  ))
+    if (UART_IsTxIntEnabled())
     {
-        if (UART_IsTxComplete(  ))
+        if (UART_IsTxComplete())
         {
             DEBUG_PRINT("TXC Interrupt\n");
             AVR_InterruptCandidate( 0x14 );
@@ -276,9 +273,9 @@ static void UART_UpdateInterruptFlags(void)
             AVR_ClearCandidate( 0x14 );
         }
     }
-    if (UART_IsDREIntEnabled(  ))
+    if (UART_IsDREIntEnabled())
     {
-        if( UART_IsEmpty(  ))
+        if( UART_IsEmpty())
         {
             DEBUG_PRINT("DRE Interrupt\n");
             AVR_InterruptCandidate( 0x13 );
@@ -288,9 +285,9 @@ static void UART_UpdateInterruptFlags(void)
             AVR_ClearCandidate( 0x13 );
         }
     }
-    if (UART_IsRxIntEnabled(  ))
+    if (UART_IsRxIntEnabled())
     {
-        if (UART_IsRxComplete(  ))
+        if (UART_IsRxComplete())
         {
             printf("RXC Interrupt\n");
             AVR_InterruptCandidate( 0x12 );
@@ -374,7 +371,7 @@ static void UART_TxClock(void *context_ )
 
                 UART_SetEmpty();
 
-                if (UART_IsDREIntEnabled(  ))
+                if (UART_IsDREIntEnabled())
                 {
                     DEBUG_PRINT("DRE Interrupt\n");
                     AVR_InterruptCandidate( 0x13 );
@@ -389,7 +386,7 @@ static void UART_TxClock(void *context_ )
                 bTSR_Empty = true;
 
                 UART_TxComplete();
-                if (UART_IsTxIntEnabled(  ))
+                if (UART_IsTxIntEnabled())
                 {
                     DEBUG_PRINT("TXC Interrupt\n");
                     AVR_InterruptCandidate( 0x14 );
@@ -416,7 +413,7 @@ static void UART_RxClock(void *context_ )
 
             // Set the RX Complete flag
             UART_RxComplete();
-            if (UART_IsRxIntEnabled(  ))
+            if (UART_IsRxIntEnabled())
             {
                 DEBUG_PRINT("RXC Interrupt\n");
                 AVR_InterruptCandidate( 0x12 );

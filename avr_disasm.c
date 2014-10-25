@@ -2,7 +2,7 @@
  *     (     (                      (     |
  *    )\ )  )\ )    (              )\ )   |
  *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
- *    /(_)) /(_))((((_)(   )\  )\  /(_))  | -- [ Litle ] -------------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))  | -- [ Litle ] -------------------
  *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
  *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
  *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
@@ -71,8 +71,8 @@ inline uint8_t Register_From_Rr16( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ADD( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
-    uint8_t u8Rr = Register_From_Rr(  );
+    uint8_t u8Rd = Register_From_Rd();
+    uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "add r%d, r%d              \t ; Add: r%d = r%d + r%d\n",
@@ -83,8 +83,8 @@ static void AVR_Disasm_ADD( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ADC( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
-    uint8_t u8Rr = Register_From_Rr(  );
+    uint8_t u8Rd = Register_From_Rd();
+    uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "adc r%d, r%d              \t ; Add with carry: r%d = r%d + r%d + C\n",
@@ -96,7 +96,7 @@ static void AVR_Disasm_ADC( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ADIW( void )
 {
-    uint8_t u8Rd = Register_From_Rd16(  );
+    uint8_t u8Rd = Register_From_Rd16();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -109,8 +109,8 @@ static void AVR_Disasm_ADIW( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_SUB( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
-    uint8_t u8Rr = Register_From_Rr(  );
+    uint8_t u8Rd = Register_From_Rd();
+    uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "sub r%d, r%d              \t ; Subtract: r%d = r%d - r%d \n",
@@ -122,7 +122,7 @@ static void AVR_Disasm_SUB( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_SUBI( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -135,8 +135,8 @@ static void AVR_Disasm_SUBI( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_SBC( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
-    uint8_t u8Rr = Register_From_Rr(  );
+    uint8_t u8Rd = Register_From_Rd();
+    uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "sbc r%d, r%d              \t ; Subtract with carry: r%d = r%d - r%d - C \n",
@@ -148,7 +148,7 @@ static void AVR_Disasm_SBC( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_SBCI( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -161,7 +161,7 @@ static void AVR_Disasm_SBCI( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_SBIW( void )
 {
-    uint8_t u8Rd = Register_From_Rd16(  );
+    uint8_t u8Rd = Register_From_Rd16();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -174,8 +174,8 @@ static void AVR_Disasm_SBIW( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_AND( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
-    uint8_t u8Rr = Register_From_Rr(  );
+    uint8_t u8Rd = Register_From_Rd();
+    uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "and r%d, r%d              \t ; Logical AND: r%d = r%d & r%d \n",
@@ -187,7 +187,7 @@ static void AVR_Disasm_AND( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ANDI( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -200,8 +200,8 @@ static void AVR_Disasm_ANDI( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_OR( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
-    uint8_t u8Rr = Register_From_Rr(  );
+    uint8_t u8Rd = Register_From_Rd();
+    uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "or r%d, r%d               \t ; Logical OR: r%d = r%d | r%d \n",
@@ -213,7 +213,7 @@ static void AVR_Disasm_OR( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ORI( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -226,8 +226,8 @@ static void AVR_Disasm_ORI( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_EOR( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
-    uint8_t u8Rr = Register_From_Rr(  );
+    uint8_t u8Rd = Register_From_Rd();
+    uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "eor r%d, r%d              \t ; Exclusive OR: r%d = r%d ^ r%d \n",
@@ -239,7 +239,7 @@ static void AVR_Disasm_EOR( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_COM( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "com r%d                   \t ; One's complement (bitwise inverse): r%d = 0xFF - r%d\n",
@@ -251,7 +251,7 @@ static void AVR_Disasm_COM( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_NEG( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "neg r%d                   \t ; Two's complement (sign swap): r%d = 0x00 - r%d\n",
@@ -263,7 +263,7 @@ static void AVR_Disasm_NEG( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_SBR( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -276,7 +276,7 @@ static void AVR_Disasm_SBR( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_CBR( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -289,7 +289,7 @@ static void AVR_Disasm_CBR( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_INC( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "inc r%d                   \t ; Increment Register: r%d = r%d + 1\n",
@@ -301,7 +301,7 @@ static void AVR_Disasm_INC( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_DEC( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "dec r%d                   \t ; Decrement Register: r%d = r%d - 1\n",
@@ -313,7 +313,7 @@ static void AVR_Disasm_DEC( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_TST( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "tst r%d                   \t ; Test Register for Zero or Negative\n",
@@ -324,7 +324,7 @@ static void AVR_Disasm_TST( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_CLR( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "clr r%d                   \t ; Clear Register\n",
@@ -335,7 +335,7 @@ static void AVR_Disasm_CLR( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_SER( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "ser r%d                   \t ; Set All Bits in Register\n",
@@ -346,8 +346,8 @@ static void AVR_Disasm_SER( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_MUL( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
-    uint8_t u8Rr = Register_From_Rr(  );
+    uint8_t u8Rd = Register_From_Rd();
+    uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "mul r%d, r%d              \t ; Unsigned Multiply: r1:0 = r%d * r%d\n",
@@ -358,8 +358,8 @@ static void AVR_Disasm_MUL( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_MULS( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
-    uint8_t u8Rr = Register_From_Rr(  );
+    uint8_t u8Rd = Register_From_Rd();
+    uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "muls r%d, r%d             \t ; Signed Multiply: r1:0 = r%d * r%d\n",
@@ -370,8 +370,8 @@ static void AVR_Disasm_MULS( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_MULSU( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
-    uint8_t u8Rr = Register_From_Rr(  );
+    uint8_t u8Rd = Register_From_Rd();
+    uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "mulsu r%d, r%d            \t ; Signed * Unsigned Multiply: r1:0 = r%d * r%d\n",
@@ -382,8 +382,8 @@ static void AVR_Disasm_MULSU( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_FMUL( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
-    uint8_t u8Rr = Register_From_Rr(  );
+    uint8_t u8Rd = Register_From_Rd();
+    uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "fmul r%d, r%d             \t ; Fractional Multiply: r1:0 = r%d * r%d\n",
@@ -394,8 +394,8 @@ static void AVR_Disasm_FMUL( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_FMULS( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
-    uint8_t u8Rr = Register_From_Rr(  );
+    uint8_t u8Rd = Register_From_Rd();
+    uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "fmuls r%d, r%d            \t ; Signed Fractional Multiply: r1:0 = r%d * r%d\n",
@@ -407,8 +407,8 @@ static void AVR_Disasm_FMULS( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_FMULSU( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
-    uint8_t u8Rr = Register_From_Rr(  );
+    uint8_t u8Rd = Register_From_Rd();
+    uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "fmulsu r%d, r%d           \t ; Signed * Unsigned Fractional Multiply: r1:0 = r%d * r%d\n",
@@ -512,8 +512,8 @@ static void AVR_Disasm_RETI( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_CPSE( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
-    uint8_t u8Rr = Register_From_Rr(  );
+    uint8_t u8Rd = Register_From_Rd();
+    uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "cpse r%d, r%d             \t ; Compare, Skip Next If r%d = r%d\n",
@@ -525,8 +525,8 @@ static void AVR_Disasm_CPSE( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_CP( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
-    uint8_t u8Rr = Register_From_Rr(  );
+    uint8_t u8Rd = Register_From_Rd();
+    uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "cp r%d, r%d               \t ; Compare: r%d == r%d\n",
@@ -538,8 +538,8 @@ static void AVR_Disasm_CP( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_CPC( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
-    uint8_t u8Rr = Register_From_Rr(  );
+    uint8_t u8Rd = Register_From_Rd();
+    uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "cpc r%d, r%d              \t ; Compare with carry: r%d == r%d + C\n",
@@ -551,7 +551,7 @@ static void AVR_Disasm_CPC( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_CPI( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -564,7 +564,7 @@ static void AVR_Disasm_CPI( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_SBRC( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint8_t u8b = stCPU.b;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -577,7 +577,7 @@ static void AVR_Disasm_SBRC( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_SBRS( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint8_t u8b = stCPU.b;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -862,8 +862,8 @@ static void AVR_Disasm_BRID( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_MOV( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
-    uint8_t u8Rr = Register_From_Rr(  );
+    uint8_t u8Rd = Register_From_Rd();
+    uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "mov r%d, r%d              \t ; Copy Register: r%d = r%d\n",
@@ -875,8 +875,8 @@ static void AVR_Disasm_MOV( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_MOVW( void )
 {
-    uint16_t u16Rd = Register_From_Rd16(  );
-    uint16_t u16Rr = Register_From_Rr16(  );
+    uint16_t u16Rd = Register_From_Rd16();
+    uint16_t u16Rr = Register_From_Rr16();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "movw r%d:r%d, r%d:r%d     \t ; Copy Register (Word): r%d:r%d = r%d:r%d\n",
@@ -888,7 +888,7 @@ static void AVR_Disasm_MOVW( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LDI( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -901,7 +901,7 @@ static void AVR_Disasm_LDI( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LDS( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint16_t u16k = stCPU.k;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -914,7 +914,7 @@ static void AVR_Disasm_LDS( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LD_X_Indirect( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "ld r%d, X                 \t ; Load Indirect from Data Space\n",
@@ -925,7 +925,7 @@ static void AVR_Disasm_LD_X_Indirect( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LD_X_Indirect_Postinc( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "ld r%d, X+                \t ; Load Indirect from Data Space w/Postincrement\n",
@@ -936,7 +936,7 @@ static void AVR_Disasm_LD_X_Indirect_Postinc( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LD_X_Indirect_Predec( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "ld r%d, -X                \t ; Load Indirect from Data Space w/Predecrement\n",
@@ -947,7 +947,7 @@ static void AVR_Disasm_LD_X_Indirect_Predec( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LD_Y_Indirect( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "ld r%d, Y                 \t ; Load Indirect from Data Space\n",
@@ -958,7 +958,7 @@ static void AVR_Disasm_LD_Y_Indirect( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LD_Y_Indirect_Postinc( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "ld r%d, Y+                \t ; Load Indirect from Data Space w/Postincrement\n",
@@ -969,7 +969,7 @@ static void AVR_Disasm_LD_Y_Indirect_Postinc( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LD_Y_Indirect_Predec( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "ld r%d, -Y                \t ; Load Indirect from Data Space w/Predecrement\n",
@@ -980,7 +980,7 @@ static void AVR_Disasm_LD_Y_Indirect_Predec( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LDD_Y( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint8_t u8q = stCPU.q;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -992,7 +992,7 @@ static void AVR_Disasm_LDD_Y( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LD_Z_Indirect( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "ld r%d, Z                 \t ; Load Indirect from Data Space\n",
@@ -1003,7 +1003,7 @@ static void AVR_Disasm_LD_Z_Indirect( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LD_Z_Indirect_Postinc( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "ld r%d, Z+                \t ; Load Indirect from Data Space w/Postincrement\n",
@@ -1014,7 +1014,7 @@ static void AVR_Disasm_LD_Z_Indirect_Postinc( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LD_Z_Indirect_Predec( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "ld r%d, -Z                \t ; Load Indirect from Data Space w/Predecrement\n",
@@ -1025,7 +1025,7 @@ static void AVR_Disasm_LD_Z_Indirect_Predec( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LDD_Z( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint8_t u8q = stCPU.q;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -1037,7 +1037,7 @@ static void AVR_Disasm_LDD_Z( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_STS( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint16_t u16k = stCPU.k;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -1050,7 +1050,7 @@ static void AVR_Disasm_STS( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ST_X_Indirect( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "st X, r%d                 \t ; Store Indirect\n",
@@ -1061,7 +1061,7 @@ static void AVR_Disasm_ST_X_Indirect( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ST_X_Indirect_Postinc( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "st X+, r%d                \t ; Store Indirect w/Postincrement \n",
@@ -1072,7 +1072,7 @@ static void AVR_Disasm_ST_X_Indirect_Postinc( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ST_X_Indirect_Predec( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "st -X, r%d                \t ; Store Indirect w/Predecrement\n",
@@ -1083,7 +1083,7 @@ static void AVR_Disasm_ST_X_Indirect_Predec( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ST_Y_Indirect( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "st Y, r%d                 \t ; Store Indirect\n",
@@ -1094,7 +1094,7 @@ static void AVR_Disasm_ST_Y_Indirect( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ST_Y_Indirect_Postinc( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "st Y+, r%d                \t ; Store Indirect w/Postincrement \n",
@@ -1105,7 +1105,7 @@ static void AVR_Disasm_ST_Y_Indirect_Postinc( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ST_Y_Indirect_Predec( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "st -Y, r%d                \t ; Store Indirect w/Predecrement\n",
@@ -1116,7 +1116,7 @@ static void AVR_Disasm_ST_Y_Indirect_Predec( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_STD_Y( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint8_t u8q = stCPU.q;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -1128,7 +1128,7 @@ static void AVR_Disasm_STD_Y( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ST_Z_Indirect( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "st Z, r%d                 \t ; Store Indirect\n",
@@ -1139,7 +1139,7 @@ static void AVR_Disasm_ST_Z_Indirect( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ST_Z_Indirect_Postinc( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "st Z+, r%d                \t ; Store Indirect w/Postincrement \n",
@@ -1150,7 +1150,7 @@ static void AVR_Disasm_ST_Z_Indirect_Postinc( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ST_Z_Indirect_Predec( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "st -Z, r%d                \t ; Store Indirect w/Predecrement\n",
@@ -1161,7 +1161,7 @@ static void AVR_Disasm_ST_Z_Indirect_Predec( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_STD_Z( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint8_t u8q = stCPU.q;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -1180,7 +1180,7 @@ static void AVR_Disasm_LPM( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LPM_Z( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "lpm r%d, Z                \t ; Load Program Memory: r%d = (Z)\n",
@@ -1192,7 +1192,7 @@ static void AVR_Disasm_LPM_Z( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LPM_Z_Postinc( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "lpm r%d, Z+               \t ; Load Program Memory with Postincrement: r%d = (Z), Z = Z + 1\n",
@@ -1211,7 +1211,7 @@ static void AVR_Disasm_ELPM( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ELPM_Z( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "elpm r%d, Z               \t ; (Extended) Load Program Memory: r%d = (Z)\n",
@@ -1223,7 +1223,7 @@ static void AVR_Disasm_ELPM_Z( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ELPM_Z_Postinc( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "elpm r%d, Z+              \t ; (Extended) Load Program Memory w/Postincrement: r%d = (Z), Z = Z + 1\n",
@@ -1249,7 +1249,7 @@ static void AVR_Disasm_SPM_Z_Postinc2( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_IN( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint8_t u8A = stCPU.A;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -1262,7 +1262,7 @@ static void AVR_Disasm_IN( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_OUT( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint8_t u8A = stCPU.A;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -1276,7 +1276,7 @@ static void AVR_Disasm_OUT( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LAC( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "lac Z, r%d                   \t ; Load And Clear\n",
@@ -1287,7 +1287,7 @@ static void AVR_Disasm_LAC( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LAS( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "las Z, r%d                   \t ; Load And Set\n",
@@ -1298,7 +1298,7 @@ static void AVR_Disasm_LAS( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LAT( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "lat Z, r%d                   \t ; Load And Toggle\n",
@@ -1309,7 +1309,7 @@ static void AVR_Disasm_LAT( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LSL( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "lsl r%d                   \t ; Logical shift left r%d by 1 bit\n",
@@ -1321,7 +1321,7 @@ static void AVR_Disasm_LSL( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_LSR( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "lsr r%d                   \t ; Logical shift right r%d by 1 bit\n",
@@ -1333,7 +1333,7 @@ static void AVR_Disasm_LSR( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_POP( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "pop r%d                   \t ; Pop byte from stack into r%d\n",
@@ -1345,7 +1345,7 @@ static void AVR_Disasm_POP( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_PUSH( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "push r%d                  \t ; Push register r%d to stack\n",
@@ -1357,7 +1357,7 @@ static void AVR_Disasm_PUSH( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ROL( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "rol r%d                   \t ; Rotate Left through Carry\n",
@@ -1368,7 +1368,7 @@ static void AVR_Disasm_ROL( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ROR( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "ror r%d                   \t ; Rotate Right through Carry\n",
@@ -1379,7 +1379,7 @@ static void AVR_Disasm_ROR( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_ASR( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "asr r%d                   \t ; Arithmatic Shift Right\n",
@@ -1390,7 +1390,7 @@ static void AVR_Disasm_ASR( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_SWAP( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "swap r%d                  \t ; Swap high/low Nibbles in Register\n",
@@ -1451,7 +1451,7 @@ static void AVR_Disasm_CBI( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_BST( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint8_t u8b = stCPU.b;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -1464,7 +1464,7 @@ static void AVR_Disasm_BST( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_BLD( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
     uint8_t u8b = stCPU.b;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
@@ -1617,7 +1617,7 @@ static void AVR_Disasm_WDR( void )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_XCH( void )
 {
-    uint8_t u8Rd = Register_From_Rd(  );
+    uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
     printf( "xch Z, r%d                \t ; Exchange registers w/memory\n",
@@ -1626,7 +1626,7 @@ static void AVR_Disasm_XCH( void )
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_Unimplemented(   )
+static void AVR_Disasm_Unimplemented()
 {
     printf( ".db 0x%04X ; Data (not an opcode)\n", stCPU.pu16ROM[ stCPU.u16PC ] );
 }

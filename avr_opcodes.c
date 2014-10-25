@@ -2,7 +2,7 @@
  *     (     (                      (     |
  *    )\ )  )\ )    (              )\ )   |
  *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
- *    /(_)) /(_))((((_)(   )\  )\  /(_))  | -- [ Litle ] -------------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))  | -- [ Litle ] -------------------
  *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
  *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
  *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
@@ -181,7 +181,7 @@ static void AVR_Opcode_ADD( void )
     ADD_Overflow_Flag(  u8Rd, u8Rr, u8Result );
     R8_Negative_Flag(  u8Result );
     R8_Zero_Flag(  u8Result );
-    Signed_Flag( );
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -201,7 +201,7 @@ static void AVR_Opcode_ADC( void )
     ADD_Overflow_Flag(  u8Rd, u8Rr, u8Result );
     R8_Negative_Flag(  u8Result );
     R8_Zero_Flag(  u8Result );
-    Signed_Flag( );
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -247,7 +247,7 @@ static void AVR_Opcode_ADIW( void )
     ADIW_Overflow_Flag(  u16Rd, u16Result );
     R16_Negative_Flag(  u16Result );
     R16_Zero_Flag(  u16Result );
-    Signed_Flag( );
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -403,7 +403,7 @@ static void AVR_Opcode_AND( void )
     stCPU.pstRAM->stRegisters.SREG.V = 0;
     R8_Negative_Flag(  u8Result );
     R8_Zero_Flag(  u8Result );
-    Signed_Flag( );
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -418,7 +418,7 @@ static void AVR_Opcode_ANDI( void )
     stCPU.pstRAM->stRegisters.SREG.V = 0;
     R8_Negative_Flag(  u8Result );
     R8_Zero_Flag(  u8Result );
-    Signed_Flag( );
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -434,7 +434,7 @@ static void AVR_Opcode_OR( void )
     stCPU.pstRAM->stRegisters.SREG.V = 0;
     R8_Negative_Flag(  u8Result );
     R8_Zero_Flag(  u8Result );
-    Signed_Flag( );
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -449,7 +449,7 @@ static void AVR_Opcode_ORI( void )
     stCPU.pstRAM->stRegisters.SREG.V = 0;
     R8_Negative_Flag(  u8Result );
     R8_Zero_Flag(  u8Result );
-    Signed_Flag( );
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -465,7 +465,7 @@ static void AVR_Opcode_EOR( void )
     stCPU.pstRAM->stRegisters.SREG.V = 0;
     R8_Negative_Flag(  u8Result );
     R8_Zero_Flag(  u8Result );
-    Signed_Flag( );
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -482,7 +482,7 @@ static void AVR_Opcode_COM( void )
     stCPU.pstRAM->stRegisters.SREG.C = 1;
     R8_Negative_Flag(  u8Result );
     R8_Zero_Flag(  u8Result );
-    Signed_Flag( );
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -511,7 +511,7 @@ static void AVR_Opcode_NEG( void )
     NEG_Carry_Flag(  u8Result );
     R8_Negative_Flag(  u8Result );
     R8_Zero_Flag(  u8Result );
-    Signed_Flag( );
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -527,7 +527,7 @@ static void AVR_Opcode_SBR( void )
     stCPU.pstRAM->stRegisters.SREG.V = 0;
     R8_Negative_Flag(  u8Result );
     R8_Zero_Flag(  u8Result );
-    Signed_Flag( );
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -543,7 +543,7 @@ static void AVR_Opcode_CBR( void )
     stCPU.pstRAM->stRegisters.SREG.V = 0;
     R8_Negative_Flag(  u8Result );
     R8_Zero_Flag(  u8Result );
-    Signed_Flag( );
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -564,7 +564,7 @@ static void AVR_Opcode_INC( void )
     INC_Overflow_Flag(  u8Result );
     R8_Negative_Flag(  u8Result );
     R8_Zero_Flag(  u8Result );
-    Signed_Flag( );
+    Signed_Flag();
 }
 //---------------------------------------------------------------------------
 inline void DEC_Overflow_Flag( uint8_t u8Result_ )
@@ -583,7 +583,7 @@ static void AVR_Opcode_DEC( void )
     DEC_Overflow_Flag(  u8Result );
     R8_Negative_Flag(  u8Result );
     R8_Zero_Flag(  u8Result );
-    Signed_Flag( );
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -941,7 +941,7 @@ static void AVR_Opcode_CP( void )
     R8_Zero_Flag(  u8Result );
     R8_Negative_Flag(  u8Result );
 
-    Signed_Flag( );
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -963,7 +963,7 @@ static void AVR_Opcode_CPC( void )
     R8_CPC_Zero_Flag(  u8Result );
     R8_Negative_Flag(  u8Result );
 
-    Signed_Flag( );
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -984,7 +984,7 @@ static void AVR_Opcode_CPI( void )
     R8_Zero_Flag(  u8Result );
     R8_Negative_Flag(  u8Result );
 
-    Signed_Flag( );
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -1046,7 +1046,7 @@ static void AVR_Opcode_BRBS( void )
 {
     if (0 != (stCPU.pstRAM->stRegisters.SREG.r & (1 << stCPU.b)))
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1055,7 +1055,7 @@ static void AVR_Opcode_BRBC( void )
 {
     if (0 == (stCPU.pstRAM->stRegisters.SREG.r & (1 << stCPU.b)))
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1064,7 +1064,7 @@ static void AVR_Opcode_BREQ( void )
 {
     if (1 == stCPU.pstRAM->stRegisters.SREG.Z)
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1073,7 +1073,7 @@ static void AVR_Opcode_BRNE( void )
 {
     if (0 == stCPU.pstRAM->stRegisters.SREG.Z)
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1082,7 +1082,7 @@ static void AVR_Opcode_BRCS( void )
 {
     if (1 == stCPU.pstRAM->stRegisters.SREG.C)
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1091,7 +1091,7 @@ static void AVR_Opcode_BRCC( void )
 {
     if (0 == stCPU.pstRAM->stRegisters.SREG.C)
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1100,7 +1100,7 @@ static void AVR_Opcode_BRSH( void )
 {
     if (0 == stCPU.pstRAM->stRegisters.SREG.C)
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1109,7 +1109,7 @@ static void AVR_Opcode_BRLO( void )
 {
     if (1 == stCPU.pstRAM->stRegisters.SREG.C)
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1118,7 +1118,7 @@ static void AVR_Opcode_BRMI( void )
 {
     if (1 == stCPU.pstRAM->stRegisters.SREG.N)
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1127,7 +1127,7 @@ static void AVR_Opcode_BRPL( void )
 {
     if (0 == stCPU.pstRAM->stRegisters.SREG.N)
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1136,7 +1136,7 @@ static void AVR_Opcode_BRGE( void )
 {
     if (0 == stCPU.pstRAM->stRegisters.SREG.S)
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1145,7 +1145,7 @@ static void AVR_Opcode_BRLT( void )
 {
     if (1 == stCPU.pstRAM->stRegisters.SREG.S)
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1154,7 +1154,7 @@ static void AVR_Opcode_BRHS( void )
 {
     if (1 == stCPU.pstRAM->stRegisters.SREG.H)
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1163,7 +1163,7 @@ static void AVR_Opcode_BRHC( void )
 {
     if (0 == stCPU.pstRAM->stRegisters.SREG.H)
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1172,7 +1172,7 @@ static void AVR_Opcode_BRTS( void )
 {
     if (1 == stCPU.pstRAM->stRegisters.SREG.T)
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1181,7 +1181,7 @@ static void AVR_Opcode_BRTC( void )
 {
     if (0 == stCPU.pstRAM->stRegisters.SREG.T)
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1190,7 +1190,7 @@ static void AVR_Opcode_BRVS( void )
 {
     if (1 == stCPU.pstRAM->stRegisters.SREG.V)
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1199,7 +1199,7 @@ static void AVR_Opcode_BRVC( void )
 {
     if (0 == stCPU.pstRAM->stRegisters.SREG.V)
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1208,7 +1208,7 @@ static void AVR_Opcode_BRIE( void )
 {
     if (1 == stCPU.pstRAM->stRegisters.SREG.I)
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1217,7 +1217,7 @@ static void AVR_Opcode_BRID( void )
 {
     if (0 == stCPU.pstRAM->stRegisters.SREG.I)
     {
-        Conditional_Branch( );
+        Conditional_Branch();
     }
 }
 
@@ -1624,7 +1624,7 @@ inline void Left_Carry_Flag( uint8_t R_  )
 }
 
 //---------------------------------------------------------------------------
-inline void Rotate_Overflow_Flag(   )
+inline void Rotate_Overflow_Flag()
 {
     stCPU.pstRAM->stRegisters.SREG.V = ( stCPU.pstRAM->stRegisters.SREG.N ^ stCPU.pstRAM->stRegisters.SREG.C );
 }
@@ -1645,8 +1645,8 @@ static void AVR_Opcode_LSL( void )
 
     R8_Negative_Flag(  u8Result );
     R8_Zero_Flag(  u8Result );
-    Rotate_Overflow_Flag( );
-    Signed_Flag( );
+    Rotate_Overflow_Flag();
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -1669,8 +1669,8 @@ static void AVR_Opcode_LSR( void )
     Right_Carry_Flag(  u8Temp );
     stCPU.pstRAM->stRegisters.SREG.N = 0;
     R8_Zero_Flag(  u8Result );
-    Rotate_Overflow_Flag( );
-    Signed_Flag( );
+    Rotate_Overflow_Flag();
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -1691,8 +1691,8 @@ static void AVR_Opcode_ROL( void )
     Left_Carry_Flag(  u8Temp );
     R8_Negative_Flag(  u8Result );
     R8_Zero_Flag(  u8Result );
-    Rotate_Overflow_Flag( );
-    Signed_Flag( );
+    Rotate_Overflow_Flag();
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -1713,8 +1713,8 @@ static void AVR_Opcode_ROR( void )
     Right_Carry_Flag(  u8Temp );
     R8_Negative_Flag(  u8Result );
     R8_Zero_Flag(  u8Result );
-    Rotate_Overflow_Flag( );
-    Signed_Flag( );
+    Rotate_Overflow_Flag();
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -1730,8 +1730,8 @@ static void AVR_Opcode_ASR( void )
     Right_Carry_Flag(  u8Temp );
     R8_Negative_Flag(  u8Result );
     R8_Zero_Flag(  u8Result );
-    Rotate_Overflow_Flag( );
-    Signed_Flag( );
+    Rotate_Overflow_Flag();
+    Signed_Flag();
 }
 
 //---------------------------------------------------------------------------
@@ -2021,5 +2021,5 @@ AVR_Opcode AVR_Opcode_Function( uint16_t OP_ )
 void AVR_RunOpcode(  uint16_t OP_ )
 {
     AVR_Opcode myOpcode = AVR_Opcode_Function( OP_);
-    myOpcode( );
+    myOpcode();
 }
