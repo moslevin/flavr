@@ -439,7 +439,7 @@ AVRPeripheral stTimer8 =
 AVRPeripheral stTimer8a =
 {
     0,
-    0,
+    Timer8_Read,
     Timer8b_Write,
     0,
     0,
@@ -451,7 +451,7 @@ AVRPeripheral stTimer8a =
 AVRPeripheral stTimer8b =
 {
     0,
-    0,
+    Timer8_Read,
     Timer8b_Write,
     0,
     0,
