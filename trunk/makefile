@@ -30,10 +30,10 @@ printlist:
 all: emulator
 
 emulator: $(SRC_LIST_EMULATOR:%.c=%.o)
-	$(CC) -g3 -O0 -o flavr $(SRC_LIST_EMULATOR:%.c=%.o)
+	$(CC) -g0 -O3 -o flavr $(SRC_LIST_EMULATOR:%.c=%.o)
 
 %.o : %.c
-	$(CC) $< -c -g3 -O0
+	$(CC) $< -c -g0 -O3
 
 clean:
 	rm *.o
