@@ -2,7 +2,7 @@
  *     (     (                      (     |
  *    )\ )  )\ )    (              )\ )   |
  *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
- *    /(_)) /(_))((((_)(   )\  )\  /(_))  | -- [ Litle ] -------------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))     | -- [ Litle ] -------------------
  *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
  *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
  *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
@@ -82,31 +82,31 @@ static uint8_t  u8Temp;  // The 8-bit temporary register used in 16-bit register
 static uint16_t u8Count; // Internal 16-bit count register
 
 //---------------------------------------------------------------------------
-static void TCNT0_Increment( )
+static void TCNT0_Increment()
 {
-    stCPU.pstRAM->stRegisters.TCNT0++;
+    stCPU.pstRAM->stRegisters.TCNT0++;    
 }
 
 //---------------------------------------------------------------------------
-static uint8_t TCNT0_Read( )
+static uint8_t TCNT0_Read()
 {    
     return stCPU.pstRAM->stRegisters.TCNT0;
 }
 
 //---------------------------------------------------------------------------
-static void TCNT0_Clear( )
+static void TCNT0_Clear()
 {
     stCPU.pstRAM->stRegisters.TCNT0 = 0;
 }
 
 //---------------------------------------------------------------------------
-static uint8_t OCR0A_Read( )
+static uint8_t OCR0A_Read()
 {    
     return stCPU.pstRAM->stRegisters.OCR0A;
 }
 
 //---------------------------------------------------------------------------
-static uint8_t OCR0B_Read( )
+static uint8_t OCR0B_Read()
 {
     return stCPU.pstRAM->stRegisters.OCR0B;
 }
@@ -132,8 +132,10 @@ static bool Timer8_Is_OCIE1B_Enabled()
 //---------------------------------------------------------------------------
 static void OV0_Ack(  uint8_t ucVector_)
 {
+    static uint64_t lastcycles = 0;
     stCPU.pstRAM->stRegisters.TIFR0.TOV0 = 0;
-    DEBUG_PRINT("OV0 - Ack'd\n");
+   // printf("OV0 - Ack'd: %d delta\n", stCPU.u64CycleCount - lastcycles);
+    lastcycles = stCPU.u64CycleCount;
 }
 
 //---------------------------------------------------------------------------
@@ -400,7 +402,7 @@ static void Timer8_Clock(void *context_ )
         {
             DEBUG_PRINT(" TOV0 Set\n" );
             stCPU.pstRAM->stRegisters.TIFR0.TOV0 = 1;
-            bIntr = true;
+            bIntr = true;            
         }
         if (bCTCA)
         {

@@ -2,7 +2,7 @@
  *     (     (                      (     |
  *    )\ )  )\ )    (              )\ )   |
  *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
- *    /(_)) /(_))((((_)(   )\  )\  /(_))  | -- [ Litle ] -------------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))     | -- [ Litle ] -------------------
  *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
  *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
  *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
@@ -134,7 +134,7 @@ typedef struct
 //---------------------------------------------------------------------------
 /*!
  * \brief CPU_Init Initialize the CPU object and its associated data
- * \param pstCPU_ Pointer to a valid AVR CPU object
+ *
  * \param pstConfig_ Pointer to an initialized AVR_CPU_Config_t struct
  */
 void CPU_Init( AVR_CPU_Config_t *pstConfig_ );
@@ -142,22 +142,23 @@ void CPU_Init( AVR_CPU_Config_t *pstConfig_ );
 //---------------------------------------------------------------------------
 /*!
  * \brief CPU_Fetch Fetch the next opcode for the CPU object
- * \param pstCPU_ Pointer to a valid AVR CPU object
+ *
  * \return First word of the next opcode
  */
 uint16_t CPU_Fetch( void );
 
 //---------------------------------------------------------------------------
 /*!
- * \brief CPU_RunCycle Run a CPU instruction cycle
- * \param pstCPU_ Pointer to a valid AVR CPU object
+ * \brief CPU_RunCycle Run a CPU instruction cycle.  This performs Fetch,
+ *  Decode, Execute, Clock updates, and Interrupt handling.
+ *
  */
 void CPU_RunCycle( void );
 
 //---------------------------------------------------------------------------
 /*!
  * \brief CPU_AddPeriph Add a new I/O Peripheral to the CPU
- * \param pstCPU_ Pointer to a valid AVR CPU Object
+ *
  * \param pstPeriph_ Pointer to an initialized AVR Peripheral object to be
  *                associated with this CPU.
  */
@@ -171,7 +172,6 @@ void CPU_AddPeriph( AVRPeripheral *pstPeriph_ );
  * is run.  This is useful for resetting peripheral registers once a specific
  * type of interrupt has been acknowledged.
  *
- * \param pstCPU_ Pointer to the CPU to register an interrupt callback for
  * \param pfIntAck_ Callback function to register
  * \param ucVector_ Interrupt vector index to install handler at
  */

@@ -2,7 +2,7 @@
  *     (     (                      (     |
  *    )\ )  )\ )    (              )\ )   |
  *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
- *    /(_)) /(_))((((_)(   )\  )\  /(_))  | -- [ Litle ] -------------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))     | -- [ Litle ] -------------------
  *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
  *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
  *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
@@ -84,7 +84,7 @@ void TraceBuffer_PrintElement( TraceElement_t *pstElement_, TracePrintFormat_t e
         AVR_Opcode pfOp = AVR_Disasm_Function( pstElement_->u16OpCode );
 
         AVR_Decode( pstElement_->u16OpCode );
-        pfOp(  );
+        pfOp();
 
         stCPU.u16PC = u16TempPC;
     }

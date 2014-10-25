@@ -2,7 +2,7 @@
  *     (     (                      (     |
  *    )\ )  )\ )    (              )\ )   |
  *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
- *    /(_)) /(_))((((_)()\  )\  /(_))  | -- [ Litle ] -------------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))     | -- [ Litle ] -------------------
  *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
  *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
  *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
@@ -42,7 +42,6 @@ typedef struct _WatchPoint
  * Insert a data watchpoint for a given address.  Has no effect if a watchpoint
  * already exists at the specified address.
  *
- * \param pstCPU_ Pointer to the CPU object to create a watchpoint on
  * \param u16Addr_ Address of the watchpoint.
  */
 void WatchPoint_Insert( uint16_t u16Addr_ );
@@ -54,7 +53,6 @@ void WatchPoint_Insert( uint16_t u16Addr_ );
  * Remove a data watchpoint installed at a specific address.  Has no effect
  * if there isn't a watchpoint at the given address.
  *
- * \param pstCPU_  Pointer to the CPU object to remove the watchpoint from
  * \param u16Addr_ Address to remove data watchpoints from (if any)
  */
 void WatchPoint_Delete( uint16_t u16Addr_ );
@@ -65,7 +63,6 @@ void WatchPoint_Delete( uint16_t u16Addr_ );
  *
  * Check to see whether or not a watchpoint is installed at a given address
  *
- * \param pstCPU_ Pointer to the CPU object to check for watchpoints on
  * \param u16Addr_ Address to check
  * \return true if watchpoint is installed at the specified adress
  */

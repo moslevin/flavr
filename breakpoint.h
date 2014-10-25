@@ -2,7 +2,7 @@
  *     (     (                      (     |
  *    )\ )  )\ )    (              )\ )   |
  *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
- *    /(_)) /(_))((((_)()\  )\  /(_))  | -- [ Litle ] -------------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))     | -- [ Litle ] -------------------
  *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
  *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
  *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
@@ -42,7 +42,6 @@ typedef struct _BreakPoint
  * Insert a CPU breakpoint at a given address.  Has no effect if a breakpoint
  * is already present at the given address.
  *
- * \param pstCPU_ Pointer to the CPU object on which to create a breakpoint.
  * \param u16Addr_ Address of the breakpoint.
  */
 void BreakPoint_Insert( uint16_t u16Addr_ );
@@ -54,7 +53,6 @@ void BreakPoint_Insert( uint16_t u16Addr_ );
  * Delete a breakpoint at a given address (if it exists).  Has no effect if
  * there isn't a breakpoint installed at the location
  *
- * \param pstCPU_ Pointer to the CPU object on which to delete the breakpoint.
  * \param u16Addr_ Address of the breakpoint to delete.
  */
 void BreakPoint_Delete( uint16_t u16Addr_ );
@@ -66,7 +64,6 @@ void BreakPoint_Delete( uint16_t u16Addr_ );
  * Check to see whether or not a CPU execution breakpoint has been installed
  * at the given address.
  *
- * \param pstCPU_ Pointer to the CPU object on which to check for breakpoints.
  * \param u16Addr_  Address (in flash) to check for breakpoint on.
  * \return true if a breakpoint has been set on the given address.
  */

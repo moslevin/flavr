@@ -2,7 +2,7 @@
  *     (     (                      (     |
  *    )\ )  )\ )    (              )\ )   |
  *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
- *    /(_)) /(_))((((_)()\  )\  /(_))  | -- [ Litle ] -------------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))     | -- [ Litle ] -------------------
  *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
  *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
  *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
@@ -47,8 +47,7 @@ AVR_Opcode AVR_Opcode_Function( uint16_t OP_ );
  * Execute the instruction corresponding to the provided opcode, on the provided
  * CPU object.  Note that the opcode must have just been decoded on the given
  * CPU object before calling this function.
- *
- * \param pstCPU_ Pointer to a valid CPU object that has just decoded the opcode
+ * 
  * \param OP_ Opcode to execute
  */
 void AVR_RunOpcode(  uint16_t OP_ );
