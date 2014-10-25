@@ -588,7 +588,7 @@ AVRPeripheral stTimer16 =
 AVRPeripheral stTimer16a =
 {
     0,
-    0,
+    Timer16_Read,
     Timer16b_Write,
     0,
     0,
@@ -600,7 +600,7 @@ AVRPeripheral stTimer16a =
 AVRPeripheral stTimer16b =
 {
     0,
-    0,
+    Timer16_Read,
     Timer16b_Write,
     0,
     0,
