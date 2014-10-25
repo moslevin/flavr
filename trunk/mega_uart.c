@@ -224,6 +224,12 @@ static void UART_WriteDataReg( )
             bTSR_Empty = false;
             bUDR_Empty = true;
             UART_SetEmpty();
+
+            if (UART_IsDREIntEnabled(  ))
+            {
+                DEBUG_PRINT("DRE Interrupt\n");
+                AVR_InterruptCandidate( 0x13 );
+            }
         }        
         else
         {
@@ -255,15 +261,60 @@ static void UART_WriteUCSR0A( uint8_t u8Value_)
 }
 
 //---------------------------------------------------------------------------
+static void UART_UpdateInterruptFlags(void)
+{
+    //DEBUG_PRINT("Check UART Interrupts\n");
+    if (UART_IsTxIntEnabled(  ))
+    {
+        if (UART_IsTxComplete(  ))
+        {
+            DEBUG_PRINT("TXC Interrupt\n");
+            AVR_InterruptCandidate( 0x14 );
+        }
+        else
+        {
+            AVR_ClearCandidate( 0x14 );
+        }
+    }
+    if (UART_IsDREIntEnabled(  ))
+    {
+        if( UART_IsEmpty(  ))
+        {
+            DEBUG_PRINT("DRE Interrupt\n");
+            AVR_InterruptCandidate( 0x13 );
+        }
+        else
+        {
+            AVR_ClearCandidate( 0x13 );
+        }
+    }
+    if (UART_IsRxIntEnabled(  ))
+    {
+        if (UART_IsRxComplete(  ))
+        {
+            printf("RXC Interrupt\n");
+            AVR_InterruptCandidate( 0x12 );
+        }
+        else
+        {
+            AVR_ClearCandidate( 0x12 );
+        }
+    }
+}
+
+//---------------------------------------------------------------------------
 static void UART_WriteUCSR0B( uint8_t u8Value_)
 {
-
+    DEBUG_PRINT("Write UCRS0B\n");
+    stCPU.pstRAM->stRegisters.UCSR0B.r = u8Value_;
+    UART_UpdateInterruptFlags();
 }
 
 //---------------------------------------------------------------------------
 static void UART_WriteUCSR0C( uint8_t u8Value_)
 {
-
+    DEBUG_PRINT("Write UCRS0C\n");
+    stCPU.pstRAM->stRegisters.UCSR0C.r == u8Value_;
 }
 
 //---------------------------------------------------------------------------
@@ -276,12 +327,10 @@ static void UART_Write(void *context_, uint8_t ucAddr_, uint8_t ucValue_ )
         UART_WriteUCSR0A( ucValue_ );
         break;
     case 0xC1:  //UCSR0B
-        DEBUG_PRINT("Write UCRS0B\n");
-        stCPU.pstRAM->au8RAM[ ucAddr_ ] = ucValue_;
+        UART_WriteUCSR0B( ucValue_ );
         break;
     case 0xC2:  //UCSR0C
-        DEBUG_PRINT("Write UCRS0C\n");
-        stCPU.pstRAM->au8RAM[ ucAddr_ ] = ucValue_;
+        UART_WriteUCSR0C( ucValue_ );
         break;
     case 0xC3:  // NA.
         break;
@@ -324,6 +373,12 @@ static void UART_TxClock(void *context_ )
                 bTSR_Empty = false;
 
                 UART_SetEmpty();
+
+                if (UART_IsDREIntEnabled(  ))
+                {
+                    DEBUG_PRINT("DRE Interrupt\n");
+                    AVR_InterruptCandidate( 0x13 );
+                }
             }
             // Nothing pending in the TXB?  Flag the TSR as empty, and
             // set the "Transmit complete" flag in the register.
@@ -334,6 +389,11 @@ static void UART_TxClock(void *context_ )
                 bTSR_Empty = true;
 
                 UART_TxComplete();
+                if (UART_IsTxIntEnabled(  ))
+                {
+                    DEBUG_PRINT("TXC Interrupt\n");
+                    AVR_InterruptCandidate( 0x14 );
+                }
             }
         }
     }
@@ -356,6 +416,11 @@ static void UART_RxClock(void *context_ )
 
             // Set the RX Complete flag
             UART_RxComplete();
+            if (UART_IsRxIntEnabled(  ))
+            {
+                DEBUG_PRINT("RXC Interrupt\n");
+                AVR_InterruptCandidate( 0x12 );
+            }
         }
     }
 }
@@ -365,27 +430,6 @@ static void UART_Clock(void *context_ )
     // Handle Rx and TX clocks.
     UART_TxClock(context_);
     UART_RxClock(context_);
-
-    // Check interrupts.
-    if (stCPU.pstRAM->stRegisters.SREG.I == 1)
-    {
-        //DEBUG_PRINT("Check UART Interrupts\n");
-        if (UART_IsTxIntEnabled(  ) && UART_IsTxComplete(  ))
-        {
-            DEBUG_PRINT("TXC Interrupt\n");
-            AVR_InterruptCandidate( 0x14 );
-        }
-        if (UART_IsDREIntEnabled(  ) && UART_IsEmpty(  ))
-        {
-            DEBUG_PRINT("DRE Interrupt\n");
-            AVR_InterruptCandidate( 0x13 );
-        }
-        if (UART_IsRxIntEnabled(  ) && UART_IsRxComplete(  ))
-        {
-            printf("RXC Interrupt\n");
-            AVR_InterruptCandidate( 0x12 );
-        }
-    }
 }
 
 //---------------------------------------------------------------------------
