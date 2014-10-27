@@ -15,7 +15,8 @@
 /*!
   \file  avr_periphregs.h
 
-  \brief Module containing struct  __attribute__ ((__packed__)) definitions for AVR Peripheral registers
+  \brief Module defining bitfield/register definitions for memory-mapped
+         peripherals located within IO memory space.
 */
 
 #ifndef __AVR_PERIPHREGS_H__
@@ -24,12 +25,7 @@
 #include <stdint.h>
 
 //---------------------------------------------------------------------------
-// Module defining bitfield/register definitions for memory-mapped peripherals
-// located within IO memory space.
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-// UART/USART register struct  __attribute__ ((__packed__)) definitions.
+// UART/USART register struct definitions.
 //---------------------------------------------------------------------------
 typedef struct  __attribute__ ((__packed__))
 {
@@ -91,7 +87,7 @@ typedef struct  __attribute__ ((__packed__))
 } AVR_UCSR0C;
 
 //---------------------------------------------------------------------------
-// TWI interface register struct  __attribute__ ((__packed__)) definitions
+// TWI interface register struct definitions
 //---------------------------------------------------------------------------
 typedef struct  __attribute__ ((__packed__))
 {

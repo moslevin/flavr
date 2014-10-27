@@ -27,7 +27,7 @@
 //---------------------------------------------------------------------------
 /*!
  * \brief AVR_Load_HEX Load a hex file, specified by path, into the flash
- *        memory of the specified CPU object
+ *        memory of the CPU object
  *
  * \param szFilePath_ Pointer to the hexfile path
  * \return true if the hex file load operation succeeded, false otherwise

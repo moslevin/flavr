@@ -16,7 +16,8 @@
 /*!
   \file  watchpoint.c
 
-  \brief Implements data watchpoints for debugging based on memory accesses.
+  \brief Implements data watchpoints for debugging running programs based on
+         reads/writes to a given memory address.
 */
 
 #include <stdint.h>

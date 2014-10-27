@@ -23,11 +23,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "avr_cpu_print.h"
 #include "emu_config.h"
-
 #include "avr_opcodes.h"
+
 //---------------------------------------------------------------------------
 #define DEBUG_PRINT(...)
+
+//---------------------------------------------------------------------------
+static void AVR_Abort(void)
+{
+    print_core_regs();
+    exit(-1);
+}
 
 //---------------------------------------------------------------------------
 static void Data_Write( uint16_t u16Addr_, uint8_t u8Val_ )
@@ -57,6 +65,11 @@ static void Data_Write( uint16_t u16Addr_, uint8_t u8Val_ )
         {
             stCPU.pstRAM->au8RAM[ u16Addr_ ] = u8Val_;
         }
+    }
+    else if (u16Addr_ >= (stCPU.u32RAMSize + 256))
+    {
+        fprintf( stderr, "[Write Abort] RAM Address 0x%04X is out of range!\n", u16Addr_ );
+        AVR_Abort();
     }
     // RAM address range - direct write-through.
     else
@@ -98,6 +111,11 @@ static uint8_t Data_Read( uint16_t u16Addr_)
             DEBUG_PRINT(" No peripheral\n");
             return stCPU.pstRAM->au8RAM[ u16Addr_ ];
         }
+    }
+    else if (u16Addr_ >= (stCPU.u32RAMSize + 256))
+    {
+        fprintf( stderr, "[Write Abort] RAM Address 0x%04X is out of range!\n", u16Addr_ );
+        AVR_Abort();
     }
     // RAM address range - direct read
     else

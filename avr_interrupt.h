@@ -15,7 +15,9 @@
 /*!
   \file  avr_interrupt.h
 
-  \brief CPU Interrupt management
+  \brief AVR CPU Interrupt management - functionality responsible for arming/
+         disarming/processing CPU interrupts generated during the course of
+         normal operation.
 */
 
 #ifndef __AVR_INTERRUPT_H__

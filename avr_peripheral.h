@@ -45,10 +45,10 @@ typedef struct AVRPeripheral
     PeriphWrite         pfWrite;
     PeriphClock         pfClock;
 
-    void        *pvContext;
+    void                *pvContext;
 
-    uint8_t     u8AddrStart;
-    uint8_t     u8AddrEnd;
+    uint8_t             u8AddrStart;
+    uint8_t             u8AddrEnd;
 } AVRPeripheral;
 
 #endif //__AVR_PERIPHERAL_H__
