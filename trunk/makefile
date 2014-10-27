@@ -49,6 +49,8 @@ doc: docfile_tex docfile_pdf $(DOCFILE_TEX) $(DOCFILE_PDF)
 
 docfile_pdf: $(DOCFILE_TEX)
 	-cd ./docs/latex && pdflatex refman.tex
+	-cd ./docs/latex && pdflatex refman.tex
+	-cd ./docs/latex && pdflatex refman.tex
 
 docfile_tex:
 	-doxygen doxyfile
