@@ -15,7 +15,9 @@
 /*!
   \file  interactive.h
 
-  \brief Interactive debugging support.
+  \brief Interactive debugging support.  Provides mechanim for debugging a 
+         virtual AVR microcontroller with a variety of functionality common
+         to external debuggers, such as GDB.
 */
 
 #ifndef __INTERACTIVE_H__
@@ -38,7 +40,7 @@ void Interactive_CheckAndExecute( void );
 /*!
  * \brief Interactive_Set
  *
- * Enable interactive-debug mode
+ * Enable interactive-debug mode on the next instruction cycle.
  */
 void Interactive_Set( void );
 
