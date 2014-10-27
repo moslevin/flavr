@@ -27,12 +27,15 @@
 #include "avr_cpu.h"
 
 //---------------------------------------------------------------------------
+/*!
+    Node-structure for a linked-list of breakpoint addresses.
+*/
 typedef struct _BreakPoint
 {
-    struct _BreakPoint *next;
-    struct _BreakPoint *prev;
+    struct _BreakPoint *next;       //!< Pointer to next breakpoint
+    struct _BreakPoint *prev;       //!< Pointer to previous breakpoint
 
-    uint16_t    u16Addr;
+    uint16_t    u16Addr;            //!< Address of the breakpoint
 } BreakPoint_t;
 
 //---------------------------------------------------------------------------

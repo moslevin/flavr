@@ -15,7 +15,9 @@
 /*!
   \file  interactive.c
 
-  \brief Interactive debugging support.
+  \brief Interactive debugging support.  Provides mechanim for debugging a
+         virtual AVR microcontroller with a variety of functionality common
+         to external debuggers, such as GDB.
 */
 
 #include "emu_config.h"
@@ -32,34 +34,165 @@
 #include <string.h>
 
 //---------------------------------------------------------------------------
+/*!
+ * Function pointer type used to implement interactive command handlers.
+ * szCommand_ is a pointer to a string of command-line data entered from the
+ *            debug console.
+ * returns a boolean value of "true" if executing this command should cause
+ * the parser to exit interactive mode.
+ */
 typedef bool (*Interactive_Handler)( char *szCommand_ );
 
 //---------------------------------------------------------------------------
+/*!
+ * Struct type used to map debugger command-line inputs to command handlers
+ */
 typedef struct
 {
-    const char *szCommand;
-    const char *szDescription;
-    Interactive_Handler pfHandler;
+    const char *szCommand;          //!< Command string, as input by the user
+    const char *szDescription;      //!< Command description, printed by "help"
+    Interactive_Handler pfHandler;  //!< Pointer to handler function
 } Interactive_Command_t;
 
 //---------------------------------------------------------------------------
-static bool bIsInteractive;
-static bool bRetrigger;
+static bool bIsInteractive;         //!< "true" when interactive debugger is running
+static bool bRetrigger;             //!< "true" when the debugger needs to be enabled on the next cycle
 
-static TraceBuffer_t *pstTrace = 0;
+static TraceBuffer_t *pstTrace = 0; //!< Pointer to a tracebuffer object used for printing CPU execution trace
 
 //---------------------------------------------------------------------------
+/*!
+ * \brief Interactive_Continue
+ *
+ * Handler function used to implement the debugger's "continue" function, which
+ * exits interactive mode until the next breakpoint or watchpoint is hit.
+ *
+ * \param szCommand_ commnd-line data passed in by the user
+ * \return true - exit interactive debugging
+ */
 static bool Interactive_Continue( char *szCommand_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief Interactive_Step
+ *
+ * Cause the debugger to step to the next CPU instruction and return back to
+ * the debug console for further input.
+ *
+ * \param szCommand_ commnd-line data passed in by the user
+ * \return true - exit interactive debugging
+ */
 static bool Interactive_Step( char *szCommand_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief Interactive_Break
+ *
+ * Inserts a CPU breakpoint at a hex-address specified in the commandline
+ *
+ * \param szCommand_ command-line data passed in by the user.
+ * \return false - continue interactive debugging
+ */
 static bool Interactive_Break( char *szCommand_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief Interactive_Watch
+ *
+ * Insert a CPU data watchpoint at a hex-address specified in the commandline
+ *
+ * \param szCommand_ command-line data passed in by the user.
+ * \return false - continue interactive debugging
+ */
 static bool Interactive_Watch( char *szCommand_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief Interactive_ROM
+ *
+ * Display the contents of ROM (hex address, hex words) on the console
+ *
+ * \param szCommand_ command-line data passed in by the user.
+ * \return false - continue interactive debugging
+ */
 static bool Interactive_ROM( char *szCommand_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief Interactive_RAM
+ *
+ * Display the contents of RAM (hex address, hex words) on the console
+ *
+ * \param szCommand_ command-line data passed in by the user.
+ * \return false - continue interactive debugging
+ */
 static bool Interactive_RAM( char *szCommand_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief Interactive_EE
+ *
+ * Display the contents of EEPROM (hex address, hex words) on the console
+ *
+ * \param szCommand_ command-line data passed in by the user.
+ * \return false - continue interactive debugging
+ */
 static bool Interactive_EE( char *szCommand_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief Interactive_Registers
+ *
+ * Display the contents of the core CPU registers on the console
+ *
+ * \param szCommand_ command-line data passed in by the user.
+ * \return false - continue interactive debugging
+ */
 static bool Interactive_Registers( char *szCommand_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief Interactive_Quit
+ *
+ * Stop debugging, and exit flAVR.
+ *
+ * \param szCommand_ command-line data passed in by the user.
+ * \return N/A - does not return (program terminates)
+ */
 static bool Interactive_Quit( char *szCommand_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief Interactive_Help
+ *
+ * Display the interactive help menu, listing available debugger
+ * commands on the console.
+ *
+ * \param szCommand_ command-line data passed in by the user.
+ * \return false - continue interactive debugging
+ */
 static bool Interactive_Help( char *szCommand_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief Interactive_Disasm
+ *
+ * Show the disassembly for the CPU's current opcode on the console.
+ *
+ * \param szCommand_ command-line data passed in by the user.
+ * \return false - continue interactive debugging
+ */
 static bool Interactive_Disasm( char *szCommand_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief Interactive_Trace
+ *
+ * Dump the contents of the simulator's tracebuffer to the command-line
+ *
+ * \param szCommand_ command-line data passed in by the user.
+ * \return false - continue interactive debugging
+ */
 static bool Interactive_Trace( char *szCommand_ );
 
 //---------------------------------------------------------------------------

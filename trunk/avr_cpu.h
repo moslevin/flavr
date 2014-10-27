@@ -37,8 +37,13 @@
 #include "breakpoint.h"
 
 //---------------------------------------------------------------------------
-// Compile-time emulator configuration
-//---------------------------------------------------------------------------
+/*!
+    union structure mapping the first 256 bytes of IO address space to an
+    aray of bytes used to represent CPU RAM.  Note that based on the runtime
+    configuration, we'll purposefully malloc() a block of memory larger than
+    the size of this struct to extend the au8RAM[] array to the appropriate
+    size for the CPU target.
+*/
 typedef struct
 {
     union
@@ -46,9 +51,15 @@ typedef struct
         AVRRegisterFile stRegisters;
         uint8_t au8RAM[ sizeof(AVRRegisterFile) ];
     };
-} AVR_RAM_t;    // Note - the true size of this struct is defined at runtime based on the configured RAM size.
+} AVR_RAM_t;
 
 //---------------------------------------------------------------------------
+/*!
+    This structure effectively represents an entire simulated AVR CPU - all
+    memories, registers (memory-mapped or internal), peripherals and housekeeping
+    information.  All new CPU functionality added to the emulator eventually winds
+    up tied to this structure.
+*/
 typedef struct
 {
     //---------------------------------------------------------------------------
@@ -90,7 +101,7 @@ typedef struct
     uint16_t    *Rr16;
     uint8_t     *Rr; // Source register
 
-    uint16_t    K; // Constant data
+    uint16_t    K;   // Constant data
     union
     {
         uint32_t    k;   // Constant address
@@ -124,6 +135,10 @@ typedef struct
 
 
 //---------------------------------------------------------------------------
+/*!
+   Struct defining parameters used to initialize the AVR CPU structure on
+   startup.
+*/
 typedef struct
 {
     uint32_t u32ROMSize;

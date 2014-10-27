@@ -30,8 +30,8 @@
 //---------------------------------------------------------------------------
 #define PRINT_FUNC      printf
 
-#define RAM_DISPLAY_SPAN        (16)
-#define ROM_DISPLAY_SPAN        (8)
+#define RAM_DISPLAY_SPAN        (16)        //!< Number of RAM values per line
+#define ROM_DISPLAY_SPAN        (8)         //!< Number of ROM values per line
 
 //---------------------------------------------------------------------------
 void print_core_regs( void )

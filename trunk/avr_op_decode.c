@@ -28,31 +28,6 @@
 #include "avr_op_decode.h"
 
 //---------------------------------------------------------------------------
-static void AVR_Decoder_NOP( uint16_t OP_);
-static void AVR_Decoder_Register_Pair_4bit( uint16_t OP_);
-static void AVR_Decoder_Register_Pair_3bit( uint16_t OP_);
-static void AVR_Decoder_Register_Pair_5bit( uint16_t OP_);
-static void AVR_Decoder_Register_Immediate( uint16_t OP_);
-static void AVR_Decoder_LDST_YZ_k( uint16_t OP_);
-static void AVR_Decoder_LDST( uint16_t OP_);
-static void AVR_Decoder_Register_Single( uint16_t OP_);
-static void AVR_Decoder_Register_SC( uint16_t OP_);
-static void AVR_Decoder_Misc( uint16_t OP_);
-static void AVR_Decoder_Indirect_Jump( uint16_t OP_);
-static void AVR_Decoder_DEC_Rd( uint16_t OP_);
-static void AVR_Decoder_DES_round_4( uint16_t OP_);
-static void AVR_Decoder_JMP_CALL_22( uint16_t OP_);
-static void AVR_Decoder_ADIW_SBIW_6( uint16_t OP_);
-static void AVR_Decoder_IO_Bit( uint16_t OP_);
-static void AVR_Decoder_MUL( uint16_t OP_);
-static void AVR_Decoder_IO_In_Out( uint16_t OP_);
-static void AVR_Decoder_Relative_Jump( uint16_t OP_);
-static void AVR_Decoder_LDI( uint16_t OP_);
-static void AVR_Decoder_Conditional_Branch( uint16_t OP_);
-static void AVR_Decoder_BLD_BST( uint16_t OP_);
-static void AVR_Decoder_SBRC_SBRS( uint16_t OP_);
-
-//---------------------------------------------------------------------------
 static void AVR_Decoder_NOP( uint16_t OP_)
 {
     // Nothing to do here...

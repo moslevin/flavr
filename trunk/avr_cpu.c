@@ -42,15 +42,16 @@ AVR_CPU stCPU;
 
 #if FEATURE_USE_JUMPTABLES
 //---------------------------------------------------------------------------
-// 2 levels of jump tables are required for AVR.
+/*!
+   2 levels of jump tables are required for AVR.
 
-// The first is to implement addressing mode detection (which we then use to
-// seed the appropriate intermediate register pointers in the AVR_CPU struct).
+   The first is to implement addressing mode detection (which we then use to
+   seed the appropriate intermediate register pointers in the AVR_CPU struct).
 
-// This greatly reduces opcode function complexity, saves lots of code.
-// Second-level is a pure jump-table to opcode function pointers, where the
-// CPU register pointers are used w/AVR_CPU struct data to execute the opcode.
-
+   This greatly reduces opcode function complexity, saves lots of code.
+   Second-level is a pure jump-table to opcode function pointers, where the
+   CPU register pointers are used w/AVR_CPU struct data to execute the opcode.
+*/
 //---------------------------------------------------------------------------
 
 static AVR_Decoder astDecoders[65536] = { 0 };

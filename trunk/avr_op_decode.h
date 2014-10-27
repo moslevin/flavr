@@ -32,7 +32,7 @@ typedef void (*AVR_Decoder)( uint16_t OP_);
 /*!
  * \brief AVR_Decoder_Function
  *
- *  Returns an "instruction decode" function pointer to the cller for a
+ *  Returns an "instruction decode" function pointer to the caller for a
  *  given opcode.
  *
  * \param OP_ Opcode to return the instruction decode function for
@@ -44,7 +44,7 @@ AVR_Decoder AVR_Decoder_Function( uint16_t OP_ );
 /*!
  * \brief AVR_Decode
  *
- * Decode a specified instruction into the internal registers of the specified
+ * Decode a specified instruction into the internal registers of the
  * CPU object.  Opcodes must be decoded before they can be executed.
  *
  * \param OP_ Opcode to decode

@@ -15,7 +15,8 @@
 /*!
   \file  watchpoint.h
 
-  \brief Implements data watchpoints for debugging based on memory accesses.
+  \brief Implements data watchpoints for debugging running programs based on
+         reads/writes to a given memory address.
 */
 
 #ifndef __WATCHPOINT_H__
@@ -29,10 +30,10 @@
 //---------------------------------------------------------------------------
 typedef struct _WatchPoint
 {
-    struct _WatchPoint *next;
-    struct _WatchPoint *prev;
+    struct _WatchPoint *next;       //!< Pointer to next watchpoint
+    struct _WatchPoint *prev;       //!< Pointer to previous watchpoint
 
-    uint16_t    u16Addr;
+    uint16_t    u16Addr;            //!< Address (in RAM) to watch on.
 } WatchPoint_t;
 
 //---------------------------------------------------------------------------

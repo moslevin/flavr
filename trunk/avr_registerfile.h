@@ -15,7 +15,7 @@
 /*!
   \file  avr_registerfile.h
 
-  \brief Module providing an AVR register file
+  \brief Module providing a mapping of IO memory to the AVR register file.
 */
 
 #ifndef __AVR_REGISTERFILE_H__
@@ -26,6 +26,15 @@
 #include "avr_periphregs.h"
 
 //---------------------------------------------------------------------------
+/*!
+    The first 256 bytes of the AVR memory space is composed of the core 32
+    general-purpse registers (R0-R31), and 224 bytes for the remaining I/O
+    registers (used by peripherals).  This data structure maps these 256
+    bytes to their function.  Note that each AVR variant has its own set of
+    peripherals, so this struct definition may change as support for new
+    targets is added.  The original mapping is based off the periphals found
+    on the atmega328p.
+*/
 typedef struct
 {
     //-- 0x00
