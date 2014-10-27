@@ -20,25 +20,6 @@
 
 #ifndef __VARIANT_H__
 #define __VARIANT_H__
-//---------------------------------------------------------------------------
-#define ADD_CAPABILITY                  0xFE, 0xEF
-
-#define IO_REGISTER_RANGE               0xFD, 0xDF
-
-#define AVR_HAS_RAMP_Z                  0x07
-#define AVR_HAS_EIND                    0x08
-
-#define AVR_HAS_UART0                   0x09
-#define AVR_HAS_UART1                   0x0A
-
-#define AVR_HAS_TIMER0_8BIT             0x0B
-#define AVR_HAS_TIMER0_16BIT            0x0C
-
-#define AVR_HAS_TIMER1_8BIT             0x0D
-#define AVR_HAS_TIMER1_16BIT            0x0E
-
-#define AVR_HAS_TIMER2_8BIT             0x0F
-#define AVR_HAS_TIMER2_16BIT            0x10
 
 //---------------------------------------------------------------------------
 /*!

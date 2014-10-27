@@ -30,6 +30,7 @@
 #include "avr_cpu_print.h"
 #include "avr_loader.h"
 
+//---------------------------------------------------------------------------
 inline int8_t Signed_From_Unsigned_6( uint8_t u8Signed_ )
 {
     int8_t i8Ret = 0;

@@ -29,28 +29,38 @@
 #include "avr_cpu.h"
 
 //---------------------------------------------------------------------------
+/*!
+    Struct defining the CPU's running state at each tracebuffer sample point.
+*/
 typedef struct
 {
-    uint64_t    u64Counter;
-    uint64_t    u64CycleCount;
-    uint16_t    u16OpCode;
-    uint16_t    u16PC;
-    uint16_t    u16SP;
-    uint8_t     u8SR;
+    uint64_t    u64Counter;         //!< Instruction counter
+    uint64_t    u64CycleCount;      //!< CPU Cycle counter
+    uint16_t    u16OpCode;          //!< opcode @ trace sample
+    uint16_t    u16PC;              //!< program counter @ trace sample
+    uint16_t    u16SP;              //!< stack pointer @ trace sample
+    uint8_t     u8SR;               //!< status register @ trace sample
 
-    AVR_CoreRegisters stCoreRegs;
+    AVR_CoreRegisters stCoreRegs;   //!< core CPU registers @ trace sample
 
 } TraceElement_t;
 
 //---------------------------------------------------------------------------
+/*!
+    Implements a circular buffer of trace elements, sized according to the 
+    compile-time configuration.
+*/
 typedef struct
 {
-    TraceElement_t  astTraceStep[ CONFIG_TRACEBUFFER_SIZE ];
-    uint32_t        u32Index;
+    TraceElement_t  astTraceStep[ CONFIG_TRACEBUFFER_SIZE ];    //!< Array of trace samples
+    uint32_t        u32Index;                                   //!< Current sample index
 } TraceBuffer_t;
 
-
 //---------------------------------------------------------------------------
+/*!
+    Enumerated values defining the various formats for printing/displaying 
+    tracebuffer information.
+*/
 typedef enum
 {
     TRACE_PRINT_COMPACT     = 1,
@@ -79,7 +89,7 @@ void TraceBuffer_StoreFromCPU( TraceBuffer_t *pstTraceBuffer_ );
 //---------------------------------------------------------------------------
 /*!
  * \brief TraceBuffer_LoadElement Load an element from the tracebuffer into a
- *        a specified
+ *        a specified output element.
  *
  * \param pstTraceBuffer_ Pointer to a tracebuffer to load from
  *
