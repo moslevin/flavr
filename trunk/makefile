@@ -24,10 +24,13 @@ SRC_LIST_EMULATOR=\
 	flavr.c \
 	variant.c
 
+DOCFILE_TEX=./docs/latex/refman.tex
+DOCFILE_PDF=./docs/latex/refman.pdf
+
 printlist:
 	echo $(SRC_LIST_DISASM)
 
-all: emulator
+all: emulator doc
 
 emulator: $(SRC_LIST_EMULATOR:%.c=%.o)
 	$(CC) -g0 -O3 -o flavr $(SRC_LIST_EMULATOR:%.c=%.o)
@@ -36,5 +39,17 @@ emulator: $(SRC_LIST_EMULATOR:%.c=%.o)
 	$(CC) $< -c -g0 -O3
 
 clean:
-	rm *.o
-	rm flavr.exe
+	-rm *.o
+	-rm flavr
+	-rm flavr.exe
+	-rm -r ./docs/*
+
+doc: docfile_tex docfile_pdf $(DOCFILE_TEX) $(DOCFILE_PDF) 
+	-cp $(DOCFILE_PDF) ./docs
+
+docfile_pdf: $(DOCFILE_TEX)
+	-cd ./docs/latex && pdflatex refman.tex
+
+docfile_tex:
+	-doxygen doxyfile
+	
