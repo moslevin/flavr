@@ -9,7 +9,7 @@
  *   |_|   |____| /_/ \_\   \_/   |_|_\   |
  *                                        | "Yeah, it does Arduino..."
  * ---------------------------------------+----------------------------------
- * (c) Copyright 2014, Funkenstein Software Consulting, All rights reserved
+ * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
 /*!
@@ -45,6 +45,7 @@ typedef enum
     OPTION_VARIANT,
     OPTION_FREQ,
     OPTION_HEXFILE,
+    OPTION_ELFFILE,
     OPTION_DEBUG,
     OPTION_SILENT,
     OPTION_DISASM,
@@ -63,6 +64,7 @@ static Option_t astAttributes[OPTION_NUM] =
     {"--variant", NULL, false },
     {"--freq", NULL, false },
     {"--hexfile", NULL, false },
+    {"--elffile", NULL, false },
     {"--debug", NULL, true },
     {"--silent", NULL, true },
     {"--disasm", NULL, true },
