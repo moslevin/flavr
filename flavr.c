@@ -9,7 +9,7 @@
  *   |_|   |____| /_/ \_\   \_/   |_|_\   |
  *                                        | "Yeah, it does Arduino..."
  * ---------------------------------------+----------------------------------
- * (c) Copyright 2014, Funkenstein Software Consulting, All rights reserved
+ * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
 /*!
@@ -79,7 +79,7 @@ printf(
        "*   |_|   |____| /_/ \\_\\   \\_/   |_|_\\   |\n"
        "*                                        | \"From the makers of Mark3!\"\n"
        "* ---------------------------------------+----------------------------------\n"
-       "* (c) Copyright 2014, Funkenstein Software Consulting, All rights reserved\n"
+       "* (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved\n"
        "*     See license.txt for details\n"
       );
 }
@@ -230,9 +230,21 @@ void emulator_init(void)
 
     if (Options_GetByName("--hexfile"))
     {
-        if( !AVR_Load_HEX( Options_GetByName("--hexfile") ) ) {
+        if (!AVR_Load_HEX( Options_GetByName("--hexfile") ))
+        {
             error_out( INVALID_HEX_FILE );
         }
+        print_rom( 0, 1000 );
+        exit(0);
+    }
+    else if (Options_GetByName("--elffile"))
+    {
+        if (!AVR_Load_ELF( Options_GetByName("--elffile") ))
+        {
+            error_out( INVALID_HEX_FILE );
+        }
+        print_rom( 0, 1000 );
+        exit(0);
     }
     else
     {

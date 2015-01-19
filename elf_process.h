@@ -12,36 +12,44 @@
  * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
-/*!
-  \file  options.c
 
-  \brief Module for managing command-line options.
-*/
+#ifndef __ELF_PROCESS_H__
+#define __ELF_PROCESS_H__
 
-#ifndef __OPTIONS_H__
-#define __OPTIONS_H__
+#include "elf_types.h"
+#include <stdint.h>
 
 //---------------------------------------------------------------------------
 /*!
- * \brief Options_Init
- *
- * Initialize command-line options for the emulator based on argc/argv input.
- *
- * \param argc_ argc, passed in from main
- * \param argv_ argv, passed in from main
+ * \brief ELF_GetHeaderStringTableOffset
+ * \param pau8Buffer_
+ * \return
  */
-void Options_Init( int argc_, char **argv_ );
+uint32_t ELF_GetHeaderStringTableOffset( const uint8_t *pau8Buffer_ );
 
 //---------------------------------------------------------------------------
 /*!
- * \brief Options_GetByName
- *
- * Return the parameter value associated with an option attribute.
- *
- * \param szAttribute_ Name of the attribute to look up
- * \return Pointer to the attribute string, or NULL if attribute is invalid,
- *         or parameter has not been set.
+ * \brief ELF_GetSymbolStringTableOffset
+ * \param pau8Buffer_
+ * \return
  */
-const char *Options_GetByName(const char *szAttribute_);
+uint32_t ELF_GetSymbolStringTableOffset( const uint8_t *pau8Buffer_ );
 
-#endif
+//---------------------------------------------------------------------------
+/*!
+ * \brief ELF_GetSymbolTableOffset
+ * \param pau8Buffer_
+ * \return
+ */
+uint32_t ELF_GetSymbolTableOffset( const uint8_t *pau8Buffer_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief ELF_LoadFromFile
+ * \param ppau8Buffer_
+ * \param szPath_
+ * \return
+ */
+int ELF_LoadFromFile( uint8_t **ppau8Buffer_, const char *szPath_ );
+
+#endif //__ELF_PROCESS_H__

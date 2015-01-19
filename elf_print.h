@@ -12,36 +12,39 @@
  * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
-/*!
-  \file  options.c
 
-  \brief Module for managing command-line options.
-*/
+#ifndef __ELF_PRINT_H__
+#define __ELF_PRINT_H__
 
-#ifndef __OPTIONS_H__
-#define __OPTIONS_H__
+#include "elf_types.h"
+#include <stdint.h>
 
 //---------------------------------------------------------------------------
 /*!
- * \brief Options_Init
- *
- * Initialize command-line options for the emulator based on argc/argv input.
- *
- * \param argc_ argc, passed in from main
- * \param argv_ argv, passed in from main
+ * \brief ELF_PrintHeader
+ * \param pau8Buffer_
  */
-void Options_Init( int argc_, char **argv_ );
+void ELF_PrintHeader( const uint8_t *pau8Buffer_ );
 
 //---------------------------------------------------------------------------
 /*!
- * \brief Options_GetByName
- *
- * Return the parameter value associated with an option attribute.
- *
- * \param szAttribute_ Name of the attribute to look up
- * \return Pointer to the attribute string, or NULL if attribute is invalid,
- *         or parameter has not been set.
+ * \brief ELF_PrintSections
+ * \param pau8Buffer_
  */
-const char *Options_GetByName(const char *szAttribute_);
+void ELF_PrintSections( const uint8_t *pau8Buffer_ );
 
-#endif
+//---------------------------------------------------------------------------
+/*!
+ * \brief ELF_PrintSymbols
+ * \param pau8Buffer_
+ */
+void ELF_PrintSymbols( const uint8_t *pau8Buffer_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief ELF_PrintProgramHeaders
+ * \param pau8Buffer_
+ */
+void ELF_PrintProgramHeaders( const uint8_t *pau8Buffer_ );
+
+#endif //__ELF_PRINT_H__
