@@ -23,6 +23,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#define DEBUG_PRINT(...)
 
 //---------------------------------------------------------------------------
 uint32_t ELF_GetHeaderStringTableOffset( const uint8_t *pau8Buffer_ )
@@ -103,20 +104,19 @@ int ELF_LoadFromFile( uint8_t **ppau8Buffer_, const char *szPath_ )
     my_file = fopen( szPath_, "rb" );
     if (NULL == my_file)
     {
-        printf( "Unable to read file @ %s\n", szPath_ );
+        DEBUG_PRINT( "Unable to read file @ %s\n", szPath_ );
         return -1;
     }
     fseek(my_file, 0, SEEK_END);
     file_size = ftell(my_file);
     fseek(my_file, 0, SEEK_SET);
-    printf( "stream sez file is %d bytes\n", file_size );
 
     uint8_t *bufptr = (uint8_t*)malloc(file_size);
     *ppau8Buffer_ = bufptr;
 
     if (!bufptr)
     {
-        printf( "Unable to malloc elf file buffer\n" );
+        DEBUG_PRINT( "Unable to malloc elf file buffer\n" );
         fclose( my_file );
         return -1;
     }
@@ -127,14 +127,14 @@ int ELF_LoadFromFile( uint8_t **ppau8Buffer_, const char *szPath_ )
         size_t iter_read = fread( bufptr, 1, 4096, my_file );
         if( iter_read == 0 )
         {
-            printf( "%d read total\n", bytes_read );
+            DEBUG_PRINT( "%d read total\n", bytes_read );
             break;
         }
         bytes_read += iter_read;
         bufptr += iter_read;
     }
 
-    printf( "Success reading %d bytes\n", file_size );
+    DEBUG_PRINT( "Success reading %d bytes\n", file_size );
     fclose( my_file );
     return 0;
 }

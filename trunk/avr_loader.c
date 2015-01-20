@@ -106,49 +106,40 @@ bool AVR_Load_ELF( const char *szFilePath_)
     uint32_t     u32MaxOffset = pstHeader->u32PHOffset
                                 + (pstHeader->u16PHNum * pstHeader->u16PHSize);
 
-    ELF_PrintProgramHeaders(pu8Buffer);
-
     // Iterate through every program header section in the elf-file
     while (u32Offset < u32MaxOffset)
     {
         ElfProgramHeader_t *pstPHeader = (ElfProgramHeader_t*)(&pu8Buffer[u32Offset]);
-        printf("Header @ Offset %08X\n", u32Offset);
-
-        printf("  Section File Size: %d\n", pstPHeader->u32FileSize );
-        printf("  Section Mem Size: %d\n", pstPHeader->u32MemSize );
-        printf("  Section VAddr: %08X\n", pstPHeader->u32VirtualAddress );
 
         // RAM encoded in ELF file using addresses >= 0x00800000
-        if (pstPHeader->u32VirtualAddress >= 0x00800000)
+        if (pstPHeader->u32PhysicalAddress >= 0x00800000)
         {
-            printf("  Destination is RAM... @ %04X\n", pstPHeader->u32VirtualAddress & 0x0000FFFF );
             // Clear range in segment
-            memset( &(stCPU.pstRAM->au8RAM[pstPHeader->u32VirtualAddress & 0x0000FFFF]),
+            memset( &(stCPU.pstRAM->au8RAM[pstPHeader->u32PhysicalAddress & 0x0000FFFF]),
                     0,
-                    pstPHeader->u32MemSize /2 );
+                    pstPHeader->u32MemSize );
             // Copy program segment from ELF into CPU RAM
-            memcpy( &(stCPU.pstRAM->au8RAM[pstPHeader->u32VirtualAddress & 0x0000FFFF]),
+            memcpy( &(stCPU.pstRAM->au8RAM[pstPHeader->u32PhysicalAddress & 0x0000FFFF]),
                     &pu8Buffer[pstPHeader->u32Offset],
-                    pstPHeader->u32FileSize /2 );
+                    pstPHeader->u32FileSize );
         }
         else
         {
-            printf("  Destination is FLASH... @ %04X\n", pstPHeader->u32VirtualAddress );
             // Clear range in segment
-            memset( &(stCPU.pu16ROM[pstPHeader->u32VirtualAddress >> 1]),
+            memset( &(stCPU.pu16ROM[pstPHeader->u32PhysicalAddress >> 1]),
                     0,
-                    pstPHeader->u32MemSize /2 );
+                    pstPHeader->u32MemSize );
 
             // Copy program segment from ELF into CPU Flash
-            memcpy( &(stCPU.pu16ROM[pstPHeader->u32VirtualAddress >> 1]),
+            memcpy( &(stCPU.pu16ROM[pstPHeader->u32PhysicalAddress >> 1]),
                     &pu8Buffer[pstPHeader->u32Offset],
-                    pstPHeader->u32FileSize /2 );
+                    pstPHeader->u32FileSize );
         }
 
         // Next Section...
         u32Offset += pstHeader->u16PHSize;
     }
+
     free( pu8Buffer );
-    printf("done...\n");
     return true;
 }
