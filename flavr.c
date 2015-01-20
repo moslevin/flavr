@@ -234,8 +234,6 @@ void emulator_init(void)
         {
             error_out( INVALID_HEX_FILE );
         }
-        print_rom( 0, 1000 );
-        exit(0);
     }
     else if (Options_GetByName("--elffile"))
     {
@@ -243,8 +241,6 @@ void emulator_init(void)
         {
             error_out( INVALID_HEX_FILE );
         }
-        print_rom( 0, 1000 );
-        exit(0);
     }
     else
     {
