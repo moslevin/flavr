@@ -33,6 +33,8 @@
 #include "elf_process.h"
 #include "elf_print.h"
 
+#include "debug_sym.h"
+
 //---------------------------------------------------------------------------
 static void AVR_Copy_Record( HEX_Record_t *pstHex_)
 {
@@ -90,6 +92,51 @@ cleanup:
 }
 
 //---------------------------------------------------------------------------
+static void AVR_Load_ELF_Symbols( const uint8_t *pau8Buffer_ )
+{
+    // Get a pointer to the section header for the symbol table
+    uint32_t u32Offset = ELF_GetSymbolTableOffset( pau8Buffer_ );
+    if (u32Offset == 0)
+    {
+        printf( "No debug symbol, bailing\n");
+        return;
+    }
+    ElfSectionHeader_t *pstSymHeader = (ElfSectionHeader_t*)(&pau8Buffer_[u32Offset]);
+
+    // Get a pointer to the section header for the symbol table's strings
+    u32Offset = ELF_GetSymbolStringTableOffset( pau8Buffer_ );
+    if (u32Offset == 0)
+    {
+        printf( "No debug symbol strings, bailing\n");
+        return;
+    }
+    ElfSectionHeader_t *pstStrHeader = (ElfSectionHeader_t*)(&pau8Buffer_[u32Offset]);
+
+    // Iterate through the symbol table section, printing out the details of each.
+    uint32_t u32SymOffset = pstSymHeader->u32Offset;
+    ElfSymbol_t *pstSymbol = (ElfSymbol_t*)(&pau8Buffer_[u32SymOffset]);
+
+    while (u32SymOffset < (pstSymHeader->u32Offset + pstSymHeader->u32Size))
+    {
+        uint8_t u8Type = pstSymbol->u8Info & 0x0F;
+        if (u8Type == 2)
+        {
+            Symbol_Add_Func( &pau8Buffer_[pstSymbol->u32Name + pstStrHeader->u32Offset],
+                              pstSymHeader->u32Address,
+                              pstSymHeader->u32Size );
+        }
+        else if (u8Type == 1)
+        {
+            Symbol_Add_Obj( &pau8Buffer_[pstSymbol->u32Name + pstStrHeader->u32Offset],
+                              pstSymHeader->u32Address,
+                              pstSymHeader->u32Size );
+        }
+        u32SymOffset += pstSymHeader->u32EntrySize;
+        pstSymbol = (ElfSymbol_t*)(&pau8Buffer_[u32SymOffset]);
+    }
+}
+
+//---------------------------------------------------------------------------
 bool AVR_Load_ELF( const char *szFilePath_)
 {
     uint8_t *pu8Buffer;
@@ -139,6 +186,8 @@ bool AVR_Load_ELF( const char *szFilePath_)
         // Next Section...
         u32Offset += pstHeader->u16PHSize;
     }
+
+    AVR_Load_ELF_Symbols( pu8Buffer );
 
     free( pu8Buffer );
     return true;
