@@ -27,6 +27,7 @@
 #include "breakpoint.h"
 #include "avr_disasm.h"
 #include "trace_buffer.h"
+#include "debug_sym.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -196,6 +197,48 @@ static bool Interactive_Disasm( char *szCommand_ );
 static bool Interactive_Trace( char *szCommand_ );
 
 //---------------------------------------------------------------------------
+/*!
+ * \brief Interactive_BreakSym
+ *
+ * Toggle a breakpoint at the beginning of a function referenced by name.
+ * Requires that the symbol name match a valid debug symbol loaded from an
+ * elf binary (i.e., not from a hex file).
+ *
+ * \param szCommand_ command-line data passed in by the user.
+ * \return false - continue interactive debugging
+ */
+static bool Interactive_BreakFunc( char *szCommand_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief Interactive_BreakSym
+ *
+ * Toggle a breakpoint at the beginning of a function referenced by name.
+ * Requires that the symbol name match a valid debug symbol loaded from an
+ * elf binary (i.e., not from a hex file).
+ *
+ * \param szCommand_ command-line data passed in by the user.
+ * \return false - continue interactive debugging
+ */
+static bool Interactive_WatchObj( char *szCommand_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief Interactive_ListObj
+ * \param szCommand_
+ * \return
+ */
+static bool Interactive_ListObj( char *szCommand_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief Interactive_ListFunc
+ * \param szCommand_
+ * \return
+ */
+static bool Interactive_ListFunc( char *szCommand_ );
+
+//---------------------------------------------------------------------------
 // Command-handler table
 static Interactive_Command_t astCommands[] =
 {
@@ -205,9 +248,13 @@ static Interactive_Command_t astCommands[] =
     { "trace",    "Dump tracebuffer to console", Interactive_Trace},
     { "break",    "toggle breakpoint at address",  Interactive_Break },
     { "watch",    "toggle watchpoint at address",  Interactive_Watch },
+    { "lfunc",    "List Functions", Interactive_ListFunc },
     { "help",     "List commands", Interactive_Help },
     { "step",     "Step to next instruction", Interactive_Step },
     { "quit",     "Quit emulator", Interactive_Quit },
+    { "lobj",     "List Objects", Interactive_ListObj },
+    { "bsym",     "Toggle breakpoint at function referenced by symbol", Interactive_BreakFunc },
+    { "wobj",     "Toggle watchpoint on object referenced by symbol", Interactive_WatchObj },
     { "reg",      "Dump registers to console",  Interactive_Registers },
     { "rom",      "Dump x bytes of ROM to console", Interactive_ROM },
     { "ram",      "Dump x bytes of RAM to console", Interactive_RAM },
@@ -317,7 +364,7 @@ void Interactive_Init( TraceBuffer_t *pstTrace_ )
 }
 
 //---------------------------------------------------------------------------
-static bool Token_ScanNext( char *szCommand_, int iStart_, int *piTokenStart_, int *piTokenLen_)
+static bool  Token_ScanNext( char *szCommand_, int iStart_, int *piTokenStart_, int *piTokenLen_)
 {
     int i = iStart_;
 
@@ -389,6 +436,7 @@ static bool Token_ReadNextHex( char *szCommand_, int iStart_, int *piNextTokenSt
     *piNextTokenStart_ = iTempStart + iTempLen + 1;
     return true;
 }
+
 
 //---------------------------------------------------------------------------
 static bool Interactive_Continue( char *szCommand_ )
@@ -580,5 +628,140 @@ static bool Interactive_Disasm( char *szCommand_ )
 static bool Interactive_Trace( char *szCommand_ )
 {
     TraceBuffer_Print( pstTrace, TRACE_PRINT_COMPACT | TRACE_PRINT_DISASSEMBLY );
+    return false;
+}
+
+//---------------------------------------------------------------------------
+static bool Interactive_BreakFunc( char *szCommand_ )
+{
+    unsigned int uiAddr;
+    unsigned int uiLen;
+    int iTokenStart;
+    int iEnd;
+
+    if (!Token_DiscardNext( szCommand_, 0, &iTokenStart))
+    {
+        return false;
+    }
+
+    if (!Token_ScanNext( szCommand_, iTokenStart, &iEnd, &uiLen ) )
+    {
+        return false;
+    }
+
+    szCommand_[iTokenStart+uiLen] = 0;
+
+    char *szName = &szCommand_[iTokenStart];
+    Debug_Symbol_t *pstSym = Symbol_Find_Func_By_Name( szName );
+
+    if (!pstSym)
+    {
+        printf( "Unknown function: %s", szName );
+        return false;
+    }
+    printf( "Name: %s, Start Addr: %x, End Addr: %x\n", pstSym->szName, pstSym->u32StartAddr, pstSym->u32EndAddr );
+
+    if (BreakPoint_EnabledAtAddress(pstSym->u32StartAddr))
+    {
+        printf( "Removing breakpoint @ 0x%04X\n", pstSym->u32StartAddr );
+        BreakPoint_Delete( pstSym->u32StartAddr );
+    }
+    else
+    {
+        printf( "Inserting breakpoint @ 0x%04X\n", pstSym->u32StartAddr );
+        BreakPoint_Insert( pstSym->u32StartAddr );
+    }
+
+    return false;
+}
+
+//---------------------------------------------------------------------------
+static bool Interactive_WatchObj( char *szCommand_ )
+{
+    unsigned int uiAddr;
+    unsigned int uiLen;
+    int iTokenStart;
+    int iEnd;
+
+    if (!Token_DiscardNext( szCommand_, 0, &iTokenStart))
+    {
+        return false;
+    }
+
+    if (!Token_ScanNext( szCommand_, iTokenStart, &iEnd, &uiLen ) )
+    {
+        return false;
+    }
+
+    szCommand_[iTokenStart+uiLen] = 0;
+
+    char *szName = &szCommand_[iTokenStart];
+    Debug_Symbol_t *pstSym = Symbol_Find_Obj_By_Name( szName );
+
+    if (!pstSym)
+    {
+        printf( "Unknown object: %s", szName );
+        return false;
+    }
+    printf( "Name: %s, Start Addr: %x, End Addr: %x\n", pstSym->szName, pstSym->u32StartAddr, pstSym->u32EndAddr );
+
+    if (WatchPoint_EnabledAtAddress(pstSym->u32StartAddr))
+    {
+        printf( "Removing watchpoint @ 0x%04X\n", pstSym->u32StartAddr );
+        uint32_t i;
+        for (i = pstSym->u32StartAddr; i <= pstSym->u32EndAddr; i++)
+        {
+            WatchPoint_Delete( i );
+        }
+    }
+    else
+    {
+        printf( "Inserting watchpoint @ 0x%04X\n", pstSym->u32StartAddr );
+        uint32_t i;
+        for (i = pstSym->u32StartAddr; i <= pstSym->u32EndAddr; i++)
+        {
+            WatchPoint_Insert( i );
+        }
+    }
+
+    return false;}
+
+//---------------------------------------------------------------------------
+static bool Interactive_ListObj( char *szCommand_ )
+{
+    uint32_t u32Count = Symbol_Get_Obj_Count();
+    uint32_t i;
+    printf( "Listing objects:\n" );
+    for (i = 0; i < u32Count; i++)
+    {
+        Debug_Symbol_t *pstSymbol = Symbol_Obj_At_Index(i);
+        if (!pstSymbol)
+        {
+            break;
+        }
+
+        printf( "%d: %s\n", i, pstSymbol->szName );
+    }
+    printf( "  done\n" );
+    return false;
+}
+
+//---------------------------------------------------------------------------
+static bool Interactive_ListFunc( char *szCommand_ )
+{
+    uint32_t u32Count = Symbol_Get_Func_Count();
+    uint32_t i;
+    printf( "Listing functions:\n" );
+    for (i = 0; i < u32Count; i++)
+    {
+        Debug_Symbol_t *pstSymbol = Symbol_Func_At_Index(i);
+        if (!pstSymbol)
+        {
+            break;
+        }
+
+        printf( "%d: %s\n", i, pstSymbol->szName );
+    }
+    printf( "  done\n" );
     return false;
 }

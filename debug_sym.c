@@ -53,3 +53,66 @@ void Symbol_Add_Obj( const char *szName_, const uint32_t u32Addr_, const uint32_
 
     u32ObjCount++;
 }
+
+
+//---------------------------------------------------------------------------
+uint32_t Symbol_Get_Obj_Count( void )
+{
+    return u32ObjCount;
+}
+
+//---------------------------------------------------------------------------
+uint32_t Symbol_Get_Func_Count( void )
+{
+    return u32FuncCount;
+}
+
+//---------------------------------------------------------------------------
+Debug_Symbol_t *Symbol_Func_At_Index( uint32_t u32Index_ )
+{
+    if (u32Index_ >= u32FuncCount)
+    {
+        return 0;
+    }
+    return &pstFuncSymbols[u32Index_];
+}
+
+//---------------------------------------------------------------------------
+Debug_Symbol_t *Symbol_Obj_At_Index( uint32_t u32Index_ )
+{
+    if (u32Index_ >= u32ObjCount)
+    {
+        return 0;
+    }
+    return &pstObjSymbols[u32Index_];
+}
+
+//---------------------------------------------------------------------------
+Debug_Symbol_t *Symbol_Find_Func_By_Name( const char *szName_ )
+{
+    uint32_t i = 0;
+    for (i = 0; i < u32FuncCount; i++)
+    {
+        if (0 == strcmp(szName_,pstFuncSymbols[i].szName))
+        {
+            return &pstFuncSymbols[i];
+        }
+    }
+    return 0;
+}
+
+//---------------------------------------------------------------------------
+Debug_Symbol_t *Symbol_Find_Obj_By_Name( const char *szName_ )
+{
+    uint32_t i = 0;
+    for (i = 0; i < u32ObjCount; i++)
+    {
+        if (0 == strcmp(szName_,pstObjSymbols[i].szName))
+        {
+            return &pstObjSymbols[i];
+        }
+    }
+    return 0;
+}
+
+

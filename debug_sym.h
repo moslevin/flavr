@@ -41,4 +41,24 @@ void Symbol_Add_Func( const char *szName_, const uint32_t u32Addr_, const uint32
 //---------------------------------------------------------------------------
 void Symbol_Add_Obj( const char *szName_, const uint32_t u32Addr_, const uint32_t u32Len_ );
 
+//---------------------------------------------------------------------------
+uint32_t Symbol_Get_Obj_Count( void );
+
+//---------------------------------------------------------------------------
+uint32_t Symbol_Get_Func_Count( void );
+
+//---------------------------------------------------------------------------
+Debug_Symbol_t *Symbol_Func_At_Index( uint32_t u32Index_ );
+
+//---------------------------------------------------------------------------
+Debug_Symbol_t *Symbol_Obj_At_Index( uint32_t u32Index_ );
+
+//---------------------------------------------------------------------------
+Debug_Symbol_t *Symbol_Find_Func_By_Name( const char *szName_ );
+
+//---------------------------------------------------------------------------
+Debug_Symbol_t *Symbol_Find_Obj_By_Name( const char *szName_ );
+
+
+
 #endif
