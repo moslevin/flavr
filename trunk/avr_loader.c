@@ -121,15 +121,17 @@ static void AVR_Load_ELF_Symbols( const uint8_t *pau8Buffer_ )
         uint8_t u8Type = pstSymbol->u8Info & 0x0F;
         if (u8Type == 2)
         {
+            // Note that elf file uses byte addressing, and we use 16-bit word addressing
             Symbol_Add_Func( &pau8Buffer_[pstSymbol->u32Name + pstStrHeader->u32Offset],
-                              pstSymHeader->u32Address,
-                              pstSymHeader->u32Size );
+                              pstSymbol->u32Value >> 1,
+                              pstSymbol->u32Size >> 1);
         }
         else if (u8Type == 1)
         {
+            // The elf files use 0x0080XXXX as an offset for dat objects.  Mask here
             Symbol_Add_Obj( &pau8Buffer_[pstSymbol->u32Name + pstStrHeader->u32Offset],
-                              pstSymHeader->u32Address,
-                              pstSymHeader->u32Size );
+                              pstSymbol->u32Value & 0x0000FFFF,
+                              pstSymbol->u32Size );
         }
         u32SymOffset += pstSymHeader->u32EntrySize;
         pstSymbol = (ElfSymbol_t*)(&pau8Buffer_[u32SymOffset]);

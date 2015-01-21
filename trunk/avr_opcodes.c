@@ -26,6 +26,7 @@
 #include "avr_cpu_print.h"
 #include "emu_config.h"
 #include "avr_opcodes.h"
+#include "interactive.h"
 
 //---------------------------------------------------------------------------
 #define DEBUG_PRINT(...)
@@ -74,6 +75,15 @@ static void Data_Write( uint16_t u16Addr_, uint8_t u8Val_ )
     // RAM address range - direct write-through.
     else
     {
+        // Watchpoints...
+        if (WatchPoint_EnabledAtAddress(u16Addr_))
+        {
+            Interactive_Set();
+            printf( "Watchpoint @ 0x%04X hit.  Old Value => %d, New Value => %d\n",
+                        u16Addr_,
+                        stCPU.pstRAM->au8RAM[ u16Addr_ ],
+                        u8Val_ );
+        }
         stCPU.pstRAM->au8RAM[ u16Addr_ ] = u8Val_;
     }
 }
