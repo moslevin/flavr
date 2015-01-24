@@ -27,6 +27,8 @@
 #include "emu_config.h"
 #include "avr_opcodes.h"
 #include "interactive.h"
+#include "write_callout.h"
+#include "interrupt_callout.h"
 
 //---------------------------------------------------------------------------
 #define DEBUG_PRINT(...)
@@ -44,6 +46,8 @@ static void Data_Write( uint16_t u16Addr_, uint8_t u8Val_ )
     // Writing to RAM can be a tricky deal, because the address space is shared
     // between RAM, the core registers, and a bunch of peripheral I/O registers.
     DEBUG_PRINT("Write: 0x%04X=%02X\n", u16Addr_, u8Val_ );
+    WriteCallout_Run( u16Addr_, u8Val_ );
+
     // Check to see if the write operation falls within the peripheral I/O range
     if (u16Addr_ >= 32 && u16Addr_ <= 255)
     {
@@ -75,17 +79,9 @@ static void Data_Write( uint16_t u16Addr_, uint8_t u8Val_ )
     // RAM address range - direct write-through.
     else
     {
-        // Watchpoints...
-        if (WatchPoint_EnabledAtAddress(u16Addr_))
-        {
-            Interactive_Set();
-            printf( "Watchpoint @ 0x%04X hit.  Old Value => %d, New Value => %d\n",
-                        u16Addr_,
-                        stCPU.pstRAM->au8RAM[ u16Addr_ ],
-                        u8Val_ );
-        }
         stCPU.pstRAM->au8RAM[ u16Addr_ ] = u8Val_;
     }
+
 }
 
 //---------------------------------------------------------------------------
@@ -912,7 +908,10 @@ static void AVR_Opcode_RETI( void )
 
 //-- Enable interrupts
     stCPU.pstRAM->stRegisters.SREG.I = 1;
-    Unconditional_Jump(  u16NewPC );
+    Unconditional_Jump( u16NewPC );
+
+//-- Run callout functions registered when we return from interrupt.
+    InterruptCallout_Run( false );
 }
 
 //---------------------------------------------------------------------------

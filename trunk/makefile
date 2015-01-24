@@ -15,6 +15,8 @@ SRC_LIST_EMULATOR=\
 	elf_print.c \
 	elf_process.c \
 	intel_hex.c \
+	interrupt_callout.c \
+	kernel_aware.c \
 	trace_buffer.c \
 	watchpoint.c \
 	breakpoint.c \
@@ -25,7 +27,8 @@ SRC_LIST_EMULATOR=\
 	mega_timer16.c \
 	mega_timer8.c \
 	flavr.c \
-	variant.c
+	variant.c \
+	write_callout.c
 
 DOCFILE_TEX=./docs/latex/refman.tex
 DOCFILE_PDF=./docs/latex/refman.pdf

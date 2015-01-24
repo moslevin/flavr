@@ -28,6 +28,7 @@
 #include "avr_disasm.h"
 #include "trace_buffer.h"
 #include "debug_sym.h"
+#include "write_callout.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -356,11 +357,28 @@ void Interactive_Set( void )
 }
 
 //---------------------------------------------------------------------------
+void Interactive_WatchpointCallback( uint16_t u16Addr_, uint8_t u8Val_ )
+{
+    if (WatchPoint_EnabledAtAddress(u16Addr_))
+    {
+        Interactive_Set();
+        printf( "Watchpoint @ 0x%04X hit.  Old Value => %d, New Value => %d\n",
+                    u16Addr_,
+                    stCPU.pstRAM->au8RAM[ u16Addr_ ],
+                    u8Val_ );
+    }
+}
+
+//---------------------------------------------------------------------------
 void Interactive_Init( TraceBuffer_t *pstTrace_ )
 {
     pstTrace = pstTrace_;
     bIsInteractive = false;
     bRetrigger = false;
+
+    // Add the watchpoint handler as a wildcard callout (i.e. every write
+    // triggers is, it's up to the callout to handle filtering on its own).
+    WriteCallout_Add( Interactive_WatchpointCallback, 0 );
 }
 
 //---------------------------------------------------------------------------
@@ -724,7 +742,8 @@ static bool Interactive_WatchObj( char *szCommand_ )
         }
     }
 
-    return false;}
+    return false;
+}
 
 //---------------------------------------------------------------------------
 static bool Interactive_ListObj( char *szCommand_ )
