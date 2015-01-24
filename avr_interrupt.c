@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include "emu_config.h"
 #include "avr_cpu.h"
+#include "interrupt_callout.h"
 
 //---------------------------------------------------------------------------
 static void AVR_NextInterrupt(void)
@@ -101,6 +102,7 @@ void AVR_Interrupt( void )
     if (stCPU.u8IntPriority < 32 && stCPU.apfInterruptCallbacks[ stCPU.u8IntPriority ])
     {
         stCPU.apfInterruptCallbacks[ stCPU.u8IntPriority ]( stCPU.u8IntPriority );
+        InterruptCallout_Run( true );
     }
 
     // Reset the CPU interrupt priority

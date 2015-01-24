@@ -43,6 +43,7 @@
 #include "interactive.h"
 #include "breakpoint.h"
 #include "watchpoint.h"
+#include "kernel_aware.h"
 
 //---------------------------------------------------------------------------
 #include "mega_uart.h"
@@ -219,7 +220,7 @@ void emulator_init(void)
     CPU_Init(&stConfig);
 
     TraceBuffer_Init( &stTraceBuffer);
-    Interactive_Init( &stTraceBuffer );
+    Interactive_Init( &stTraceBuffer );    
 
     // Only insert a breakpoint/enter interactive debugging mode if specified.
     // Otherwise, start with the emulator running.
@@ -254,6 +255,12 @@ void emulator_init(void)
     }
 
     add_plugins();
+
+    if (Options_GetByName("--mark3"))
+    {
+        // Mark3 kernel-aware mode should only be enabled on-demand
+        KernelAware_Init();
+    }
 }
 
 //---------------------------------------------------------------------------
