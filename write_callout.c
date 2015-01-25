@@ -19,6 +19,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+
 //---------------------------------------------------------------------------
 typedef struct Write_Callout_
 {
@@ -31,8 +33,31 @@ typedef struct Write_Callout_
 static Write_Callout_t *pstCallouts = 0;
 
 //---------------------------------------------------------------------------
+static bool WriteCallout_IsDuplicate( WriteCalloutFunc pfCallout_, uint16_t u16Addr_ )
+{
+    Write_Callout_t *pstCallout = pstCallouts;
+
+    while (pstCallout)
+    {
+        if ( (pstCallout->pfCallout == pfCallout_) &&
+             (pstCallout->u16Addr == u16Addr_) )
+        {
+            return true;
+        }
+
+        pstCallout = pstCallout->pstNext;
+    }
+    return false;
+}
+
+//---------------------------------------------------------------------------
 void WriteCallout_Add( WriteCalloutFunc pfCallout_, uint16_t u16Addr_ )
 {
+    if (WriteCallout_IsDuplicate(pfCallout_, u16Addr_))
+    {
+        return;
+    }
+
     Write_Callout_t *pstNewCallout = (Write_Callout_t*)(malloc(sizeof(*pstNewCallout)));
 
     pstNewCallout->pstNext = pstCallouts;

@@ -102,12 +102,14 @@ void AVR_Interrupt( void )
     if (stCPU.u8IntPriority < 32 && stCPU.apfInterruptCallbacks[ stCPU.u8IntPriority ])
     {
         stCPU.apfInterruptCallbacks[ stCPU.u8IntPriority ]( stCPU.u8IntPriority );
-        InterruptCallout_Run( true );
     }
 
     // Reset the CPU interrupt priority
     stCPU.u32IntFlags &= ~(1 << stCPU.u8IntPriority);
     AVR_NextInterrupt();
+
+    // Run the generic interrupt callout routine
+    InterruptCallout_Run( true );
 
     // Clear any sleep-mode flags currently set
     stCPU.bAsleep = false;
