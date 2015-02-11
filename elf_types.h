@@ -12,6 +12,11 @@
  * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
+/*!
+    \file elf_types.h
+
+    \brief Defines and types used by ELF loader and supporting functionality.
+*/
 
 #ifndef __ELF_TYPES_H__
 #define __ELF_TYPES_H__

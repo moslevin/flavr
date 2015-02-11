@@ -911,7 +911,7 @@ static void AVR_Opcode_RETI( void )
     Unconditional_Jump( u16NewPC );
 
 //-- Run callout functions registered when we return from interrupt.
-    InterruptCallout_Run( false );
+    InterruptCallout_Run( false, 0 );
 }
 
 //---------------------------------------------------------------------------

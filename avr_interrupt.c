@@ -99,17 +99,18 @@ void AVR_Interrupt( void )
     stCPU.pstRAM->stRegisters.SREG.I = 0;
 
     // Run the interrupt-acknowledge callback associated with this vector
-    if (stCPU.u8IntPriority < 32 && stCPU.apfInterruptCallbacks[ stCPU.u8IntPriority ])
+    uint8_t u8Pri = stCPU.u8IntPriority;
+    if (u8Pri < 32 && stCPU.apfInterruptCallbacks[ u8Pri ])
     {
-        stCPU.apfInterruptCallbacks[ stCPU.u8IntPriority ]( stCPU.u8IntPriority );
+        stCPU.apfInterruptCallbacks[ u8Pri ]( u8Pri );
     }
 
     // Reset the CPU interrupt priority
-    stCPU.u32IntFlags &= ~(1 << stCPU.u8IntPriority);
+    stCPU.u32IntFlags &= ~(1 << u8Pri);
     AVR_NextInterrupt();
 
     // Run the generic interrupt callout routine
-    InterruptCallout_Run( true );
+    InterruptCallout_Run( true, u8Pri );
 
     // Clear any sleep-mode flags currently set
     stCPU.bAsleep = false;

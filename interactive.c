@@ -199,7 +199,7 @@ static bool Interactive_Trace( char *szCommand_ );
 
 //---------------------------------------------------------------------------
 /*!
- * \brief Interactive_BreakSym
+ * \brief Interactive_BreakFunc
  *
  * Toggle a breakpoint at the beginning of a function referenced by name.
  * Requires that the symbol name match a valid debug symbol loaded from an
@@ -212,9 +212,9 @@ static bool Interactive_BreakFunc( char *szCommand_ );
 
 //---------------------------------------------------------------------------
 /*!
- * \brief Interactive_BreakSym
+ * \brief Interactive_WatchObj
  *
- * Toggle a breakpoint at the beginning of a function referenced by name.
+ * Toggle a watchpoint at the beginning of an object referenced by name.
  * Requires that the symbol name match a valid debug symbol loaded from an
  * elf binary (i.e., not from a hex file).
  *
@@ -226,16 +226,24 @@ static bool Interactive_WatchObj( char *szCommand_ );
 //---------------------------------------------------------------------------
 /*!
  * \brief Interactive_ListObj
- * \param szCommand_
- * \return
+ *
+ * Display a list of objects in the symbol table, if the program was read
+ * from an ELF file, and contains debug symbols.
+ *
+ * \param szCommand_ command-line data passed in by the user.
+ * \return false - continue interactive debugging
  */
 static bool Interactive_ListObj( char *szCommand_ );
 
 //---------------------------------------------------------------------------
 /*!
  * \brief Interactive_ListFunc
- * \param szCommand_
- * \return
+ *
+ * Display a list of functions in the symbol table, if the program was read
+ * from an ELF file, and contains debug symbols.
+ *
+ * \param szCommand_ command-line data passed in by the user.
+ * \return false - continue interactive debugging
  */
 static bool Interactive_ListFunc( char *szCommand_ );
 
