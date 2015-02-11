@@ -12,6 +12,11 @@
  * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
+/*!
+    \file   elf_print.h
+
+    \brief  Functions to print information from ELF files
+*/
 
 #ifndef __ELF_PRINT_H__
 #define __ELF_PRINT_H__
@@ -22,28 +27,40 @@
 //---------------------------------------------------------------------------
 /*!
  * \brief ELF_PrintHeader
- * \param pau8Buffer_
+ *
+ * Print the contents of a loaded ELF file's header data to standard output.
+ *
+ * \param pau8Buffer_ Buffer containing the loaded ELF contents
  */
 void ELF_PrintHeader( const uint8_t *pau8Buffer_ );
 
 //---------------------------------------------------------------------------
 /*!
  * \brief ELF_PrintSections
- * \param pau8Buffer_
+ *
+ * Print a list of named sections contained in the loaded ELF file.
+ *
+ * \param pau8Buffer_ Buffer containing the loaded ELF contents
  */
 void ELF_PrintSections( const uint8_t *pau8Buffer_ );
 
 //---------------------------------------------------------------------------
 /*!
  * \brief ELF_PrintSymbols
- * \param pau8Buffer_
+ *
+ * Print a list of ELF Symbols contained in the loaded ELF file.
+ *
+ * \param pau8Buffer_ Buffer containing the loaded ELF contents
  */
 void ELF_PrintSymbols( const uint8_t *pau8Buffer_ );
 
 //---------------------------------------------------------------------------
 /*!
  * \brief ELF_PrintProgramHeaders
- * \param pau8Buffer_
+ *
+ * Print the list of program headers stored in the loaded ELF file .
+ *
+ * \param pau8Buffer_ Buffer containing the loaded ELF contents
  */
 void ELF_PrintProgramHeaders( const uint8_t *pau8Buffer_ );
 

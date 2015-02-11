@@ -12,6 +12,11 @@
  * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
+/*!
+    \file
+
+    \brief
+*/
 
 #include "elf_print.h"
 #include "elf_types.h"

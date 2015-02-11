@@ -12,6 +12,12 @@
  * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
+/*!
+    \file   interrupt_callout.c
+
+    \brief  Module providing functionality allowing emulator extensions to
+            be triggered on interrupts.
+*/
 
 #include "interrupt_callout.h"
 
@@ -22,8 +28,8 @@
 //---------------------------------------------------------------------------
 typedef struct Interrupt_Callout_
 {
-    struct Interrupt_Callout_ *pstNext;
-    InterruptCalloutFunc  pfCallout;
+    struct Interrupt_Callout_ *pstNext; //!< Next interrupt callout
+    InterruptCalloutFunc  pfCallout;    //!< Callout function
 } Interrupt_Callout_t;
 
 //---------------------------------------------------------------------------
@@ -41,12 +47,12 @@ void InterruptCallout_Add( InterruptCalloutFunc pfCallout_ )
 }
 
 //---------------------------------------------------------------------------
-void InterruptCallout_Run( bool bEntry_ )
+void InterruptCallout_Run( bool bEntry_, uint8_t u8Vector_ )
 {
     Interrupt_Callout_t *pstCallout = pstCallouts;
     while (pstCallout)
     {
-        pstCallout->pfCallout( bEntry_ );
+        pstCallout->pfCallout( bEntry_, u8Vector_ );
         pstCallout = pstCallout->pstNext;
     }
 }

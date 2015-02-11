@@ -12,6 +12,11 @@
  * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
+/*!
+    \file   kernel_aware.h
+
+    \brief  Mark3 RTOS Kernel-Aware debugger
+*/
 
 #include "kernel_aware.h"
 #include "debug_sym.h"
@@ -24,6 +29,7 @@
 #include <string.h>
 #include <time.h>
 
+//---------------------------------------------------------------------------
 /*!
   Things we would want from a kernel-aware plugin..
 
@@ -95,10 +101,11 @@ typedef struct
 static uint64_t u64IntCycles = 0;
 static uint64_t u64IntLatencyMax = 0;
 static uint64_t u64IdleTime = 0;
-static FILE *fOutput = NULL;
+static FILE *fKernelState = NULL;
+static FILE *fInterrupts = NULL;
 
 //---------------------------------------------------------------------------
-static void Mark3KA_InitOutputFile(void)
+static void Mark3KA_InitOutputFiles(void)
 {
     char acFileName[256];
     int iWritten;
@@ -110,14 +117,27 @@ static void Mark3KA_InitOutputFile(void)
     myLocalTime = localtime(&myTime);
 
     iWritten = strftime(acFileName, 256, "%Y%m%d_%H%M%S", myLocalTime);
+
+    // -- Create a textfile for writing kernel-aware data
     sprintf( &acFileName[iWritten], "-Mark3KA.csv" );
     printf( "%s\n", acFileName );
 
-    fOutput = fopen(acFileName, "w");
+    fKernelState = fopen(acFileName, "w");
 
-    if (fOutput)
+    if (fKernelState)
     {
-        fprintf( fOutput, "Cycle Count, Thread ID, Priority, Interrupt Time (%%), Interrupt Latency (cycles), Idle Time (%%), Stack Margin (Bytes)\n" );
+        fprintf( fKernelState, "Cycle Count, Thread ID, Priority, Interrupt Time (%%), Interrupt Latency (cycles), Idle Time (%%), Stack Margin (Bytes)\n" );
+    }
+
+    // -- Create a textfile for writing interrupt stats
+    sprintf( &acFileName[iWritten], "-Interrupts.csv" );
+    printf( "%s\n", acFileName );
+
+    fInterrupts = fopen(acFileName, "w");
+
+    if (fInterrupts)
+    {
+        fprintf( fInterrupts, "Cycle Count, INT, Enter(1)/Exit(0)\n" );
     }
 }
 
@@ -209,9 +229,9 @@ static void KA_ThreadChange( uint16_t u16Addr_, uint8_t u8Data_ )
 
     uint16_t u16Margin = Mark3KA_GetCurrentStackMargin();
 
-    if (fOutput)
+    if (fKernelState)
     {
-        fprintf( fOutput, "%llu, %d, %d, %0.3f, %llu, %0.3f, %d\n",
+        fprintf( fKernelState, "%llu, %d, %d, %0.3f, %llu, %0.3f, %d\n",
                 stCPU.u64CycleCount,
                 u8Thread,
                 u8Pri,
@@ -238,9 +258,11 @@ static void KA_ThreadChange( uint16_t u16Addr_, uint8_t u8Data_ )
 }
 
 //---------------------------------------------------------------------------
-static void KA_Interrupt( bool bEntry_ )
+static void KA_Interrupt( bool bEntry_, uint8_t u8Vector_ )
 {
     static uint64_t u64TempIntCycles = 0;
+    static uint8_t u8LastVector = 0;
+
     static bool bReset = true;
     if (bEntry_)
     {
@@ -269,6 +291,25 @@ static void KA_Interrupt( bool bEntry_ )
             bReset = true;
         }
     }
+
+    if (fInterrupts)
+    {
+        uint8_t u8Vect;
+        if (bEntry_)
+        {
+            u8Vect = u8Vector_;
+            u8LastVector = u8Vector_;
+        }
+        else
+        {
+            u8Vect = u8LastVector;
+        }
+
+        fprintf( fInterrupts, "%llu, %d, %d\n",
+                 stCPU.u64CycleCount,
+                 u8Vect,
+                 bEntry_ );
+    }
 }
 
 //---------------------------------------------------------------------------
@@ -283,6 +324,7 @@ void KernelAware_Init( void )
         return;
     }
 
+    // Ensure that we actually have the information we need at a valid address
     uint16_t u16CurrPtr = (uint16_t)(pstSymbol->u32StartAddr & 0x0000FFFF);
     if (!u16CurrPtr)
     {
@@ -293,7 +335,10 @@ void KernelAware_Init( void )
     // locally-tracked statistics.
     WriteCallout_Add( KA_ThreadChange , u16CurrPtr + 1 );
 
+    // Add a callback so that whenever there's an interrupt taken, we can
+    // update our locally-tracked statistics
     InterruptCallout_Add( KA_Interrupt );
 
-    Mark3KA_InitOutputFile();
+    // Create all output files used by the kernel-aware debugger callbacks
+    Mark3KA_InitOutputFiles();
 }

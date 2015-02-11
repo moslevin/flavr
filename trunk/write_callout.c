@@ -12,6 +12,12 @@
  * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
+/*!
+    \file   write_callout.h
+
+    \brief  Extended emulator functionality allowing for functions to be triggered
+            based on RAM-write operations.
+*/
 
 #include "write_callout.h"
 
@@ -24,9 +30,9 @@
 //---------------------------------------------------------------------------
 typedef struct Write_Callout_
 {
-    struct Write_Callout_ *pstNext;
-    uint16_t          u16Addr;
-    WriteCalloutFunc  pfCallout;
+    struct Write_Callout_ *pstNext;     //!< Pointer to the next callout
+    uint16_t          u16Addr;          //!< Address in RAM to monitor
+    WriteCalloutFunc  pfCallout;        //!< Function to call on write
 } Write_Callout_t;
 
 //---------------------------------------------------------------------------

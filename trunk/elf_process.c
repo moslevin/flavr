@@ -12,6 +12,11 @@
  * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
+/*!
+    \file elf_process.c
+
+    \brief Functions used to process ELF Binaries.
+*/
 
 #include "elf_process.h"
 #include "elf_types.h"

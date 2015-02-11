@@ -12,6 +12,12 @@
  * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
+/*!
+    \file   debug_sym.c
+
+    \brief  Symbolic debugging support for data and functions.
+*/
+
 
 #include "debug_sym.h"
 #include <stdint.h>
