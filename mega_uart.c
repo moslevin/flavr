@@ -174,7 +174,7 @@ static void UART_Init(void *context_ )
 //---------------------------------------------------------------------------
 static void UART_Read(void *context_, uint8_t ucAddr_, uint8_t *pucValue_ )
 {
-    DEBUG_PRINT( "UART Read: 0x%02x\n", ucAddr_);
+    DEBUG_PRINT( "UART Read: 0x%02x == 0x%02X\n", ucAddr_, stCPU.pstRAM->au8RAM[ ucAddr_ ]);
     *pucValue_ = stCPU.pstRAM->au8RAM[ ucAddr_ ];
     switch (ucAddr_)
     {
@@ -265,11 +265,12 @@ static void UART_UpdateInterruptFlags(void)
     {
         if (UART_IsTxComplete())
         {
-            DEBUG_PRINT("TXC Interrupt\n");
+            DEBUG_PRINT("Enable TXC Interrupt\n");
             AVR_InterruptCandidate( 0x14 );
         }
         else
         {
+            DEBUG_PRINT("Clear TXC Interrupt\n");
             AVR_ClearCandidate( 0x14 );
         }
     }
@@ -277,11 +278,12 @@ static void UART_UpdateInterruptFlags(void)
     {
         if( UART_IsEmpty())
         {
-            DEBUG_PRINT("DRE Interrupt\n");
+            DEBUG_PRINT("Enable DRE Interrupt\n");
             AVR_InterruptCandidate( 0x13 );
         }
         else
         {
+            DEBUG_PRINT("Clear DRE Interrupt\n");
             AVR_ClearCandidate( 0x13 );
         }
     }
@@ -289,11 +291,12 @@ static void UART_UpdateInterruptFlags(void)
     {
         if (UART_IsRxComplete())
         {
-            printf("RXC Interrupt\n");
+            DEBUG_PRINT("Enable RXC Interrupt\n");
             AVR_InterruptCandidate( 0x12 );
         }
         else
         {
+            DEBUG_PRINT("Clear RXC Interrupt\n");
             AVR_ClearCandidate( 0x12 );
         }
     }
@@ -302,7 +305,7 @@ static void UART_UpdateInterruptFlags(void)
 //---------------------------------------------------------------------------
 static void UART_WriteUCSR0B( uint8_t u8Value_)
 {
-    DEBUG_PRINT("Write UCRS0B\n");
+    DEBUG_PRINT("Write UCSR0B = %02x\n", u8Value_);
     stCPU.pstRAM->stRegisters.UCSR0B.r = u8Value_;
     UART_UpdateInterruptFlags();
 }
@@ -393,7 +396,7 @@ static void UART_TxClock(void *context_ )
                 }
             }
         }
-    }
+    }    
 }
 
 //---------------------------------------------------------------------------
