@@ -44,4 +44,13 @@ void Options_Init( int argc_, char **argv_ );
  */
 const char *Options_GetByName(const char *szAttribute_);
 
+//---------------------------------------------------------------------------
+/*!
+ * \brief Options_PrintUsage
+ *
+ * Print a brief description of each command-line option and its usage.
+ *
+ */
+void Options_PrintUsage(void);
+
 #endif

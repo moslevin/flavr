@@ -31,6 +31,7 @@
 typedef struct
 {
     const char *szAttribute;    //!< Name of the attribute (i.e. what's parsed from the commandline)
+    const char *szDescription;  //!< Description string, used for printing valid options
     char *szParameter;          //!< Parameter string associated with the option
     bool bStandalone;           //!< Attribute is standalone (no parameter value expected)
 } Option_t;
@@ -63,16 +64,16 @@ typedef enum
 */
 static Option_t astAttributes[OPTION_NUM] =
 {
-    {"--variant", NULL, false },
-    {"--freq", NULL, false },
-    {"--hexfile", NULL, false },
-    {"--elffile", NULL, false },
-    {"--debug", NULL, true },
-    {"--silent", NULL, true },
-    {"--disasm", NULL, true },
-    {"--trace", NULL, true },
-    {"--mark3", NULL, true },
-    {"--exitreset", NULL, true }
+    {"--variant",   "Specify the CPU variant by model name (default - atmega328p)", NULL, false },
+    {"--freq",      "Speed (in Hz) of the simulated CPU", NULL, false },
+    {"--hexfile",   "Programming file (intel HEX binary). Mutually exclusive with --elffile ", NULL, false },
+    {"--elffile",   "Programming file (ELF binary).  Mutually exclusive with --hexfile", NULL, false },
+    {"--debug",     "Run simulator in interactive debug mode", NULL, true },
+    {"--silent",    "Start without the flavr-banner print", NULL, true },
+    {"--disasm",    "Disassemble programming file to standard output", NULL, true },
+    {"--trace",     "Enable tracebuffer support when used in conjunction with --debug", NULL, true },
+    {"--mark3",     "Enable Mark3 kernel-aware plugin", NULL, true },
+    {"--exitreset", "Exit simulator if a jump-to-zero operation is encountered", NULL, true }
 };
 
 //---------------------------------------------------------------------------
@@ -189,4 +190,20 @@ void Options_Init( int argc_, char **argv_ )
     Options_SetDefaults();
     Options_Parse( argc_, argv_ );
 }
+
 //---------------------------------------------------------------------------
+void Options_PrintUsage(void)
+{
+    int i;
+    printf("\n Usage:\n\n"
+             "    flavr <options>\n\n Where <options> include:\n");
+    for (i = 0; i < OPTION_NUM; i++)
+    {
+        printf( "  %14s: %s", astAttributes[i].szAttribute, astAttributes[i].szDescription );
+        if (!astAttributes[i].bStandalone)
+        {
+            printf(" (takes an argument)" );
+        }
+        printf( "\n" );
+    }
+}
