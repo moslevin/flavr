@@ -229,6 +229,8 @@ void CPU_Init( AVR_CPU_Config_t *pstConfig_ )
     memset( &stCPU, 0, sizeof(stCPU));
     pstConfig_->u32RAMSize += 256;
 
+    stCPU.bExitOnReset = pstConfig_->bExitOnReset;
+
     // Dynamically allocate memory for RAM, ROM, and EEPROM buffers
     stCPU.pu8EEPROM = (uint8_t*)malloc( pstConfig_->u32EESize );
     stCPU.pu16ROM    = (uint16_t*)malloc( pstConfig_->u32ROMSize );
