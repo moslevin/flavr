@@ -111,6 +111,9 @@ void error_out( ErrorReason_t eReason_ )
         default:
             printf( "Some other reason\n" );
     }
+
+    Options_PrintUsage();
+
     exit (-1);
 }
 
