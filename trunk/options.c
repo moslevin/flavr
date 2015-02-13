@@ -51,6 +51,7 @@ typedef enum
     OPTION_DISASM,
     OPTION_TRACE,
     OPTION_MARK3,
+    OPTION_EXITRESET,
 //-- New options go here ^^^
     OPTION_NUM      //!< Total count of command-line options supported
 } OptionIndex_t;
@@ -70,7 +71,8 @@ static Option_t astAttributes[OPTION_NUM] =
     {"--silent", NULL, true },
     {"--disasm", NULL, true },
     {"--trace", NULL, true },
-    {"--mark3", NULL, true }
+    {"--mark3", NULL, true },
+    {"--exitreset", NULL, true }
 };
 
 //---------------------------------------------------------------------------

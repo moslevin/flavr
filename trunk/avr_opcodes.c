@@ -753,6 +753,12 @@ static inline Unconditional_Jump( uint16_t u16Addr_ )
 {
     stCPU.u16PC = u16Addr_;
     stCPU.u16ExtraPC = 0;
+
+    // Feature -- Terminate emulator if jump-to-zero encountered at runtime.
+    if (stCPU.u16PC == 0 && stCPU.bExitOnReset)
+    {
+        exit(0);
+    }
 }
 
 //---------------------------------------------------------------------------

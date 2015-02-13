@@ -131,6 +131,9 @@ typedef struct
 
     //---------------------------------------------------------------------------
     InterruptAck apfInterruptCallbacks[32]; // Interrupt callbacks
+
+    //---------------------------------------------------------------------------
+    bool        bExitOnReset;   // Flag indicating behavior when we jump to 0.  true == exit emulator.
 } AVR_CPU;
 
 
@@ -144,6 +147,7 @@ typedef struct
     uint32_t u32ROMSize;
     uint32_t u32RAMSize;
     uint32_t u32EESize;
+    bool     bExitOnReset;
 } AVR_CPU_Config_t;
 
 //---------------------------------------------------------------------------

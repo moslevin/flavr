@@ -194,6 +194,15 @@ void emulator_init(void)
         error_out( INVALID_VARIANT );
     }
 
+    if (Options_GetByName("--exitreset"))
+    {
+        stConfig.bExitOnReset = true;
+    }
+    else
+    {
+        stConfig.bExitOnReset = false;
+    }
+
     stConfig.u32EESize  = pstVariant->u32EESize;
     stConfig.u32RAMSize = pstVariant->u32RAMSize;
     stConfig.u32ROMSize = pstVariant->u32ROMSize;
