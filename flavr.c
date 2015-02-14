@@ -44,6 +44,7 @@
 #include "breakpoint.h"
 #include "watchpoint.h"
 #include "kernel_aware.h"
+#include "code_profile.h"
 
 //---------------------------------------------------------------------------
 #include "mega_uart.h"
@@ -121,10 +122,16 @@ void error_out( ErrorReason_t eReason_ )
 void emulator_loop(void)
 {
     bool bUseTrace = false;
+    bool bProfile = false;
 
     if ( Options_GetByName("--trace") && Options_GetByName("--debug") )
     {
         bUseTrace = true;
+    }
+
+    if ( Options_GetByName("--profile"))
+    {
+        bProfile = true;
     }
 
     while (1)
@@ -142,6 +149,12 @@ void emulator_loop(void)
         if (bUseTrace)
         {
             TraceBuffer_StoreFromCPU(&stTraceBuffer);
+        }
+
+        // Run code profiling logic
+        if (bProfile)
+        {
+            Profile_Hit(stCPU.u16PC);
         }
 
         // Execute a machine cycle
@@ -231,7 +244,7 @@ void emulator_init(void)
 
     CPU_Init(&stConfig);
 
-    TraceBuffer_Init( &stTraceBuffer);
+    TraceBuffer_Init( &stTraceBuffer );
     Interactive_Init( &stTraceBuffer );    
 
     // Only insert a breakpoint/enter interactive debugging mode if specified.
@@ -272,6 +285,12 @@ void emulator_init(void)
     {
         // Mark3 kernel-aware mode should only be enabled on-demand
         KernelAware_Init();
+    }
+
+    if (Options_GetByName("--profile"))
+    {
+        Profile_Init( stConfig.u32ROMSize );
+        atexit( Profile_Print );
     }
 }
 

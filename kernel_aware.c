@@ -98,11 +98,26 @@ typedef struct
 
 
 //---------------------------------------------------------------------------
+typedef struct
+{
+    Mark3_Thread_t *pstThread;
+    uint8_t        u8ThreadID;
+    uint64_t       u64TotalCycles;
+    uint64_t       u64EpockCycles;
+} Mark3_Thread_Info_t;
+
+//---------------------------------------------------------------------------
 static uint64_t u64IntCycles = 0;
 static uint64_t u64IntLatencyMax = 0;
 static uint64_t u64IdleTime = 0;
 static FILE *fKernelState = NULL;
 static FILE *fInterrupts = NULL;
+static Mark3_Thread_Info_t *pstThreadInfo = NULL;
+static uint16_t u16NumThreads = 0;
+
+static Mark3_Thread_t *pstLastThread = NULL;
+static uint64_t u64LastTime = 0;
+static uint8_t u8LastPri = 255;
 
 //---------------------------------------------------------------------------
 static void Mark3KA_InitOutputFiles(void)
@@ -139,6 +154,53 @@ static void Mark3KA_InitOutputFiles(void)
     {
         fprintf( fInterrupts, "Cycle Count, INT, Enter(1)/Exit(0)\n" );
     }
+}
+
+//---------------------------------------------------------------------------
+static void Mark3KA_AddKnownThread( Mark3_Thread_t *pstThread_ )
+{
+    // Bail if the thread pointer is NULL
+    if (!pstThread_ || ((uint32_t)pstThread_ == (uint32_t)stCPU.pstRAM->au8RAM))
+    {
+        return;
+    }
+
+    // Check to see if a thread has already been tagged at this address
+    bool bExists = false;
+    if (pstThreadInfo)
+    {
+        int i;
+        for (i = 0; i < u16NumThreads; i++)
+        {
+            Mark3_Thread_t *pstThread = pstThreadInfo[i].pstThread;
+            if (pstThread == pstThread_)
+            {
+                bExists = true;
+                // If this thread is a dynamic thread being "recycled", reset the CPU usage stats associated with it.
+                if (pstThread->u8ThreadID != pstThreadInfo[i].u8ThreadID)
+                {
+                    pstThreadInfo[i].u64EpockCycles = 0;
+                    pstThreadInfo[i].u64TotalCycles = 0;
+                    pstThreadInfo[i].u8ThreadID = pstThread->u8ThreadID;
+                }
+                break;
+            }
+        }
+    }
+
+    // If not, add it to the list of known threads.
+    if (!bExists)
+    {
+        u16NumThreads++;
+        pstThreadInfo = (Mark3_Thread_Info_t*)realloc(pstThreadInfo, sizeof(Mark3_Thread_Info_t) * u16NumThreads);
+
+        pstThreadInfo[u16NumThreads - 1].pstThread = pstThread_;
+        pstThreadInfo[u16NumThreads - 1].u64EpockCycles = 0;
+        pstThreadInfo[u16NumThreads - 1].u64TotalCycles = 0;
+        pstThreadInfo[u16NumThreads - 1].u8ThreadID = pstThread_->u8ThreadID;
+    }
+
+    //!!ToDo -- hook into the thread exit function to properly clean-up dynamically-created/re-used threads.
 }
 
 //---------------------------------------------------------------------------
@@ -189,10 +251,10 @@ static uint8_t Mark3KA_GetCurrentPriority(void)
 }
 
 //---------------------------------------------------------------------------
-static uint16_t Mark3KA_GetCurrentStackMargin(void)
+static uint16_t Mark3KA_GetStackMargin( Mark3_Thread_t *pstThread_ )
 {
-    uint16_t u16StackBase = Mark3KA_GetCurrentThread()->u16StackPtr;
-    uint16_t u16StackSize = Mark3KA_GetCurrentThread()->u16StackSize;
+    uint16_t u16StackBase = pstThread_->u16StackPtr;
+    uint16_t u16StackSize = pstThread_->u16StackSize;
 
     int i;
 
@@ -205,6 +267,12 @@ static uint16_t Mark3KA_GetCurrentStackMargin(void)
     }
 
     return u16StackSize;
+}
+
+//---------------------------------------------------------------------------
+static uint16_t Mark3KA_GetCurrentStackMargin(void)
+{
+   return Mark3KA_GetStackMargin( Mark3KA_GetCurrentThread() );
 }
 
 //---------------------------------------------------------------------------
@@ -221,9 +289,6 @@ static void KA_StackWarning( uint16_t u16Addr_, uint8_t u8Data_ )
 //---------------------------------------------------------------------------
 static void KA_ThreadChange( uint16_t u16Addr_, uint8_t u8Data_ )
 {
-    static uint8_t u8LastPri = 255;
-    static uint64_t u64LastTime = 0;
-
     uint8_t u8Pri = Mark3KA_GetCurrentPriority();
     uint8_t u8Thread = Mark3KA_GetCurrentThread()->u8ThreadID;
 
@@ -246,6 +311,23 @@ static void KA_ThreadChange( uint16_t u16Addr_, uint8_t u8Data_ )
         u64IdleTime += (stCPU.u64CycleCount - u64LastTime);
     }
 
+
+    // Track this as a known-thread internally for future reporting.
+    Mark3KA_AddKnownThread( Mark3KA_GetCurrentThread() );
+
+    if (pstLastThread && u64LastTime)
+    {
+        Mark3_Thread_t *pstThread;
+        int i;
+        for ( i = 0; i < u16NumThreads; i++ )
+        {
+            if (pstLastThread == pstThreadInfo[i].pstThread)
+            {
+                pstThreadInfo[i].u64TotalCycles += stCPU.u64CycleCount - u64LastTime;
+            }
+        }
+    }
+
     u64LastTime = stCPU.u64CycleCount;
     u8LastPri = u8Pri;
 
@@ -255,6 +337,10 @@ static void KA_ThreadChange( uint16_t u16Addr_, uint8_t u8Data_ )
 
     uint16_t u16StackWarning = Mark3KA_GetCurrentThread()->u16StackPtr + 32;
     WriteCallout_Add( KA_StackWarning, u16StackWarning );
+
+    // Cache the current thread for use as the "last run" thread in
+    // subsequent iterations
+    pstLastThread = Mark3KA_GetCurrentThread();
 }
 
 //---------------------------------------------------------------------------
@@ -313,6 +399,47 @@ static void KA_Interrupt( bool bEntry_, uint8_t u8Vector_ )
 }
 
 //---------------------------------------------------------------------------
+void KernelAware_AtExit( void )
+{
+    // Print a list of known threads and their stack margins
+    Mark3_Thread_t *pstThread;
+    int i;
+
+    // Take into account the fact that we've exitted asynchronously to the last context
+    // switch.  Add any outstanding time to the currently-executing thread.
+    pstThread = Mark3KA_GetCurrentThread();
+    for (i = 0; i < u16NumThreads; i++)
+    {
+        if (pstThread == pstThreadInfo[i].pstThread)
+        {
+            pstThreadInfo[i].u64TotalCycles += stCPU.u64CycleCount - u64LastTime;
+        }
+    }
+
+    printf( "===========================================================================\n");
+    printf( "Mark3 Kernel-aware Plugin -- Thread stats\n" );
+    printf( "===========================================================================\n");
+    printf( "Addr, Thread #, Priority, Stack Size, Stack Margin (bytes), Total CPU Cycles, CPU Usage (%)\n");
+
+    for (i = 0; i < u16NumThreads; i++)
+    {
+        pstThread = pstThreadInfo[i].pstThread;
+        if (pstThread)
+        {
+            printf( "%04X, %d, %d, %d, %d, %llu, %0.3f\n",
+                    (uint32_t)pstThread - (uint32_t)stCPU.pstRAM->au8RAM,
+                    pstThread->u8ThreadID,
+                    pstThread->u8CurPriority,
+                    pstThread->u16StackSize,
+                    Mark3KA_GetStackMargin( pstThread ),
+                    pstThreadInfo[i].u64TotalCycles,
+                    100.0 * (double)pstThreadInfo[i].u64TotalCycles / (double)stCPU.u64CycleCount
+                    );
+        }
+    }
+}
+
+//---------------------------------------------------------------------------
 void KernelAware_Init( void )
 {
     Debug_Symbol_t *pstSymbol = 0;
@@ -341,4 +468,7 @@ void KernelAware_Init( void )
 
     // Create all output files used by the kernel-aware debugger callbacks
     Mark3KA_InitOutputFiles();
+
+    // Register a function to be executed on exit
+    atexit( KernelAware_AtExit );
 }

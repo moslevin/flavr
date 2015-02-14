@@ -133,7 +133,8 @@ typedef struct
     InterruptAck apfInterruptCallbacks[32]; // Interrupt callbacks
 
     //---------------------------------------------------------------------------
-    bool        bExitOnReset;   // Flag indicating behavior when we jump to 0.  true == exit emulator.
+    bool        bExitOnReset;   // Flag indicating behavior when we jump to 0.  true == exit emulator
+    bool        bProfile;       // Flag indicating that CPU is running with active code profiling
 } AVR_CPU;
 
 

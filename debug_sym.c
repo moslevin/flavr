@@ -42,7 +42,8 @@ void Symbol_Add_Func( const char *szName_, const uint32_t u32Addr_, const uint32
     pstNew->szName          = strdup( szName_ );
     pstNew->u32StartAddr    = u32Addr_;
     pstNew->u32EndAddr      = u32Addr_ + u32Len_ - 1;
-
+    pstNew->u64EpochRefs    = 0;
+    pstNew->u64TotalRefs    = 0;
     u32FuncCount++;
 }
 
