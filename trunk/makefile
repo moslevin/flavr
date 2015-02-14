@@ -11,6 +11,7 @@ SRC_LIST_EMULATOR=\
 	avr_opcodes.c \
 	avr_op_cycles.c \
 	avr_disasm.c \
+	code_profile.c \
 	debug_sym.c \
 	elf_print.c \
 	elf_process.c \

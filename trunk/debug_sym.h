@@ -39,6 +39,9 @@ typedef struct
     uint32_t    u32StartAddr;   //!< Start of the address range held by the symbol
     uint32_t    u32EndAddr;     //!< Last address held by the symbol
     const char *szName;         //!< Name of the debug symbol
+
+    uint64_t    u64TotalRefs;   //!< Total reference count, used in code profiling
+    uint64_t    u64EpochRefs;   //!< Current reference count, used in code profiling
 } Debug_Symbol_t;
 
 //---------------------------------------------------------------------------

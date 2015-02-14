@@ -53,6 +53,7 @@ typedef enum
     OPTION_TRACE,
     OPTION_MARK3,
     OPTION_EXITRESET,
+    OPTION_PROFILE,
 //-- New options go here ^^^
     OPTION_NUM      //!< Total count of command-line options supported
 } OptionIndex_t;
@@ -73,7 +74,8 @@ static Option_t astAttributes[OPTION_NUM] =
     {"--disasm",    "Disassemble programming file to standard output", NULL, true },
     {"--trace",     "Enable tracebuffer support when used in conjunction with --debug", NULL, true },
     {"--mark3",     "Enable Mark3 kernel-aware plugin", NULL, true },
-    {"--exitreset", "Exit simulator if a jump-to-zero operation is encountered", NULL, true }
+    {"--exitreset", "Exit simulator if a jump-to-zero operation is encountered", NULL, true },
+    {"--profile",   "Run with code profile and code coverage enabled", NULL, true },
 };
 
 //---------------------------------------------------------------------------
