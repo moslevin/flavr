@@ -24,6 +24,7 @@
 #include <string.h>
 #include "debug_sym.h"
 #include "code_profile.h"
+#include "avr_disasm.h"
 
 //---------------------------------------------------------------------------
 typedef struct
@@ -75,7 +76,7 @@ void Profile_Hit( uint32_t u32Addr_ )
     if (pstSym)
     {
         pstSym->u64EpochRefs++;
-        pstSym->u64TotalRefs++;
+        pstSym->u64TotalRefs++;        
     }
 }
 
@@ -96,6 +97,53 @@ void Profile_ResetEpoch(void)
     {
         pstSym = Symbol_Func_At_Index(i);
         pstSym->u64EpochRefs = 0;
+    }
+}
+
+//---------------------------------------------------------------------------
+void Profile_PrintCoverageDissassembly(void)
+{
+    Debug_Symbol_t *pstSym;
+    int iSymCount = Symbol_Get_Func_Count();
+    int i;
+    int j;
+
+    printf( "=====================================================================================\n");
+    printf( "Detailed Code Coverage\n");
+    printf( "=====================================================================================\n");
+    // Go through all of our symbols and show which instructions have actually
+    // been hit.
+    for (i = 0; i < iSymCount; i++)
+    {
+        pstSym = Symbol_Func_At_Index(i);
+
+        if (!pstSym)
+        {
+            break;
+        }
+
+        printf("%s:\n", pstSym->szName);
+        j = pstSym->u32StartAddr;
+        while (j <= (int)pstSym->u32EndAddr)
+        {
+            uint16_t OP = stCPU.pu16ROM[j];
+            stCPU.u16PC = (uint16_t)j;
+
+            if (pstProfile[j].u64TotalHit)
+            {
+                printf( "[X]" );
+            }
+            else
+            {
+                printf( "[ ]" );
+            }
+            printf(" 0x%04X: [0x%04X] ", stCPU.u16PC, OP);
+
+            AVR_Decode(OP);
+            AVR_Disasm_Function(OP)();
+            j += AVR_Opcode_Size(OP);
+        }
+        printf("\n");
     }
 }
 
@@ -126,7 +174,7 @@ void Profile_Print(void)
     }
 
     printf( "=====================================================================================\n");
-    printf( "Detailed code coverage information:\n");
+    printf( "Code coverage summary:\n");
     printf( "=====================================================================================\n");
     int iGlobalHits = 0;
     int iGlobalMisses = 0;
@@ -149,9 +197,17 @@ void Profile_Print(void)
                 iMisses++;
                 iGlobalMisses++;
             }
+
+            // If this is a 2-opcode instruction, skip the next word, as to not skew the results
+            uint16_t OP = stCPU.pu16ROM[j];
+            if (2 == AVR_Opcode_Size(OP))
+            {
+                j++;
+            }
         }
         printf("%60s: %0.3f\n", pstSym->szName, 100.0 * (double)iHits/(double)(iHits + iMisses));
     }
     printf( "\n[Global Code Coverage] : %0.3f\n",
             100.0 * (double)iGlobalHits/(double)(iGlobalHits + iGlobalMisses));
+
 }
