@@ -287,6 +287,61 @@ static void KA_StackWarning( uint16_t u16Addr_, uint8_t u8Data_ )
 }
 
 //---------------------------------------------------------------------------
+static uint64_t u64ProfileEpochStart = 0;
+static uint64_t u64ProfileTotal = 0;
+
+//---------------------------------------------------------------------------
+static void KA_PrintProfileResults(void)
+{
+    Debug_Symbol_t *pstSymbol;
+    const char *szName = "(NONE)";
+    pstSymbol = Symbol_Find_Obj_By_Name( "gKAProfileName" );
+    if (pstSymbol)
+    {
+        uint16_t u16NamePtr = *((uint16_t*)&stCPU.pstRAM->au8RAM[ pstSymbol->u32StartAddr ]);
+        szName = (const char*)&stCPU.pstRAM->au8RAM[ u16NamePtr ];
+    }
+
+    uint32_t u32ProfileCount = 0;
+    pstSymbol = Symbol_Find_Obj_By_Name( "gKAProfileCount" );
+    if (pstSymbol)
+    {
+        u32ProfileCount = *((uint32_t*)&stCPU.pstRAM->au8RAM[ pstSymbol->u32StartAddr ]);
+    }
+
+    printf(" %s: %d iterations, %llu cycles per iteration\n", szName, u32ProfileCount, u64ProfileTotal / u32ProfileCount );
+}
+
+//---------------------------------------------------------------------------
+static void KA_Profile( uint16_t u16Addr_, uint8_t u8Data_ )
+{
+    switch (u8Data_)
+    {
+    case 0:
+        // Profile stop or reset
+        if (u64ProfileEpochStart)
+        {
+            u64ProfileTotal += (stCPU.u64CycleCount - u64ProfileEpochStart);
+            u64ProfileEpochStart = 0;
+        }
+        break;
+    case 1:
+        // Profile start
+        u64ProfileEpochStart = stCPU.u64CycleCount;
+        break;
+    case 2:
+        // Print profiling information for this test
+        KA_PrintProfileResults();
+        u64ProfileTotal = 0;
+        u64ProfileEpochStart = 0;
+        break;
+    default:
+        break;
+
+    }
+}
+
+//---------------------------------------------------------------------------
 static void KA_ThreadChange( uint16_t u16Addr_, uint8_t u8Data_ )
 {
     uint8_t u8Pri = Mark3KA_GetCurrentPriority();
@@ -461,6 +516,19 @@ void KernelAware_Init( void )
     // Add a callback so that when g_pstCurrent changes, we can update our
     // locally-tracked statistics.
     WriteCallout_Add( KA_ThreadChange , u16CurrPtr + 1 );
+
+    // Add a callout for profiling information (present in Mark3 Unit Tests)
+    pstSymbol = Symbol_Find_Obj_By_Name( "gKAProfileState" );
+    if (pstSymbol)
+    {
+        // Ensure that we actually have the information we need at a valid address
+        u16CurrPtr = (uint16_t)(pstSymbol->u32StartAddr & 0x0000FFFF);
+        if (u16CurrPtr)
+        {
+            // Add a callback so that when profiling state changes, we do something.
+            WriteCallout_Add( KA_Profile , u16CurrPtr );
+        }
+    }
 
     // Add a callback so that whenever there's an interrupt taken, we can
     // update our locally-tracked statistics
