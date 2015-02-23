@@ -25,6 +25,7 @@
 #include "debug_sym.h"
 #include "code_profile.h"
 #include "avr_disasm.h"
+#include "tlv_file.h"
 
 //---------------------------------------------------------------------------
 typedef struct
@@ -140,7 +141,11 @@ void Profile_PrintCoverageDissassembly(void)
             printf(" 0x%04X: [0x%04X] ", stCPU.u16PC, OP);
 
             AVR_Decode(OP);
-            AVR_Disasm_Function(OP)();
+
+            char szBuf[256];
+            AVR_Disasm_Function(OP)(szBuf);
+            printf( "%s", szBuf );
+
             j += AVR_Opcode_Size(OP);
         }
         printf("\n");

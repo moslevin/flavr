@@ -643,10 +643,14 @@ static bool Interactive_Help( char *szCommand_ )
 //---------------------------------------------------------------------------
 static bool Interactive_Disasm( char *szCommand_ )
 {
+    char szBuf[256];
     uint16_t OP = stCPU.pu16ROM[stCPU.u16PC];
+
     printf("0x%04X: [0x%04X] ", stCPU.u16PC, OP);
     AVR_Decode(OP);
-    AVR_Disasm_Function(OP)();
+    AVR_Disasm_Function(OP)(szBuf);
+    printf( "%s", szBuf );
+
     return false;
 }
 

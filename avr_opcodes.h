@@ -26,8 +26,7 @@
 
 //---------------------------------------------------------------------------
 // Format opcode function jump table
-typedef void (*AVR_Opcode)();
-
+typedef void (*AVR_Opcode)( void );
 //---------------------------------------------------------------------------
 /*!
  * \brief AVR_Opcode_Function

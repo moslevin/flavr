@@ -18,6 +18,9 @@ SRC_LIST_EMULATOR=\
 	intel_hex.c \
 	interrupt_callout.c \
 	kernel_aware.c \
+    ka_interrupt.c \
+    ka_thread.c \
+    ka_profile.c \
 	trace_buffer.c \
 	watchpoint.c \
 	breakpoint.c \
@@ -29,7 +32,8 @@ SRC_LIST_EMULATOR=\
 	mega_timer8.c \
 	flavr.c \
 	variant.c \
-	write_callout.c
+    write_callout.c \
+    tlv_file.c
 
 DOCFILE_TEX=./docs/latex/refman.tex
 DOCFILE_PDF=./docs/latex/refman.pdf
