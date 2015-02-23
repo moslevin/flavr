@@ -81,10 +81,12 @@ void TraceBuffer_PrintElement( TraceElement_t *pstElement_, TracePrintFormat_t e
         uint16_t u16TempPC = stCPU.u16PC;
         stCPU.u16PC = pstElement_->u16PC;
 
-        AVR_Opcode pfOp = AVR_Disasm_Function( pstElement_->u16OpCode );
+        AVR_Disasm pfOp = AVR_Disasm_Function( pstElement_->u16OpCode );
 
-        AVR_Decode( pstElement_->u16OpCode );
-        pfOp();
+        char szBuf[256];
+        AVR_Decode( pstElement_->u16OpCode );        
+        pfOp( szBuf );
+        printf( "%s", szBuf );
 
         stCPU.u16PC = u16TempPC;
     }

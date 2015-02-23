@@ -23,6 +23,7 @@
 
 #include "emu_config.h"
 
+#include "avr_disasm.h"
 #include "avr_op_decode.h"
 #include "avr_opcodes.h"
 #include "avr_op_size.h"
@@ -70,519 +71,519 @@ inline uint8_t Register_From_Rr16( void )
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ADD( void )
+static void AVR_Disasm_ADD( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "add r%d, r%d              \t ; Add: r%d = r%d + r%d\n",
+    sprintf( szOutput_, "add r%d, r%d              \t ; Add: r%d = r%d + r%d\n",
                  u8Rd, u8Rr,
                  u8Rd, u8Rd, u8Rr );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ADC( void )
+static void AVR_Disasm_ADC( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "adc r%d, r%d              \t ; Add with carry: r%d = r%d + r%d + C\n",
+    sprintf( szOutput_, "adc r%d, r%d              \t ; Add with carry: r%d = r%d + r%d + C\n",
                  u8Rd, u8Rr,
                  u8Rd, u8Rd, u8Rr );
 
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ADIW( void )
+static void AVR_Disasm_ADIW( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd16();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "adiw r%d:%d, %d           \t ; Add immediate to word: r%d:%d = r%d:%d + %d \n",
+    sprintf( szOutput_, "adiw r%d:%d, %d           \t ; Add immediate to word: r%d:%d = r%d:%d + %d \n",
                 u8Rd + 1, u8Rd, u8K,
                 u8Rd + 1, u8Rd, u8Rd + 1, u8Rd, u8K
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SUB( void )
+static void AVR_Disasm_SUB( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "sub r%d, r%d              \t ; Subtract: r%d = r%d - r%d \n",
+    sprintf( szOutput_, "sub r%d, r%d              \t ; Subtract: r%d = r%d - r%d \n",
                 u8Rd, u8Rr,
                 u8Rd, u8Rd, u8Rr
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SUBI( void )
+static void AVR_Disasm_SUBI( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "subi r%d, %d              \t ; Subtract immediate: r%d = r%d - %d \n",
+    sprintf( szOutput_, "subi r%d, %d              \t ; Subtract immediate: r%d = r%d - %d \n",
                 u8Rd, u8K,
                 u8Rd, u8Rd, u8K
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SBC( void )
+static void AVR_Disasm_SBC( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "sbc r%d, r%d              \t ; Subtract with carry: r%d = r%d - r%d - C \n",
+    sprintf( szOutput_, "sbc r%d, r%d              \t ; Subtract with carry: r%d = r%d - r%d - C \n",
                 u8Rd, u8Rr,
                 u8Rd, u8Rd, u8Rr
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SBCI( void )
+static void AVR_Disasm_SBCI( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "sbci r%d, %d              \t ; Subtract immediate with carry: r%d = r%d - %d - C\n",
+    sprintf( szOutput_, "sbci r%d, %d              \t ; Subtract immediate with carry: r%d = r%d - %d - C\n",
                 u8Rd, u8K,
                 u8Rd, u8Rd, u8K
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SBIW( void )
+static void AVR_Disasm_SBIW( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd16();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "sbiw r%d:%d, %d           \t ; Subtract immediate from word: r%d:%d = r%d:%d + %d \n",
+    sprintf( szOutput_, "sbiw r%d:%d, %d           \t ; Subtract immediate from word: r%d:%d = r%d:%d + %d \n",
                 u8Rd + 1, u8Rd, u8K,
                 u8Rd + 1, u8Rd, u8Rd + 1, u8Rd, u8K
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_AND( void )
+static void AVR_Disasm_AND( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "and r%d, r%d              \t ; Logical AND: r%d = r%d & r%d \n",
+    sprintf( szOutput_, "and r%d, r%d              \t ; Logical AND: r%d = r%d & r%d \n",
                 u8Rd, u8Rr,
                 u8Rd, u8Rd, u8Rr
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ANDI( void )
+static void AVR_Disasm_ANDI( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "andi r%d, %d              \t ; Logical AND with Immediate: r%d = r%d & %d\n",
+    sprintf( szOutput_, "andi r%d, %d              \t ; Logical AND with Immediate: r%d = r%d & %d\n",
                 u8Rd, u8K,
                 u8Rd, u8Rd, u8K
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_OR( void )
+static void AVR_Disasm_OR( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "or r%d, r%d               \t ; Logical OR: r%d = r%d | r%d \n",
+    sprintf( szOutput_, "or r%d, r%d               \t ; Logical OR: r%d = r%d | r%d \n",
                 u8Rd, u8Rr,
                 u8Rd, u8Rd, u8Rr
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ORI( void )
+static void AVR_Disasm_ORI( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "ori r%d, %d               \t ; Logical OR with Immediate: r%d = r%d | %d\n",
+    sprintf( szOutput_, "ori r%d, %d               \t ; Logical OR with Immediate: r%d = r%d | %d\n",
                 u8Rd, u8K,
                 u8Rd, u8Rd, u8K
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_EOR( void )
+static void AVR_Disasm_EOR( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "eor r%d, r%d              \t ; Exclusive OR: r%d = r%d ^ r%d \n",
+    sprintf( szOutput_, "eor r%d, r%d              \t ; Exclusive OR: r%d = r%d ^ r%d \n",
                 u8Rd, u8Rr,
                 u8Rd, u8Rd, u8Rr
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_COM( void )
+static void AVR_Disasm_COM( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "com r%d                   \t ; One's complement (bitwise inverse): r%d = 0xFF - r%d\n",
+    sprintf( szOutput_, "com r%d                   \t ; One's complement (bitwise inverse): r%d = 0xFF - r%d\n",
                 u8Rd,
                 u8Rd, u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_NEG( void )
+static void AVR_Disasm_NEG( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "neg r%d                   \t ; Two's complement (sign swap): r%d = 0x00 - r%d\n",
+    sprintf( szOutput_, "neg r%d                   \t ; Two's complement (sign swap): r%d = 0x00 - r%d\n",
                 u8Rd,
                 u8Rd, u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SBR( void )
+static void AVR_Disasm_SBR( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "sbr r%d, %d               \t ; Set Bits in Register: r%d = r%d | %d\n",
+    sprintf( szOutput_, "sbr r%d, %d               \t ; Set Bits in Register: r%d = r%d | %d\n",
                 u8Rd, u8K,
                 u8Rd, u8Rd, u8K
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_CBR( void )
+static void AVR_Disasm_CBR( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "cbr r%d, %d               \t ; Clear Bits in Register: r%d = r%d & (0xFF - %d)\n",
+    sprintf( szOutput_, "cbr r%d, %d               \t ; Clear Bits in Register: r%d = r%d & (0xFF - %d)\n",
                 u8Rd, u8K,
                 u8Rd, u8Rd, u8K
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_INC( void )
+static void AVR_Disasm_INC( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "inc r%d                   \t ; Increment Register: r%d = r%d + 1\n",
+    sprintf( szOutput_, "inc r%d                   \t ; Increment Register: r%d = r%d + 1\n",
                 u8Rd,
                 u8Rd, u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_DEC( void )
+static void AVR_Disasm_DEC( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "dec r%d                   \t ; Decrement Register: r%d = r%d - 1\n",
+    sprintf( szOutput_, "dec r%d                   \t ; Decrement Register: r%d = r%d - 1\n",
                 u8Rd,
                 u8Rd, u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_TST( void )
+static void AVR_Disasm_TST( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "tst r%d                   \t ; Test Register for Zero or Negative\n",
+    sprintf( szOutput_, "tst r%d                   \t ; Test Register for Zero or Negative\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_CLR( void )
+static void AVR_Disasm_CLR( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "clr r%d                   \t ; Clear Register\n",
+    sprintf( szOutput_, "clr r%d                   \t ; Clear Register\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SER( void )
+static void AVR_Disasm_SER( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "ser r%d                   \t ; Set All Bits in Register\n",
+    sprintf( szOutput_, "ser r%d                   \t ; Set All Bits in Register\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_MUL( void )
+static void AVR_Disasm_MUL( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "mul r%d, r%d              \t ; Unsigned Multiply: r1:0 = r%d * r%d\n",
+    sprintf( szOutput_, "mul r%d, r%d              \t ; Unsigned Multiply: r1:0 = r%d * r%d\n",
                 u8Rd, u8Rr,
                 u8Rd, u8Rr );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_MULS( void )
+static void AVR_Disasm_MULS( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "muls r%d, r%d             \t ; Signed Multiply: r1:0 = r%d * r%d\n",
+    sprintf( szOutput_, "muls r%d, r%d             \t ; Signed Multiply: r1:0 = r%d * r%d\n",
                 u8Rd, u8Rr,
                 u8Rd, u8Rr );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_MULSU( void )
+static void AVR_Disasm_MULSU( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "mulsu r%d, r%d            \t ; Signed * Unsigned Multiply: r1:0 = r%d * r%d\n",
+    sprintf( szOutput_, "mulsu r%d, r%d            \t ; Signed * Unsigned Multiply: r1:0 = r%d * r%d\n",
                 u8Rd, u8Rr,
                 u8Rd, u8Rr );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_FMUL( void )
+static void AVR_Disasm_FMUL( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "fmul r%d, r%d             \t ; Fractional Multiply: r1:0 = r%d * r%d\n",
+    sprintf( szOutput_, "fmul r%d, r%d             \t ; Fractional Multiply: r1:0 = r%d * r%d\n",
                 u8Rd, u8Rr,
                 u8Rd, u8Rr );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_FMULS( void )
+static void AVR_Disasm_FMULS( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "fmuls r%d, r%d            \t ; Signed Fractional Multiply: r1:0 = r%d * r%d\n",
+    sprintf( szOutput_, "fmuls r%d, r%d            \t ; Signed Fractional Multiply: r1:0 = r%d * r%d\n",
                 u8Rd, u8Rr,
                 u8Rd, u8Rr );
 
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_FMULSU( void )
+static void AVR_Disasm_FMULSU( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "fmulsu r%d, r%d           \t ; Signed * Unsigned Fractional Multiply: r1:0 = r%d * r%d\n",
+    sprintf( szOutput_, "fmulsu r%d, r%d           \t ; Signed * Unsigned Fractional Multiply: r1:0 = r%d * r%d\n",
                 u8Rd, u8Rr,
                 u8Rd, u8Rr );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_DES( void )
+static void AVR_Disasm_DES( char *szOutput_ )
 {
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "des %d                    \t ; DES Encrypt/Decrypt\n",
+    sprintf( szOutput_, "des %d                    \t ; DES Encrypt/Decrypt\n",
             u8K );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_RJMP( void )
+static void AVR_Disasm_RJMP( char *szOutput_ )
 {
     int16_t i16k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "rjmp %d                   \t ; Relative Jump: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "rjmp %d                   \t ; Relative Jump: PC = PC + %d + 1\n",
                 i16k, i16k );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_IJMP( void )
+static void AVR_Disasm_IJMP( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "ijmp                      \t ; Indirect Jump: PC = Z\n");
+    sprintf( szOutput_, "ijmp                      \t ; Indirect Jump: PC = Z\n");
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_EIJMP( void )
+static void AVR_Disasm_EIJMP( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "eijmp                     \t ; Extended Indirect Jump: PC(15:0) = Z(15:0), PC(21:16) = EIND\n" );
+    sprintf( szOutput_, "eijmp                     \t ; Extended Indirect Jump: PC(15:0) = Z(15:0), PC(21:16) = EIND\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_JMP( void )
+static void AVR_Disasm_JMP( char *szOutput_ )
 {
     uint32_t u32k = stCPU.k;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "jmp 0x%X                     \t ; Jump to 0x%X \n",
+    sprintf( szOutput_, "jmp 0x%X                     \t ; Jump to 0x%X \n",
                 u32k, u32k );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_RCALL( void )
+static void AVR_Disasm_RCALL( char *szOutput_ )
 {
     int16_t i16k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "rcall %d                  \t ; Relative call to Subroutine: PC = PC +%d + 1\n",
+    sprintf( szOutput_, "rcall %d                  \t ; Relative call to Subroutine: PC = PC +%d + 1\n",
                 i16k, i16k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ICALL( void )
+static void AVR_Disasm_ICALL( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "icall                     \t ; Indirect Jump: PC = Z\n");
+    sprintf( szOutput_, "icall                     \t ; Indirect Jump: PC = Z\n");
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_EICALL( void )
+static void AVR_Disasm_EICALL( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "eicall                    \t ; Extended Indirect Jump: PC(15:0) = Z(15:0), PC(21:16) = EIND\n" );
+    sprintf( szOutput_, "eicall                    \t ; Extended Indirect Jump: PC(15:0) = Z(15:0), PC(21:16) = EIND\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_CALL( void )
+static void AVR_Disasm_CALL( char *szOutput_ )
 {
     uint32_t u32k = stCPU.k;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "call 0x%X                 \t ; Long Call to Subroutine: PC = 0x%X \n",
+    sprintf( szOutput_, "call 0x%X                 \t ; Long Call to Subroutine: PC = 0x%X \n",
                 u32k, u32k
                 );
 }
 //---------------------------------------------------------------------------
-static void AVR_Disasm_RET( void )
+static void AVR_Disasm_RET( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "ret                       \t ; Return from subroutine\n" );
+    sprintf( szOutput_, "ret                       \t ; Return from subroutine\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_RETI( void )
+static void AVR_Disasm_RETI( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "reti                      \t ; Return from interrupt\n" );
+    sprintf( szOutput_, "reti                      \t ; Return from interrupt\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_CPSE( void )
+static void AVR_Disasm_CPSE( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "cpse r%d, r%d             \t ; Compare, Skip Next If r%d = r%d\n",
+    sprintf( szOutput_, "cpse r%d, r%d             \t ; Compare, Skip Next If r%d = r%d\n",
                 u8Rd, u8Rr,
                 u8Rd, u8Rr
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_CP( void )
+static void AVR_Disasm_CP( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "cp r%d, r%d               \t ; Compare: r%d == r%d\n",
+    sprintf( szOutput_, "cp r%d, r%d               \t ; Compare: r%d == r%d\n",
                 u8Rd, u8Rr,
                 u8Rd, u8Rr
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_CPC( void )
+static void AVR_Disasm_CPC( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "cpc r%d, r%d              \t ; Compare with carry: r%d == r%d + C\n",
+    sprintf( szOutput_, "cpc r%d, r%d              \t ; Compare with carry: r%d == r%d + C\n",
                 u8Rd, u8Rr,
                 u8Rd, u8Rr
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_CPI( void )
+static void AVR_Disasm_CPI( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "cpi r%d, %d               \t ; Compare with Immediate: r%d == %d\n",
+    sprintf( szOutput_, "cpi r%d, %d               \t ; Compare with Immediate: r%d == %d\n",
                 u8Rd, u8K,
                 u8Rd, u8K
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SBRC( void )
+static void AVR_Disasm_SBRC( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8b = stCPU.b;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "sbrc r%d, %d              \t ; Skip if Bit (%d) in Register (r%d) Cleared \n",
+    sprintf( szOutput_, "sbrc r%d, %d              \t ; Skip if Bit (%d) in Register (r%d) Cleared \n",
                 u8Rd, u8b,
                 u8Rd, u8b
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SBRS( void )
+static void AVR_Disasm_SBRS( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8b = stCPU.b;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "sbrs r%d, %d              \t ; Skip if Bit (%d) in Register (r%d) Set \n",
+    sprintf( szOutput_, "sbrs r%d, %d              \t ; Skip if Bit (%d) in Register (r%d) Set \n",
                 u8Rd, u8b,
                 u8Rd, u8b
                 );
@@ -590,100 +591,100 @@ static void AVR_Disasm_SBRS( void )
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SBIC( void )
+static void AVR_Disasm_SBIC( char *szOutput_ )
 {
     uint8_t u8A = stCPU.A;
     uint8_t u8b = stCPU.b;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "sbic %d, %d               \t ; Skip if Bit (%d) in IO Register (r%d) Cleared \n",
+    sprintf( szOutput_, "sbic %d, %d               \t ; Skip if Bit (%d) in IO Register (r%d) Cleared \n",
                 u8A, u8b,
                 u8A, u8b
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SBIS( void )
+static void AVR_Disasm_SBIS( char *szOutput_ )
 {
     uint8_t u8A = stCPU.A;
     uint8_t u8b = stCPU.b;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "sbis %d, %d               \t ; Skip if Bit (%d) in IO Register (r%d) Set \n",
+    sprintf( szOutput_, "sbis %d, %d               \t ; Skip if Bit (%d) in IO Register (r%d) Set \n",
                 u8A, u8b,
                 u8A, u8b
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRBS( void )
+static void AVR_Disasm_BRBS( char *szOutput_ )
 {
     uint8_t u8s = stCPU.s;
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brbs %d, %d               \t ; Branch if Bit (%d) in SR set: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brbs %d, %d               \t ; Branch if Bit (%d) in SR set: PC = PC + %d + 1\n",
                 u8s, s8k,
                 u8s, s8k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRBC( void )
+static void AVR_Disasm_BRBC( char *szOutput_ )
 {
     uint8_t u8s = stCPU.s;
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brbc %d, %d               \t ; Branch if Bit (%d) in SR clear: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brbc %d, %d               \t ; Branch if Bit (%d) in SR clear: PC = PC + %d + 1\n",
                 u8s, s8k,
                 u8s, s8k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BREQ( void )
+static void AVR_Disasm_BREQ( char *szOutput_ )
 {    
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "breq %d                   \t ; Branch if zero flag set: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "breq %d                   \t ; Branch if zero flag set: PC = PC + %d + 1\n",
                 s8k,
                 s8k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRNE( void )
+static void AVR_Disasm_BRNE( char *szOutput_ )
 {
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brne %d                   \t ; Branch if zero flag clear: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brne %d                   \t ; Branch if zero flag clear: PC = PC + %d + 1\n",
                 s8k,
                 s8k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRCS( void )
+static void AVR_Disasm_BRCS( char *szOutput_ )
 {
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brcs %d                   \t ; Branch if carry flag set: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brcs %d                   \t ; Branch if carry flag set: PC = PC + %d + 1\n",
                 s8k,
                 s8k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRCC( void )
+static void AVR_Disasm_BRCC( char *szOutput_ )
 {
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brcc %d                   \t ; Branch if carry flag clear: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brcc %d                   \t ; Branch if carry flag clear: PC = PC + %d + 1\n",
                 s8k,
                 s8k
                 );
@@ -691,96 +692,96 @@ static void AVR_Disasm_BRCC( void )
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRSH( void )
+static void AVR_Disasm_BRSH( char *szOutput_ )
 {
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brsh %d                   \t ; Branch if same or higher: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brsh %d                   \t ; Branch if same or higher: PC = PC + %d + 1\n",
                 s8k,
                 s8k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRLO( void )
+static void AVR_Disasm_BRLO( char *szOutput_ )
 {
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brlo %d                   \t ; Branch if lower: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brlo %d                   \t ; Branch if lower: PC = PC + %d + 1\n",
                 s8k,
                 s8k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRMI( void )
+static void AVR_Disasm_BRMI( char *szOutput_ )
 {
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brmi %d                   \t ; Branch if minus: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brmi %d                   \t ; Branch if minus: PC = PC + %d + 1\n",
                 s8k,
                 s8k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRPL( void )
+static void AVR_Disasm_BRPL( char *szOutput_ )
 {
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brpl %d                   \t ; Branch if plus: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brpl %d                   \t ; Branch if plus: PC = PC + %d + 1\n",
                 s8k,
                 s8k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRGE( void )
+static void AVR_Disasm_BRGE( char *szOutput_ )
 {
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brge %d                   \t ; Branch if greater-or-equal (signed): PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brge %d                   \t ; Branch if greater-or-equal (signed): PC = PC + %d + 1\n",
                 s8k,
                 s8k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRLT( void )
+static void AVR_Disasm_BRLT( char *szOutput_ )
 {
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brlt %d                   \t ; Branch if less-than (signed): PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brlt %d                   \t ; Branch if less-than (signed): PC = PC + %d + 1\n",
                 s8k,
                 s8k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRHS( void )
+static void AVR_Disasm_BRHS( char *szOutput_ )
 {
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brlt %d                   \t ; Branch if half-carry set: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brlt %d                   \t ; Branch if half-carry set: PC = PC + %d + 1\n",
                 s8k,
                 s8k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRHC( void )
+static void AVR_Disasm_BRHC( char *szOutput_ )
 {
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brhc %d                   \t ; Branch if half-carry clear: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brhc %d                   \t ; Branch if half-carry clear: PC = PC + %d + 1\n",
                 s8k,
                 s8k
                 );
@@ -788,72 +789,72 @@ static void AVR_Disasm_BRHC( void )
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRTS( void )
+static void AVR_Disasm_BRTS( char *szOutput_ )
 {
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brts %d                   \t ; Branch if T-flag set: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brts %d                   \t ; Branch if T-flag set: PC = PC + %d + 1\n",
                 s8k,
                 s8k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRTC( void )
+static void AVR_Disasm_BRTC( char *szOutput_ )
 {
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brtc %d                   \t ; Branch if T-flag clear: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brtc %d                   \t ; Branch if T-flag clear: PC = PC + %d + 1\n",
                 s8k,
                 s8k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRVS( void )
+static void AVR_Disasm_BRVS( char *szOutput_ )
 {
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brvs %d                   \t ; Branch if Overflow set: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brvs %d                   \t ; Branch if Overflow set: PC = PC + %d + 1\n",
                 s8k,
                 s8k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRVC( void )
+static void AVR_Disasm_BRVC( char *szOutput_ )
 {
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brvc %d                   \t ; Branch if Overflow clear: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brvc %d                   \t ; Branch if Overflow clear: PC = PC + %d + 1\n",
                 s8k,
                 s8k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRIE( void )
+static void AVR_Disasm_BRIE( char *szOutput_ )
 {
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brie %d                   \t ; Branch if Interrupt Enabled: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brie %d                   \t ; Branch if Interrupt Enabled: PC = PC + %d + 1\n",
                 s8k,
                 s8k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BRID( void )
+static void AVR_Disasm_BRID( char *szOutput_ )
 {
     int8_t  s8k = stCPU.k_s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "brid %d                   \t ; Branch if Interrupt Disabled: PC = PC + %d + 1\n",
+    sprintf( szOutput_, "brid %d                   \t ; Branch if Interrupt Disabled: PC = PC + %d + 1\n",
                 s8k,
                 s8k
                 );
@@ -861,413 +862,413 @@ static void AVR_Disasm_BRID( void )
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_MOV( void )
+static void AVR_Disasm_MOV( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8Rr = Register_From_Rr();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "mov r%d, r%d              \t ; Copy Register: r%d = r%d\n",
+    sprintf( szOutput_, "mov r%d, r%d              \t ; Copy Register: r%d = r%d\n",
                 u8Rd, u8Rr,
                 u8Rd, u8Rr
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_MOVW( void )
+static void AVR_Disasm_MOVW( char *szOutput_ )
 {
     uint16_t u16Rd = Register_From_Rd16();
     uint16_t u16Rr = Register_From_Rr16();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "movw r%d:r%d, r%d:r%d     \t ; Copy Register (Word): r%d:r%d = r%d:r%d\n",
+    sprintf( szOutput_, "movw r%d:r%d, r%d:r%d     \t ; Copy Register (Word): r%d:r%d = r%d:r%d\n",
                 u16Rd+1, u16Rd, u16Rr+1, u16Rr,
                 u16Rd+1, u16Rd, u16Rr+1, u16Rr
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LDI( void )
+static void AVR_Disasm_LDI( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8K = stCPU.K;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "ldi r%d, %d               \t ; Load Immediate: r%d = %d\n",
+    sprintf( szOutput_, "ldi r%d, %d               \t ; Load Immediate: r%d = %d\n",
                 u8Rd, u8K,
                 u8Rd, u8K
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LDS( void )
+static void AVR_Disasm_LDS( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint16_t u16k = stCPU.k;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "lds r%d, %d               \t ; Load Direct from Data Space: r%d = (%d)\n",
+    sprintf( szOutput_, "lds r%d, %d               \t ; Load Direct from Data Space: r%d = (%d)\n",
                 u8Rd, u16k,
                 u8Rd, u16k
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LD_X_Indirect( void )
+static void AVR_Disasm_LD_X_Indirect( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "ld r%d, X                 \t ; Load Indirect from Data Space\n",
+    sprintf( szOutput_, "ld r%d, X                 \t ; Load Indirect from Data Space\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LD_X_Indirect_Postinc( void )
+static void AVR_Disasm_LD_X_Indirect_Postinc( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "ld r%d, X+                \t ; Load Indirect from Data Space w/Postincrement\n",
+    sprintf( szOutput_, "ld r%d, X+                \t ; Load Indirect from Data Space w/Postincrement\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LD_X_Indirect_Predec( void )
+static void AVR_Disasm_LD_X_Indirect_Predec( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "ld r%d, -X                \t ; Load Indirect from Data Space w/Predecrement\n",
+    sprintf( szOutput_, "ld r%d, -X                \t ; Load Indirect from Data Space w/Predecrement\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LD_Y_Indirect( void )
+static void AVR_Disasm_LD_Y_Indirect( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "ld r%d, Y                 \t ; Load Indirect from Data Space\n",
+    sprintf( szOutput_, "ld r%d, Y                 \t ; Load Indirect from Data Space\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LD_Y_Indirect_Postinc( void )
+static void AVR_Disasm_LD_Y_Indirect_Postinc( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "ld r%d, Y+                \t ; Load Indirect from Data Space w/Postincrement\n",
+    sprintf( szOutput_, "ld r%d, Y+                \t ; Load Indirect from Data Space w/Postincrement\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LD_Y_Indirect_Predec( void )
+static void AVR_Disasm_LD_Y_Indirect_Predec( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "ld r%d, -Y                \t ; Load Indirect from Data Space w/Predecrement\n",
+    sprintf( szOutput_, "ld r%d, -Y                \t ; Load Indirect from Data Space w/Predecrement\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LDD_Y( void )
+static void AVR_Disasm_LDD_Y( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8q = stCPU.q;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "ldd r%d, Y+%d             \t ; Load Indirect from Data Space (with Displacement)\n",
+    sprintf( szOutput_, "ldd r%d, Y+%d             \t ; Load Indirect from Data Space (with Displacement)\n",
                 u8Rd, u8q
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LD_Z_Indirect( void )
+static void AVR_Disasm_LD_Z_Indirect( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "ld r%d, Z                 \t ; Load Indirect from Data Space\n",
+    sprintf( szOutput_, "ld r%d, Z                 \t ; Load Indirect from Data Space\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LD_Z_Indirect_Postinc( void )
+static void AVR_Disasm_LD_Z_Indirect_Postinc( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "ld r%d, Z+                \t ; Load Indirect from Data Space w/Postincrement\n",
+    sprintf( szOutput_, "ld r%d, Z+                \t ; Load Indirect from Data Space w/Postincrement\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LD_Z_Indirect_Predec( void )
+static void AVR_Disasm_LD_Z_Indirect_Predec( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "ld r%d, -Z                \t ; Load Indirect from Data Space w/Predecrement\n",
+    sprintf( szOutput_, "ld r%d, -Z                \t ; Load Indirect from Data Space w/Predecrement\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LDD_Z( void )
+static void AVR_Disasm_LDD_Z( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8q = stCPU.q;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "ldd r%d, Z+%d             \t ; Load Indirect from Data Space (with Displacement)\n",
+    sprintf( szOutput_, "ldd r%d, Z+%d             \t ; Load Indirect from Data Space (with Displacement)\n",
                 u8Rd, u8q
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_STS( void )
+static void AVR_Disasm_STS( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint16_t u16k = stCPU.k;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "sts %d, r%d               \t ; Store Direct to Data Space: (%d) = r%d\n",
+    sprintf( szOutput_, "sts %d, r%d               \t ; Store Direct to Data Space: (%d) = r%d\n",
                 u16k, u8Rd,
                 u16k, u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ST_X_Indirect( void )
+static void AVR_Disasm_ST_X_Indirect( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "st X, r%d                 \t ; Store Indirect\n",
+    sprintf( szOutput_, "st X, r%d                 \t ; Store Indirect\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ST_X_Indirect_Postinc( void )
+static void AVR_Disasm_ST_X_Indirect_Postinc( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "st X+, r%d                \t ; Store Indirect w/Postincrement \n",
+    sprintf( szOutput_, "st X+, r%d                \t ; Store Indirect w/Postincrement \n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ST_X_Indirect_Predec( void )
+static void AVR_Disasm_ST_X_Indirect_Predec( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "st -X, r%d                \t ; Store Indirect w/Predecrement\n",
+    sprintf( szOutput_, "st -X, r%d                \t ; Store Indirect w/Predecrement\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ST_Y_Indirect( void )
+static void AVR_Disasm_ST_Y_Indirect( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "st Y, r%d                 \t ; Store Indirect\n",
+    sprintf( szOutput_, "st Y, r%d                 \t ; Store Indirect\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ST_Y_Indirect_Postinc( void )
+static void AVR_Disasm_ST_Y_Indirect_Postinc( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "st Y+, r%d                \t ; Store Indirect w/Postincrement \n",
+    sprintf( szOutput_, "st Y+, r%d                \t ; Store Indirect w/Postincrement \n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ST_Y_Indirect_Predec( void )
+static void AVR_Disasm_ST_Y_Indirect_Predec( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "st -Y, r%d                \t ; Store Indirect w/Predecrement\n",
+    sprintf( szOutput_, "st -Y, r%d                \t ; Store Indirect w/Predecrement\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_STD_Y( void )
+static void AVR_Disasm_STD_Y( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8q = stCPU.q;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "std Y+%d, r%d             \t ; Store Indirect from Data Space (with Displacement)\n",
+    sprintf( szOutput_, "std Y+%d, r%d             \t ; Store Indirect from Data Space (with Displacement)\n",
                 u8q, u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ST_Z_Indirect( void )
+static void AVR_Disasm_ST_Z_Indirect( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "st Z, r%d                 \t ; Store Indirect\n",
+    sprintf( szOutput_, "st Z, r%d                 \t ; Store Indirect\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ST_Z_Indirect_Postinc( void )
+static void AVR_Disasm_ST_Z_Indirect_Postinc( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "st Z+, r%d                \t ; Store Indirect w/Postincrement \n",
+    sprintf( szOutput_, "st Z+, r%d                \t ; Store Indirect w/Postincrement \n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ST_Z_Indirect_Predec( void )
+static void AVR_Disasm_ST_Z_Indirect_Predec( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "st -Z, r%d                \t ; Store Indirect w/Predecrement\n",
+    sprintf( szOutput_, "st -Z, r%d                \t ; Store Indirect w/Predecrement\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_STD_Z( void )
+static void AVR_Disasm_STD_Z( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8q = stCPU.q;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "std Z+%d, r%d             \t ; Store Indirect from Data Space (with Displacement)\n",
+    sprintf( szOutput_, "std Z+%d, r%d             \t ; Store Indirect from Data Space (with Displacement)\n",
                 u8q, u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LPM( void )
+static void AVR_Disasm_LPM( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "lpm                       \t ; Load Program Memory: r0 = (Z)\n" );
+    sprintf( szOutput_, "lpm                       \t ; Load Program Memory: r0 = (Z)\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LPM_Z( void )
+static void AVR_Disasm_LPM_Z( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "lpm r%d, Z                \t ; Load Program Memory: r%d = (Z)\n",
+    sprintf( szOutput_, "lpm r%d, Z                \t ; Load Program Memory: r%d = (Z)\n",
                 u8Rd,
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LPM_Z_Postinc( void )
+static void AVR_Disasm_LPM_Z_Postinc( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "lpm r%d, Z+               \t ; Load Program Memory with Postincrement: r%d = (Z), Z = Z + 1\n",
+    sprintf( szOutput_, "lpm r%d, Z+               \t ; Load Program Memory with Postincrement: r%d = (Z), Z = Z + 1\n",
                 u8Rd,
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ELPM( void )
+static void AVR_Disasm_ELPM( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "elpm                      \t ; (Extended) Load Program Memory: r0 = (Z)\n" );
+    sprintf( szOutput_, "elpm                      \t ; (Extended) Load Program Memory: r0 = (Z)\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ELPM_Z( void )
+static void AVR_Disasm_ELPM_Z( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "elpm r%d, Z               \t ; (Extended) Load Program Memory: r%d = (Z)\n",
+    sprintf( szOutput_, "elpm r%d, Z               \t ; (Extended) Load Program Memory: r%d = (Z)\n",
                 u8Rd,
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ELPM_Z_Postinc( void )
+static void AVR_Disasm_ELPM_Z_Postinc( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "elpm r%d, Z+              \t ; (Extended) Load Program Memory w/Postincrement: r%d = (Z), Z = Z + 1\n",
+    sprintf( szOutput_, "elpm r%d, Z+              \t ; (Extended) Load Program Memory w/Postincrement: r%d = (Z), Z = Z + 1\n",
                 u8Rd,
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SPM( void )
+static void AVR_Disasm_SPM( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "spm                       \t ; Store Program Memory\n" );
+    sprintf( szOutput_, "spm                       \t ; Store Program Memory\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SPM_Z_Postinc2( void )
+static void AVR_Disasm_SPM_Z_Postinc2( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "spm Z+                    \t ; Store Program Memory Z = Z + 2 \n" );
+    sprintf( szOutput_, "spm Z+                    \t ; Store Program Memory Z = Z + 2 \n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_IN( void )
+static void AVR_Disasm_IN( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8A = stCPU.A;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "in r%d, %d                \t ; Load an I/O location to register\n",
+    sprintf( szOutput_, "in r%d, %d                \t ; Load an I/O location to register\n",
                 u8Rd,
                 u8A
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_OUT( void )
+static void AVR_Disasm_OUT( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8A = stCPU.A;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "out %d, r%d               \t ; Load an I/O location to register\n",
+    sprintf( szOutput_, "out %d, r%d               \t ; Load an I/O location to register\n",
                 u8A,
                 u8Rd
                 );
@@ -1275,365 +1276,365 @@ static void AVR_Disasm_OUT( void )
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LAC( void )
+static void AVR_Disasm_LAC( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "lac Z, r%d                   \t ; Load And Clear\n",
+    sprintf( szOutput_, "lac Z, r%d                   \t ; Load And Clear\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LAS( void )
+static void AVR_Disasm_LAS( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "las Z, r%d                   \t ; Load And Set\n",
+    sprintf( szOutput_, "las Z, r%d                   \t ; Load And Set\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LAT( void )
+static void AVR_Disasm_LAT( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "lat Z, r%d                   \t ; Load And Toggle\n",
+    sprintf( szOutput_, "lat Z, r%d                   \t ; Load And Toggle\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LSL( void )
+static void AVR_Disasm_LSL( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "lsl r%d                   \t ; Logical shift left r%d by 1 bit\n",
+    sprintf( szOutput_, "lsl r%d                   \t ; Logical shift left r%d by 1 bit\n",
                 u8Rd,
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_LSR( void )
+static void AVR_Disasm_LSR( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "lsr r%d                   \t ; Logical shift right r%d by 1 bit\n",
+    sprintf( szOutput_, "lsr r%d                   \t ; Logical shift right r%d by 1 bit\n",
                 u8Rd,
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_POP( void )
+static void AVR_Disasm_POP( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "pop r%d                   \t ; Pop byte from stack into r%d\n",
+    sprintf( szOutput_, "pop r%d                   \t ; Pop byte from stack into r%d\n",
                 u8Rd,
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_PUSH( void )
+static void AVR_Disasm_PUSH( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "push r%d                  \t ; Push register r%d to stack\n",
+    sprintf( szOutput_, "push r%d                  \t ; Push register r%d to stack\n",
                 u8Rd,
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ROL( void )
+static void AVR_Disasm_ROL( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "rol r%d                   \t ; Rotate Left through Carry\n",
+    sprintf( szOutput_, "rol r%d                   \t ; Rotate Left through Carry\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ROR( void )
+static void AVR_Disasm_ROR( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "ror r%d                   \t ; Rotate Right through Carry\n",
+    sprintf( szOutput_, "ror r%d                   \t ; Rotate Right through Carry\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_ASR( void )
+static void AVR_Disasm_ASR( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "asr r%d                   \t ; Arithmatic Shift Right\n",
+    sprintf( szOutput_, "asr r%d                   \t ; Arithmatic Shift Right\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SWAP( void )
+static void AVR_Disasm_SWAP( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "swap r%d                  \t ; Swap high/low Nibbles in Register\n",
+    sprintf( szOutput_, "swap r%d                  \t ; Swap high/low Nibbles in Register\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BSET( void )
+static void AVR_Disasm_BSET( char *szOutput_ )
 {
     uint8_t u8s = stCPU.s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "bset %d                   \t ; Set bit %d in status register\n",
+    sprintf( szOutput_, "bset %d                   \t ; Set bit %d in status register\n",
                 u8s,
                 u8s
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BCLR( void )
+static void AVR_Disasm_BCLR( char *szOutput_ )
 {
     uint8_t u8s = stCPU.s;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "bclr %d                   \t ; Clear bit %d in status register\n",
+    sprintf( szOutput_, "bclr %d                   \t ; Clear bit %d in status register\n",
                 u8s,
                 u8s
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SBI( void )
+static void AVR_Disasm_SBI( char *szOutput_ )
 {
     uint8_t u8b = stCPU.b;
     uint8_t u8A = stCPU.A;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "sbi %d, %d                \t ; Set bit in I/O register\n",
+    sprintf( szOutput_, "sbi %d, %d                \t ; Set bit in I/O register\n",
                 u8A,
                 u8b
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_CBI( void )
+static void AVR_Disasm_CBI( char *szOutput_ )
 {
     uint8_t u8s = stCPU.b;
     uint8_t u8A = stCPU.A;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "cbi %d, %d                \t ; Clear bit in I/O register\n",
+    sprintf( szOutput_, "cbi %d, %d                \t ; Clear bit in I/O register\n",
                 u8A,
                 u8s
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BST( void )
+static void AVR_Disasm_BST( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8b = stCPU.b;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "bst r%d, %d               \t ; Store Bit %d of r%d in the T register\n",
+    sprintf( szOutput_, "bst r%d, %d               \t ; Store Bit %d of r%d in the T register\n",
                 u8Rd, u8b,
                 u8b, u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BLD( void )
+static void AVR_Disasm_BLD( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
     uint8_t u8b = stCPU.b;
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "bld r%d, %d               \t ; Load the T register into Bit %d of r%d\n",
+    sprintf( szOutput_, "bld r%d, %d               \t ; Load the T register into Bit %d of r%d\n",
                 u8Rd, u8b,
                 u8b, u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SEC( void )
+static void AVR_Disasm_SEC( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "sec                       \t ; Set the carry flag in the SR\n" );
+    sprintf( szOutput_, "sec                       \t ; Set the carry flag in the SR\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_CLC( void )
+static void AVR_Disasm_CLC( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "clc                       \t ; Clear the carry flag in the SR\n" );
+    sprintf( szOutput_, "clc                       \t ; Clear the carry flag in the SR\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SEN( void )
+static void AVR_Disasm_SEN( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "sen                       \t ; Set the negative flag in the SR\n" );
+    sprintf( szOutput_, "sen                       \t ; Set the negative flag in the SR\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_CLN( void )
+static void AVR_Disasm_CLN( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "cln                       \t ; Clear the negative flag in the SR\n" );
+    sprintf( szOutput_, "cln                       \t ; Clear the negative flag in the SR\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SEZ( void )
+static void AVR_Disasm_SEZ( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "sez                       \t ; Set the zero flag in the SR\n" );
+    sprintf( szOutput_, "sez                       \t ; Set the zero flag in the SR\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_CLZ( void )
+static void AVR_Disasm_CLZ( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "clz                       \t ; Clear the zero flag in the SR\n" );
+    sprintf( szOutput_, "clz                       \t ; Clear the zero flag in the SR\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SEI( void )
+static void AVR_Disasm_SEI( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "sei                       \t ; Enable MCU interrupts\n" );
+    sprintf( szOutput_, "sei                       \t ; Enable MCU interrupts\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_CLI( void )
+static void AVR_Disasm_CLI( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "cli                       \t ; Disable MCU interrupts\n" );
+    sprintf( szOutput_, "cli                       \t ; Disable MCU interrupts\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SES( void )
+static void AVR_Disasm_SES( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "ses                       \t ; Set the sign flag in the SR\n" );
+    sprintf( szOutput_, "ses                       \t ; Set the sign flag in the SR\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_CLS( void )
+static void AVR_Disasm_CLS( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "cls                       \t ; Clear the sign flag in the SR\n" );
+    sprintf( szOutput_, "cls                       \t ; Clear the sign flag in the SR\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SEV( void )
+static void AVR_Disasm_SEV( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "sev                       \t ; Set the overflow flag in the SR\n" );
+    sprintf( szOutput_, "sev                       \t ; Set the overflow flag in the SR\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_CLV( void )
+static void AVR_Disasm_CLV( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "clv                       \t ; Clear the overflow flag in the SR\n" );
+    sprintf( szOutput_, "clv                       \t ; Clear the overflow flag in the SR\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SET( void )
+static void AVR_Disasm_SET( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "set                       \t ; Set the T-flag in the SR\n" );
+    sprintf( szOutput_, "set                       \t ; Set the T-flag in the SR\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_CLT( void )
+static void AVR_Disasm_CLT( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "clt                       \t ; Clear the T-flag in the SR\n" );
+    sprintf( szOutput_, "clt                       \t ; Clear the T-flag in the SR\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SEH( void )
+static void AVR_Disasm_SEH( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "seh                       \t ; Set half-carry flag in SR\n" );
+    sprintf( szOutput_, "seh                       \t ; Set half-carry flag in SR\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_CLH( void )
+static void AVR_Disasm_CLH( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "clh                       \t ; Clear half-carry flag in SR\n" );
+    sprintf( szOutput_, "clh                       \t ; Clear half-carry flag in SR\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_BREAK( void )
+static void AVR_Disasm_BREAK( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "break                     \t ; Halt for debugger\n" );
+    sprintf( szOutput_, "break                     \t ; Halt for debugger\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_NOP( void )
+static void AVR_Disasm_NOP( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "nop                       \t ; Do nothing\n" );
+    sprintf( szOutput_, "nop                       \t ; Do nothing\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_SLEEP( void )
+static void AVR_Disasm_SLEEP( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "sleep                     \t ; Put MCU into sleep mode\n" );
+    sprintf( szOutput_, "sleep                     \t ; Put MCU into sleep mode\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_WDR( void )
+static void AVR_Disasm_WDR( char *szOutput_ )
 {
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "wdr                       \t ; Reset Watchdog Timer\n" );
+    sprintf( szOutput_, "wdr                       \t ; Reset Watchdog Timer\n" );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_XCH( void )
+static void AVR_Disasm_XCH( char *szOutput_ )
 {
     uint8_t u8Rd = Register_From_Rd();
 
     //ruler: 0----5----10---15---20---25---30---35---40" );
-    printf( "xch Z, r%d                \t ; Exchange registers w/memory\n",
+    sprintf( szOutput_, "xch Z, r%d                \t ; Exchange registers w/memory\n",
                 u8Rd
                 );
 }
 
 //---------------------------------------------------------------------------
-static void AVR_Disasm_Unimplemented()
+static void AVR_Disasm_Unimplemented( char *szOutput_ )
 {
-    printf( ".db 0x%04X ; Data (not an opcode)\n", stCPU.pu16ROM[ stCPU.u16PC ] );
+    sprintf( szOutput_, ".db 0x%04X ; Data (not an opcode)\n", stCPU.pu16ROM[ stCPU.u16PC ] );
 }
 
 //---------------------------------------------------------------------------
-AVR_Opcode AVR_Disasm_Function( uint16_t OP_ )
+AVR_Disasm AVR_Disasm_Function( uint16_t OP_ )
 {
     // Special instructions - "static" encoding
     switch (OP_)

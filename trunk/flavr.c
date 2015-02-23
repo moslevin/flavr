@@ -37,6 +37,13 @@
 #include "avr_cpu.h"
 #include "avr_loader.h"
 
+//---------------------------------------------------------------------------
+#include "mega_uart.h"
+#include "mega_eint.h"
+#include "mega_timer16.h"
+#include "mega_timer8.h"
+
+//---------------------------------------------------------------------------
 #include "avr_disasm.h"
 #include "trace_buffer.h"
 #include "options.h"
@@ -45,12 +52,7 @@
 #include "watchpoint.h"
 #include "kernel_aware.h"
 #include "code_profile.h"
-
-//---------------------------------------------------------------------------
-#include "mega_uart.h"
-#include "mega_eint.h"
-#include "mega_timer16.h"
-#include "mega_timer8.h"
+#include "tlv_file.h"
 
 //---------------------------------------------------------------------------
 typedef enum
@@ -188,9 +190,12 @@ void flavr_disasm(void)
     while (stCPU.u16PC < u32Size)
     {
         uint16_t OP = stCPU.pu16ROM[stCPU.u16PC];
+        char szBuf[256];
+
         printf("0x%04X: [0x%04X] ", stCPU.u16PC, OP);
         AVR_Decode(OP);
-        AVR_Disasm_Function(OP)();
+        AVR_Disasm_Function(OP)(szBuf);
+        printf( "%s", szBuf );
         stCPU.u16PC += AVR_Opcode_Size(OP);
     }
     exit(0);
@@ -280,6 +285,15 @@ void emulator_init(void)
     }
 
     add_plugins();
+
+    if (Options_GetByName("--mark3") || Options_GetByName("--profile"))
+    {
+        // Initialize tag-length-value code if we're running with code
+        // profiling or kernel-aware debugging, since they generate a
+        // lot of data that's better stored in a binary format for
+        // efficiency.
+        TLV_Init( "flavr.tlv" );
+    }
 
     if (Options_GetByName("--mark3"))
     {

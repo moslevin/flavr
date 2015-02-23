@@ -24,6 +24,10 @@
 #include "avr_opcodes.h"
 
 //---------------------------------------------------------------------------
+// Format opcode function for disassembly
+typedef void (*AVR_Disasm)( char *szOutput_ );
+
+//---------------------------------------------------------------------------
 /*!
  * \brief AVR_Disasm_Function
  *
@@ -35,7 +39,7 @@
  *         opcode, will produce a valid disassembly statement to standard
  *         output.
  */
-AVR_Opcode AVR_Disasm_Function( uint16_t OP_ );
+AVR_Disasm AVR_Disasm_Function( uint16_t OP_ );
 
 
 #endif
