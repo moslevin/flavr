@@ -292,7 +292,7 @@ void emulator_init(void)
         // profiling or kernel-aware debugging, since they generate a
         // lot of data that's better stored in a binary format for
         // efficiency.
-        TLV_Init( "flavr.tlv" );
+        TLV_WriteInit( "flavr.tlv" );
     }
 
     if (Options_GetByName("--mark3"))
@@ -311,6 +311,7 @@ void emulator_init(void)
 //---------------------------------------------------------------------------
 int main( int argc, char **argv )
 {    
+
     // Initialize all emulator data
     Options_Init(argc, argv);
 
