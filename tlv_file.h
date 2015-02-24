@@ -58,15 +58,16 @@ typedef struct
 
 //---------------------------------------------------------------------------
 /*!
- * \brief TLV_Init
+ * \brief TLV_WriteInit
  *
  * Initialize the TLV file used to store profiling and diagnostics information
  * in an efficient binary format.  Must be called before logging TLV data.
  *
  * \param szPath_ Name of the TLV output file to create
  */
-void TLV_Init( const char *szPath_ );
+void TLV_WriteInit( const char *szPath_ );
 
+void TLV_WriteFinish( void );
 //---------------------------------------------------------------------------
 /*!
  * \brief TLV_Alloc
@@ -99,5 +100,51 @@ void TLV_Free( TLV_t *pstTLV_ );
  * \return -1 on error, number of bytes written on success.
  */
 int TLV_Write( TLV_t *pstData_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief TLV_ReadInit
+ *
+ * Open the tlv-formatted binary specified in the szPath_ argument, and read
+ * its contents into a newly-allocated buffer, which is passed back to the
+ * user by the double-pointer pu8Buffer_ argument..
+ *
+ * \param szPath_       Path to the file to open
+ * \param pu8Buffer_    Pointer which will be assigned to the newly-created
+ *                      buffer.
+ *
+ * \return size of the newly-created buffer (in bytes), or 0 on error.
+ */
+int TLV_ReadInit( const char *szPath_, uint8_t **pu8Buffer_ );
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief TLV_Read
+ *
+ * Read an entry from a local copy of the TLV buffer into a user-provided
+ * TLV pointer.
+ *
+ * \param pstTLV_       Pointer to a valid TLV object, with a buffer large
+ *                      enough to hold the largest data object we may encounter.
+ *
+ * \param pu8Buffer_    Pointer to a buffer containing the contents of the
+ *                      TLV input file.
+ *
+ * \param iIndex_       Byte index at whch to start reading TLV data.
+ *
+ * \return              Number of bytes read into the TLV struct
+ */
+int TLV_Read( TLV_t *pstTLV_, uint8_t *pu8Buffer_, int iIndex_);
+
+//---------------------------------------------------------------------------
+/*!
+ * \brief TLV_ReadFinish
+ *
+ * Dispose of the in-ram copy of the TLV read buffer, allocated from
+ * TLV_ReadInit
+ *
+ * \param pu8Buffer_    Pointer to the previously allocated TLV ram buffer
+ */
+void TLV_ReadFinish( uint8_t *pu8Buffer_ );
 
 #endif
