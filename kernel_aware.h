@@ -28,6 +28,21 @@
 #include <stdint.h>
 
 //---------------------------------------------------------------------------
+typedef enum
+{
+    KA_COMMAND_IDLE = 0,
+    KA_COMMAND_PROFILE_INIT,
+    KA_COMMAND_PROFILE_START,
+    KA_COMMAND_PROFILE_STOP,
+    KA_COMMAND_PROFILE_REPORT,
+    KA_COMMAND_EXIT_SIMULATOR,
+    KA_COMMAND_TRACE_0,
+    KA_COMMAND_TRACE_1,
+    KA_COMMAND_TRACE_2,
+    KA_COMMAND_PRINT
+} KernelAwareCommand_t;
+
+//---------------------------------------------------------------------------
 /*!
  * \brief KernelAware_Init
  *

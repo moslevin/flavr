@@ -21,6 +21,7 @@ SRC_LIST_EMULATOR=\
     ka_interrupt.c \
     ka_thread.c \
     ka_profile.c \
+    ka_trace.c \
 	trace_buffer.c \
 	watchpoint.c \
 	breakpoint.c \
