@@ -61,6 +61,8 @@ static void KA_PrintProfileResults(void)
     strcpy( stTLV.szName, szNameBuffer );
     memcpy( pstTLV->au8Data, &stTLV, sizeof(Mark3Profile_TLV_t) );
 
+    printf( "%s: %llu, %llu, %llu\n", stTLV.szName, stTLV.u64Timestamp, stTLV.u64ProfileCount, stTLV.u64ProfileTotalCycles );
+
     TLV_Write( pstTLV );
 }
 
@@ -72,34 +74,38 @@ void KA_Command_Profile_Begin(void)
     u64ProfileEpochStart = 0;
 
     Debug_Symbol_t *pstSymbol = Symbol_Find_Obj_By_Name( "g_stKAData" );
-    if (pstSymbol)
+    if (!pstSymbol)
     {
-        uint16_t u16NamePtr = *((uint16_t*)&stCPU.pstRAM->au8RAM[ pstSymbol->u32StartAddr ]);
-        const char *szName = (const char*)&stCPU.pstRAM->au8RAM[ u16NamePtr ];
-        if (szName)
-        {
-            strcpy( szNameBuffer, szName );
-        }
-        else
-        {
-            strcpy( szNameBuffer, "(NONE)" );
-        }
+        return;
     }
+
+    uint16_t u16NamePtr = *((uint16_t*)&stCPU.pstRAM->au8RAM[ pstSymbol->u32StartAddr ]);
+    const char *szName = (const char*)&stCPU.pstRAM->au8RAM[ u16NamePtr ];
+    if (szName)
+    {
+        strcpy( szNameBuffer, szName );
+    }
+    else
+    {
+        strcpy( szNameBuffer, "(NONE)" );
+    }
+
 }
 
 //---------------------------------------------------------------------------
 void KA_Command_Profile_Start(void)
 {
     // Profile stop or reset
-    u64ProfileTotal += (stCPU.u64CycleCount - u64ProfileEpochStart);
-    u64ProfileEpochStart = 0;
-    u64ProfileCount++;
+    u64ProfileEpochStart = stCPU.u64CycleCount;
 }
 
 //---------------------------------------------------------------------------
 void KA_Command_Profile_Stop(void)
 {
-    u64ProfileEpochStart = stCPU.u64CycleCount;
+    u64ProfileTotal += (stCPU.u64CycleCount - u64ProfileEpochStart);
+    u64ProfileEpochStart = 0;
+    u64ProfileCount++;
+
 }
 
 //---------------------------------------------------------------------------

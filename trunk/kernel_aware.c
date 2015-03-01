@@ -26,6 +26,7 @@
 #include "ka_interrupt.h"
 #include "ka_profile.h"
 #include "ka_thread.h"
+#include "ka_trace.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -33,27 +34,10 @@
 #include <string.h>
 #include <time.h>
 
-//---------------------------------------------------------------------------
-typedef enum
-{
-    KA_COMMAND_IDLE = 0,
-    KA_COMMAND_PROFILE_INIT,
-    KA_COMMAND_PROFILE_START,
-    KA_COMMAND_PROFILE_STOP,
-    KA_COMMAND_PROFILE_REPORT,
-    KA_COMMAND_EXIT_SIMULATOR,
-    KA_COMMAND_TRACE_0,
-    KA_COMMAND_TRACE_1,
-    KA_COMMAND_TRACE_2,
-    KA_COMMAND_PRINT
-} KernelAwareCommand_t;
-
-//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 static void KA_Command( uint16_t u16Addr_, uint8_t u8Data_ )
 {
-    // printf("Command:%d\n", u8Data_);
     switch (u8Data_)
     {
     case KA_COMMAND_PROFILE_INIT:   KA_Command_Profile_Begin();     break;
@@ -61,13 +45,9 @@ static void KA_Command( uint16_t u16Addr_, uint8_t u8Data_ )
     case KA_COMMAND_PROFILE_START:  KA_Command_Profile_Start();     break;
     case KA_COMMAND_PROFILE_REPORT: KA_Command_Profile_Report();    break;
     case KA_COMMAND_TRACE_0:
-        break;
     case KA_COMMAND_TRACE_1:
-        break;
-    case KA_COMMAND_TRACE_2:
-        break;
-    case KA_COMMAND_PRINT:
-        break;
+    case KA_COMMAND_TRACE_2:        KA_EmitTrace(u8Data_);          break;
+    case KA_COMMAND_PRINT:          KA_Print();                     break;
     default:
         break;
 
@@ -100,4 +80,5 @@ void KernelAware_Init( void )
     KA_Interrupt_Init();
     KA_Thread_Init();
     KA_Profile_Init();
+    KA_Trace_Init();
 }
