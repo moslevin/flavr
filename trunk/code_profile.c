@@ -36,35 +36,91 @@ typedef struct
 } Profile_t;
 
 //---------------------------------------------------------------------------
+typedef struct
+{
+    uint64_t u64CyclesTotal;
+    uint64_t u64CPUCycles;
+    char szSymName[256];
+} FunctionProfileTLV_t;
+
+//---------------------------------------------------------------------------
+typedef struct
+{
+    uint32_t u32FunctionSize;
+    uint32_t u32AddressesHit;
+    char szSymName[256];
+} FunctionCoverageTLV_t;
+
+//---------------------------------------------------------------------------
+typedef struct
+{
+    uint32_t u32CodeAddress;
+    uint64_t u64Hits;
+    char     szDisasmLine[256];   //!< Disassembly for the address in question
+} AddressCoverageTLV_t;
+
+//---------------------------------------------------------------------------
 static Profile_t *pstProfile = 0;
 static uint32_t  u32ROMSize = 0;
 
 //---------------------------------------------------------------------------
-void Profile_Init( uint32_t u32ROMSize_ )
-{
-    // Allocate a lookup table, one entry per address in ROM to allow us to
-    // gather code-coverage and code-profiling information.
-    uint32_t u32BufSize = sizeof(Profile_t) * u32ROMSize_ ;
-    u32ROMSize = u32ROMSize_;
-    pstProfile = (Profile_t*)malloc( u32BufSize );
-    memset( pstProfile, 0, u32BufSize );
+static TLV_t *pstFunctionCoverageTLV = NULL;
+static TLV_t *pstFunctionProfileTLV = NULL;
+static TLV_t *pstAddressCoverageTLV = NULL;
 
-    // Go through the list of symbols, and associate each function with its
-    // address range in the lookup table.
-    int iFuncs = Symbol_Get_Func_Count();
-    int i;
-    for (i = 0; i < iFuncs; i++)
-    {
-        Debug_Symbol_t *pstSym = Symbol_Func_At_Index( i );
-        int j;
-        if (pstSym)
-        {
-            for (j = pstSym->u32StartAddr; j < pstSym->u32EndAddr; j++)
-            {
-                pstProfile[j].pstSym = pstSym;
-            }
-        }
-    }
+//---------------------------------------------------------------------------
+static void Profile_TLVInit(void)
+{
+    pstFunctionProfileTLV = TLV_Alloc( sizeof(FunctionProfileTLV_t));
+    pstFunctionProfileTLV->eTag = TAG_CODE_PROFILE_FUNCTION_GLOBAL;
+
+    pstFunctionCoverageTLV = TLV_Alloc( sizeof(FunctionCoverageTLV_t));
+    pstFunctionCoverageTLV->eTag = TAG_CODE_COVERAGE_FUNCTION_GLOBAL;
+
+    pstAddressCoverageTLV = TLV_Alloc( sizeof(AddressCoverageTLV_t));
+    pstAddressCoverageTLV->eTag = TAG_CODE_COVERAGE_ADDRESS;
+}
+
+//---------------------------------------------------------------------------
+static void Profile_FunctionCoverage( const char *szFunc_, uint32_t u32FuncSize_, uint32_t u32HitSize_ )
+{
+    FunctionCoverageTLV_t *pstData = (FunctionCoverageTLV_t*)(&pstFunctionCoverageTLV->au8Data[0]);
+
+    strcpy(pstData->szSymName, szFunc_);
+    pstData->u32FunctionSize = u32FuncSize_;
+    pstData->u32AddressesHit = u32HitSize_;
+    pstFunctionCoverageTLV->u16Len = strlen(szFunc_) + 8; // Size of the static + variable data
+
+    TLV_Write( pstFunctionCoverageTLV );
+}
+
+//---------------------------------------------------------------------------
+static void Profile_Function( const char *szFunc_, uint64_t u64Cycles_, uint64_t u64CPUCycles_ )
+{
+    FunctionProfileTLV_t *pstData = (FunctionProfileTLV_t*)(&pstFunctionProfileTLV->au8Data[0]);
+
+    strcpy(pstData->szSymName, szFunc_);
+    pstData->u64CyclesTotal = u64Cycles_;
+    pstData->u64CPUCycles = u64CPUCycles_;
+
+    pstFunctionProfileTLV->u16Len = strlen(szFunc_) + 16; // Size of the static + variable data
+
+    TLV_Write( pstFunctionProfileTLV );
+}
+
+//---------------------------------------------------------------------------
+static void Profile_AddressCoverage( const char *szDisasm_, uint32_t u32Addr_, uint64_t u64Hits_ )
+{
+    AddressCoverageTLV_t *pstData = (AddressCoverageTLV_t*)(&pstAddressCoverageTLV->au8Data[0]);
+
+    strcpy(pstData->szDisasmLine, szDisasm_);
+
+    pstData->u32CodeAddress = u32Addr_;
+    pstData->u64Hits = u64Hits_;
+
+    pstAddressCoverageTLV->u16Len = strlen(szDisasm_) + 12;
+
+    TLV_Write( pstAddressCoverageTLV );
 }
 
 //---------------------------------------------------------------------------
@@ -146,6 +202,8 @@ void Profile_PrintCoverageDissassembly(void)
             AVR_Disasm_Function(OP)(szBuf);
             printf( "%s", szBuf );
 
+            Profile_AddressCoverage( szBuf, stCPU.u16PC, pstProfile[j].u64TotalHit );
+
             j += AVR_Opcode_Size(OP);
         }
         printf("\n");
@@ -176,6 +234,7 @@ void Profile_Print(void)
         printf( "%60s: %0.3f\n",
                 pstSym->szName,
                 100.0 * (double)(pstSym->u64TotalRefs) / (double)(u64TotalCycles) );
+        Profile_Function( pstSym->szName, pstSym->u64TotalRefs, u64TotalCycles );
     }
 
     printf( "=====================================================================================\n");
@@ -211,8 +270,41 @@ void Profile_Print(void)
             }
         }
         printf("%60s: %0.3f\n", pstSym->szName, 100.0 * (double)iHits/(double)(iHits + iMisses));
+        Profile_FunctionCoverage(pstSym->szName, iHits + iMisses, iHits);
     }
     printf( "\n[Global Code Coverage] : %0.3f\n",
             100.0 * (double)iGlobalHits/(double)(iGlobalHits + iGlobalMisses));
 
+}
+//---------------------------------------------------------------------------
+void Profile_Init( uint32_t u32ROMSize_ )
+{
+    // Allocate a lookup table, one entry per address in ROM to allow us to
+    // gather code-coverage and code-profiling information.
+    uint32_t u32BufSize = sizeof(Profile_t) * u32ROMSize_ ;
+    u32ROMSize = u32ROMSize_;
+    pstProfile = (Profile_t*)malloc( u32BufSize );
+    memset( pstProfile, 0, u32BufSize );
+
+    // Go through the list of symbols, and associate each function with its
+    // address range in the lookup table.
+    int iFuncs = Symbol_Get_Func_Count();
+    int i;
+    for (i = 0; i < iFuncs; i++)
+    {
+        Debug_Symbol_t *pstSym = Symbol_Func_At_Index( i );
+        int j;
+        if (pstSym)
+        {
+            for (j = pstSym->u32StartAddr; j < pstSym->u32EndAddr; j++)
+            {
+                pstProfile[j].pstSym = pstSym;
+            }
+        }
+    }
+
+    Profile_TLVInit();
+
+    atexit( Profile_Print );
+    atexit( Profile_PrintCoverageDissassembly );
 }

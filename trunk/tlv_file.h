@@ -44,6 +44,7 @@ typedef enum
     TAG_CODE_COVERAGE_FUNCTION_EPOCH,           //!< Code coverage for a given function (per epoch)
     TAG_CODE_COVERAGE_FUNCTION_GLOBAL,          //!< Code coverage for a given function (cumulative)
     TAG_CODE_COVERAGE_GLOBAL,                   //!< Global code coverage (cumulative)
+    TAG_CODE_COVERAGE_ADDRESS,                  //!< Code coverage stats for a given address (cumulative)
 //---
     TAG_COUNT
 } FlavrTag_t;
