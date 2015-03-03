@@ -73,6 +73,7 @@ typedef struct
     uint8_t        u8ThreadID;
     uint64_t       u64TotalCycles;
     uint64_t       u64EpockCycles;
+    bool           bActive;
 } Mark3_Thread_Info_t;
 
 //---------------------------------------------------------------------------
@@ -114,23 +115,25 @@ static void Mark3KA_AddKnownThread( Mark3_Thread_t *pstThread_ )
         for (i = 0; i < u16NumThreads; i++)
         {
             Mark3_Thread_t *pstThread = pstThreadInfo[i].pstThread;
-            if ( (pstThread == pstThread_) &&
-                 (pstThreadInfo[i].u8ThreadID == pstThread_->u8ThreadID) )
+            // If there are other threads that exist at this address,
+            if (pstThread == pstThread_)
             {
-                bExists = true;
-                // If this thread is a dynamic thread being "recycled", reset the CPU usage stats associated with it.
-                if (pstThread->u8ThreadID != pstThreadInfo[i].u8ThreadID)
+                // If the stored thread's ID is different than the ID being presented here,
+                // then it's a dynamic thread involved.  Create a new threadinfo object to track it.
+                if (pstThreadInfo[i].u8ThreadID != pstThread_->u8ThreadID)
                 {
-                    pstThreadInfo[i].u64EpockCycles = 0;
-                    pstThreadInfo[i].u64TotalCycles = 0;
-                    pstThreadInfo[i].u8ThreadID = pstThread->u8ThreadID;
+                    pstThreadInfo[i].bActive = false;
                 }
-                break;
+                // Thread IDs are the same, thread has already been tracked, don't do anything.
+                else
+                {
+                    bExists = true;
+                }
             }
         }
     }
 
-    // If not, add it to the list of known threads.
+    // If not already known, add the thread to the list of known threads.
     if (!bExists)
     {
         u16NumThreads++;
@@ -140,6 +143,7 @@ static void Mark3KA_AddKnownThread( Mark3_Thread_t *pstThread_ )
         pstThreadInfo[u16NumThreads - 1].u64EpockCycles = 0;
         pstThreadInfo[u16NumThreads - 1].u64TotalCycles = 0;
         pstThreadInfo[u16NumThreads - 1].u8ThreadID = pstThread_->u8ThreadID;
+        pstThreadInfo[u16NumThreads - 1].bActive = true;
     }
 }
 
@@ -249,7 +253,6 @@ static void KA_ThreadChange( uint16_t u16Addr_, uint8_t u8Data_ )
         u64IdleTime += (stCPU.u64CycleCount - u64LastTime);
     }
 
-
     // Track this as a known-thread internally for future reporting.
     Mark3KA_AddKnownThread( Mark3KA_GetCurrentThread() );
 
@@ -283,6 +286,36 @@ static void KA_ThreadChange( uint16_t u16Addr_, uint8_t u8Data_ )
 }
 
 //---------------------------------------------------------------------------
+void KA_PrintThreadInfo(void)
+{
+    int i;
+    uint64_t u64TrackedThreadTime = 0;
+
+    uint16_t u16LastThread = (uint16_t)((void*)Mark3KA_GetCurrentThread() - (void*)&stCPU.pstRAM->au8RAM[0]);
+
+    KA_ThreadChange( u16LastThread, 0 );
+
+    for ( i = 0; i < u16NumThreads; i++ )
+    {
+        u64TrackedThreadTime += pstThreadInfo[i].u64TotalCycles;
+    }
+
+    printf( "ThreadID, ThreadAddr, TotalCycles, PercentCPU, IsActive, Prio, StackMargin\n");
+    for ( i = 0; i < u16NumThreads; i++ )
+    {
+        printf( "%d, %04X, %llu, %0.3f, %d, %d, %d\n",
+                    pstThreadInfo[i].u8ThreadID,
+                    (uint16_t)((void*)(pstThreadInfo[i].pstThread) - (void*)(&stCPU.pstRAM->au8RAM[0])),
+                    pstThreadInfo[i].u64TotalCycles,
+                    (double)pstThreadInfo[i].u64TotalCycles / u64TrackedThreadTime * 100.0f,
+                    pstThreadInfo[i].bActive,
+                    (pstThreadInfo[i].bActive ? pstThreadInfo[i].pstThread->u8Priority : 0),
+                    (pstThreadInfo[i].bActive ? Mark3KA_GetStackMargin(pstThreadInfo[i].pstThread) : 0)
+                ) ;
+    }
+}
+
+//---------------------------------------------------------------------------
 void KA_Thread_Init( void )
 {
     Debug_Symbol_t *pstSymbol = 0;
@@ -309,4 +342,5 @@ void KA_Thread_Init( void )
     pstTLV->eTag = TAG_KERNEL_AWARE_CONTEXT_SWITCH;
     pstTLV->u16Len = sizeof(Mark3ContextSwitch_TLV_t);
 
+    atexit( KA_PrintThreadInfo );
 }
