@@ -120,7 +120,7 @@ static uint8_t Data_Read( uint16_t u16Addr_)
     }
     else if (u16Addr_ >= (stCPU.u32RAMSize + 256))
     {
-        fprintf( stderr, "[Write Abort] RAM Address 0x%04X is out of range!\n", u16Addr_ );
+        fprintf( stderr, "[Read Abort] RAM Address 0x%04X is out of range!\n", u16Addr_ );
         AVR_Abort();
     }
     // RAM address range - direct read
