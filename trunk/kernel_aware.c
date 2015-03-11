@@ -27,6 +27,7 @@
 #include "ka_profile.h"
 #include "ka_thread.h"
 #include "ka_trace.h"
+#include "ka_graphics.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -52,6 +53,13 @@ static void KA_Command( uint16_t u16Addr_, uint8_t u8Data_ )
         break;
 
     }
+}
+
+//---------------------------------------------------------------------------
+void KA_Graphics_Init( void )  __attribute__((weak));
+void KA_Graphics_Init( void )
+{
+
 }
 
 //---------------------------------------------------------------------------
@@ -81,4 +89,5 @@ void KernelAware_Init( void )
     KA_Thread_Init();
     KA_Profile_Init();
     KA_Trace_Init();
+    KA_Graphics_Init();
 }

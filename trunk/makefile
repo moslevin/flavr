@@ -36,6 +36,8 @@ SRC_LIST_EMULATOR=\
     write_callout.c \
     tlv_file.c
 
+SRC_LIST_SDL=$(SRC_LIST_EMULATOR) ka_graphics.c
+
 DOCFILE_TEX=./docs/latex/refman.tex
 DOCFILE_PDF=./docs/latex/refman.pdf
 
@@ -46,6 +48,9 @@ all: emulator doc
 
 emulator: $(SRC_LIST_EMULATOR:%.c=%.o)
 	$(CC) -g0 -O3 -o flavr $(SRC_LIST_EMULATOR:%.c=%.o)
+
+emulator_sdl: $(SRC_LIST_SDL:%.c=%.o)
+	$(CC) -g0 -O3 -o flavr_sdl $(SRC_LIST_SDL:%.c=%.o) -lSDL
 
 %.o : %.c
 	$(CC) $< -c -g0 -O3
