@@ -87,6 +87,7 @@ void KA_Print( void )
     const char *szString = (const char*)&stCPU.pstRAM->au8RAM[ u16NamePtr ];
 
     strcpy( pstTLV->au8Data, szString );
+    fprintf( stderr, "%s", szString );
 }
 
 //---------------------------------------------------------------------------
