@@ -28,6 +28,7 @@
 #include "ka_thread.h"
 #include "ka_trace.h"
 #include "ka_graphics.h"
+#include "ka_joystick.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -37,7 +38,7 @@
 
 
 //---------------------------------------------------------------------------
-static void KA_Command( uint16_t u16Addr_, uint8_t u8Data_ )
+static bool KA_Command( uint16_t u16Addr_, uint8_t u8Data_ )
 {
     switch (u8Data_)
     {
@@ -53,11 +54,28 @@ static void KA_Command( uint16_t u16Addr_, uint8_t u8Data_ )
         break;
 
     }
+    return true;
+}
+
+//---------------------------------------------------------------------------
+static bool KA_Set( uint16_t u16Addr_, uint8_t u8Data_ )
+{
+    Debug_Symbol_t *pstSymbol = 0;
+
+    stCPU.pstRAM->au8RAM[ u16Addr_ ] = 1;
+    return false;
 }
 
 //---------------------------------------------------------------------------
 void KA_Graphics_Init( void )  __attribute__((weak));
 void KA_Graphics_Init( void )
+{
+
+}
+
+//---------------------------------------------------------------------------
+void KA_Joystick_Init( void )  __attribute__((weak));
+void KA_Joystick_Init( void )
 {
 
 }
@@ -85,9 +103,32 @@ void KernelAware_Init( void )
         printf( "Unable to find g_ucKACommand\n" );
     }
 
+
+    // Set the kernel's "simulator aware" flag, to let it know to configure itself
+    // appropriately.
+
+    pstSymbol = Symbol_Find_Obj_By_Name( "g_bIsKernelAware" );
+    if (pstSymbol)
+    {
+        // Ensure that we actually have the information we need at a valid address
+        uint16_t u16CurrPtr = (uint16_t)(pstSymbol->u32StartAddr);
+
+        if (u16CurrPtr)
+        {
+            // Add a callout so that the kernel-aware flag is *always* set.
+            WriteCallout_Add( KA_Set , u16CurrPtr );
+        }
+    }
+    else
+    {
+        printf( "Unable to find g_bIsKernelAware" );
+    }
+
+
     KA_Interrupt_Init();
     KA_Thread_Init();
     KA_Profile_Init();
     KA_Trace_Init();
     KA_Graphics_Init();
+    KA_Joystick_Init();
 }

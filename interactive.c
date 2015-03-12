@@ -365,7 +365,7 @@ void Interactive_Set( void )
 }
 
 //---------------------------------------------------------------------------
-void Interactive_WatchpointCallback( uint16_t u16Addr_, uint8_t u8Val_ )
+bool Interactive_WatchpointCallback( uint16_t u16Addr_, uint8_t u8Val_ )
 {
     if (WatchPoint_EnabledAtAddress(u16Addr_))
     {
@@ -375,6 +375,7 @@ void Interactive_WatchpointCallback( uint16_t u16Addr_, uint8_t u8Val_ )
                     stCPU.pstRAM->au8RAM[ u16Addr_ ],
                     u8Val_ );
     }
+    return true;
 }
 
 //---------------------------------------------------------------------------
@@ -387,6 +388,7 @@ void Interactive_Init( TraceBuffer_t *pstTrace_ )
     // Add the watchpoint handler as a wildcard callout (i.e. every write
     // triggers is, it's up to the callout to handle filtering on its own).
     WriteCallout_Add( Interactive_WatchpointCallback, 0 );
+
 }
 
 //---------------------------------------------------------------------------

@@ -74,16 +74,21 @@ void WriteCallout_Add( WriteCalloutFunc pfCallout_, uint16_t u16Addr_ )
 }
 
 //---------------------------------------------------------------------------
-void WriteCallout_Run( uint16_t u16Addr_, uint8_t u8Data_ )
+bool WriteCallout_Run( uint16_t u16Addr_, uint8_t u8Data_ )
 {
     Write_Callout_t *pstCallout = pstCallouts;
+    bool bRet = true;
     while (pstCallout)
     {
         if ( (pstCallout->u16Addr == u16Addr_) ||
              (pstCallout->u16Addr == 0) )
         {
-            pstCallout->pfCallout( u16Addr_, u8Data_ );
+            if (!pstCallout->pfCallout( u16Addr_, u8Data_ ))
+            {
+                bRet = false;
+            }
         }
         pstCallout = pstCallout->pstNext;
     }
+    return bRet;
 }

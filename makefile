@@ -36,7 +36,7 @@ SRC_LIST_EMULATOR=\
     write_callout.c \
     tlv_file.c
 
-SRC_LIST_SDL=$(SRC_LIST_EMULATOR) ka_graphics.c
+SRC_LIST_SDL=$(SRC_LIST_EMULATOR) ka_graphics.c ka_joystick.c
 
 DOCFILE_TEX=./docs/latex/refman.tex
 DOCFILE_PDF=./docs/latex/refman.pdf

@@ -46,7 +46,10 @@ static void Data_Write( uint16_t u16Addr_, uint8_t u8Val_ )
     // Writing to RAM can be a tricky deal, because the address space is shared
     // between RAM, the core registers, and a bunch of peripheral I/O registers.
     DEBUG_PRINT("Write: 0x%04X=%02X\n", u16Addr_, u8Val_ );
-    WriteCallout_Run( u16Addr_, u8Val_ );
+    if (!WriteCallout_Run( u16Addr_, u8Val_ ))
+    {
+        return;
+    }
 
     // Check to see if the write operation falls within the peripheral I/O range
     if (u16Addr_ >= 32 && u16Addr_ <= 255)
