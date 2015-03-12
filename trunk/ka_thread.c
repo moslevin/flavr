@@ -220,7 +220,7 @@ static uint16_t Mark3KA_GetCurrentStackMargin(void)
 }
 
 //---------------------------------------------------------------------------
-static void KA_StackWarning( uint16_t u16Addr_, uint8_t u8Data_ )
+static bool KA_StackWarning( uint16_t u16Addr_, uint8_t u8Data_ )
 {
     if (u8Data_ != 0xFF && stCPU.pstRAM->au8RAM[ u16Addr_ ] == 0xFF )
     {
@@ -228,10 +228,11 @@ static void KA_StackWarning( uint16_t u16Addr_, uint8_t u8Data_ )
                 Mark3KA_GetCurrentThread()->u8ThreadID,
                 Mark3KA_GetCurrentStackMargin() );
     }
+    return true;
 }
 
 //---------------------------------------------------------------------------
-static void KA_ThreadChange( uint16_t u16Addr_, uint8_t u8Data_ )
+static bool KA_ThreadChange( uint16_t u16Addr_, uint8_t u8Data_ )
 {
     uint8_t  u8Pri = Mark3KA_GetCurrentPriority();
     uint8_t  u8Thread = Mark3KA_GetCurrentThread()->u8ThreadID;
@@ -283,6 +284,8 @@ static void KA_ThreadChange( uint16_t u16Addr_, uint8_t u8Data_ )
     // Cache the current thread for use as the "last run" thread in
     // subsequent iterations
     pstLastThread = Mark3KA_GetCurrentThread();
+
+    return true;
 }
 
 //---------------------------------------------------------------------------

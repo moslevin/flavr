@@ -1,3 +1,23 @@
+/****************************************************************************
+ *     (     (                      (     |
+ *    )\ )  )\ )    (              )\ )   |
+ *   (()/( (()/(    )\     (   (  (()/(   | -- [ Funkenstein ] -------------
+ *    /(_)) /(_))((((_)()\  )\  /(_))     | -- [ Litle ] -------------------
+ *   (_))_|(_))   )\ _ )\ ((_)((_)(_))    | -- [ AVR ] ---------------------
+ *   | |_  | |    (_)_\(_)\ \ / / | _ \   | -- [ Virtual ] -----------------
+ *   | __| | |__   / _ \   \ V /  |   /   | -- [ Runtime ] -----------------
+ *   |_|   |____| /_/ \_\   \_/   |_|_\   |
+ *                                        | "Yeah, it does Arduino..."
+ * ---------------------------------------+----------------------------------
+ * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
+ *     See license.txt for details
+ ****************************************************************************/
+/*!
+    \file   ka_graphics.c
+
+    \brief  Mark3 RTOS Kernel-Aware graphics library
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -72,7 +92,7 @@ void KA_Graphics_Flip(void)
 }
 
 //---------------------------------------------------------------------------
-void KA_Graphics_Command( uint16_t u16Addr_, uint8_t u8Data_ )
+bool KA_Graphics_Command( uint16_t u16Addr_, uint8_t u8Data_ )
 {
     Debug_Symbol_t *pstSymbol = Symbol_Find_Obj_By_Name( "g_pstPoint" );
 
@@ -93,13 +113,13 @@ void KA_Graphics_Command( uint16_t u16Addr_, uint8_t u8Data_ )
         default:
             break;
     }
+
+    return true;
 }
 
 //---------------------------------------------------------------------------
 void KA_Graphics_Init(void)
 {
-    fprintf(stderr, "TEST\n" );
-
     Debug_Symbol_t *pstSymbol = 0;
     pstSymbol = Symbol_Find_Obj_By_Name( "g_ucGfxCommand" );
 

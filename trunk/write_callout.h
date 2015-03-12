@@ -23,10 +23,11 @@
 #define __WRITE_CALLOUT_H__
 
 #include <stdint.h>
+#include <stdbool.h>
 
 //---------------------------------------------------------------------------
 //! Function pointer type for memory-write callout handlers
-typedef void (*WriteCalloutFunc)(uint16_t u16Addr_, uint8_t u8Data_);
+typedef bool (*WriteCalloutFunc)(uint16_t u16Addr_, uint8_t u8Data_);
 
 //---------------------------------------------------------------------------
 /*!
@@ -51,8 +52,10 @@ void WriteCallout_Add( WriteCalloutFunc pfCallout_, uint16_t u16Addr_ );
  *
  * \param u16Addr_   - Address in RAM currently being modified
  * \param u8Data_    - Data that will be written to the address
+ *
+ * \return false - bypass CPU's own write function for this memory write.
  */
-void WriteCallout_Run( uint16_t u16Addr_, uint8_t u8Data_ );
+bool WriteCallout_Run( uint16_t u16Addr_, uint8_t u8Data_ );
 
 
 #endif
