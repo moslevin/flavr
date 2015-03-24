@@ -24,6 +24,15 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+#if 1
+    #define DEBUG_PRINT(...)
+#else
+    #define DEBUG_PRINT     printf
+#endif
 
 //---------------------------------------------------------------------------
 typedef enum
@@ -54,21 +63,22 @@ static uint32_t       u32CountDown = 0;
 //---------------------------------------------------------------------------
 static void EEARH_Write( uint8_t u8Addr_ )
 {
-    stCPU.pstRAM->stRegisters.EEARH.r = (u8Addr_ & 0x03);
+    stCPU.pstRAM->stRegisters.EEARH = (u8Addr_ & 0x03);
 }
 
 //---------------------------------------------------------------------------
 static void EEARL_Write( uint8_t u8Addr_ )
 {
-    stCPU.pstRAM->stRegisters.EEARL.r = u8Addr_;
+    stCPU.pstRAM->stRegisters.EEARL = u8Addr_;
 }
 
 //---------------------------------------------------------------------------
 static uint16_t EEAR_Read( void )
 {
     uint16_t u16Addr;
-    u16Addr = ((uint16_t)(stCPU.pstRAM->stRegisters.EEARH.r) << 8) |
-              (uint16_t)(stCPU.pstRAM->stRegisters.EEARL.r);
+    u16Addr = ((uint16_t)(stCPU.pstRAM->stRegisters.EEARH) << 8) |
+              (uint16_t)(stCPU.pstRAM->stRegisters.EEARL);
+    return u16Addr;
 }
 
 //---------------------------------------------------------------------------
@@ -88,7 +98,23 @@ static bool EEPE_Read(void)
 {
     return (stCPU.pstRAM->stRegisters.EECR.EEPE == 1);
 }
+//---------------------------------------------------------------------------
+static void EERE_Clear(void)
+{
+    stCPU.pstRAM->stRegisters.EECR.EERE = 0;
+}
 
+//---------------------------------------------------------------------------
+static void EERE_Set(void)
+{
+    stCPU.pstRAM->stRegisters.EECR.EERE = 1;
+}
+
+//---------------------------------------------------------------------------
+static bool EERE_Read(void)
+{
+    return (stCPU.pstRAM->stRegisters.EECR.EERE == 1);
+}
 //---------------------------------------------------------------------------
 static void EEMPE_Clear(void)
 {
@@ -136,13 +162,21 @@ static EEPROM_Mode_t EEPM_Read(void)
 //---------------------------------------------------------------------------
 static uint8_t EEDR_Read(void)
 {
-    return stCPU.pstRAM->stRegisters.EEDR.r;
+    return stCPU.pstRAM->stRegisters.EEDR;
+}
+
+//---------------------------------------------------------------------------
+static void EEPROM_Init(void *context_ )
+{
+    eState = EEPROM_STATE_IDLE;
+    u32CountDown = 0;
 }
 
 //---------------------------------------------------------------------------
 static void EEPROM_Read(void *context_, uint8_t ucAddr_, uint8_t *pucValue_ )
 {
-    return (stCPU.pstRAM->stRegisters.EECR.r & 0x3F);
+    DEBUG_PRINT( "EEPROM Read %2x\n", stCPU.pstRAM->stRegisters.EECR.r );
+    *pucValue_ = stCPU.pstRAM->stRegisters.EECR.r;
 }
 
 //---------------------------------------------------------------------------
@@ -155,7 +189,7 @@ static void EEPROM_Write(void *context_, uint8_t ucAddr_, uint8_t ucValue_ )
     // libc implementation, which is very much "sunny case" code.  In short,
     // this will handle incorrectly-implemented code incorrectly.
 
-    stCPU.pstRAM->stRegisters.EECR.r |= (ucValue & 0x3F);
+    stCPU.pstRAM->stRegisters.EECR.r |= (ucValue_ & 0x3F);
 
     switch (eState)
     {
@@ -165,6 +199,7 @@ static void EEPROM_Write(void *context_, uint8_t ucAddr_, uint8_t ucValue_ )
             {
                 // When the data is read, the data is available in the next instruction
                 // but the CPU is halted for 4 cycles before it's executed.
+                DEBUG_PRINT( "EEPROM Read\n" );
                 eState = EEPROM_STATE_READ;
                 u32CountDown = 4;
 
@@ -172,11 +207,12 @@ static void EEPROM_Write(void *context_, uint8_t ucAddr_, uint8_t ucValue_ )
                 stCPU.u64CycleCount += u32CountDown;
 
                 // Read data at EEPROM address to EEPROM data register
-                stCPU.pstRAM->stRegisters.EEDR.r = stCPU.pu8EEPROM[ EEAR_Read() ];
+                stCPU.pstRAM->stRegisters.EEDR = stCPU.pu8EEPROM[ EEAR_Read() ];
             }
             else if ((ucValue_ & 0x04) == 0x04) // Program Enable
             {
                 // Must initiate a write within 4 cycles of enabling the EEPROM write bit
+                DEBUG_PRINT( "EEPROM Write Enable \n" );
                 eState = EEPROM_STATE_WRITE_ENABLE;
                 u32CountDown = 4;
             }
@@ -188,7 +224,7 @@ static void EEPROM_Write(void *context_, uint8_t ucAddr_, uint8_t ucValue_ )
             if ((ucValue_ & 0x02) == 0x02) // Value has EEPE
             {
                 eState = EEPROM_STATE_WRITE;
-
+                DEBUG_PRINT( "EEPROM Write\n" );
                 switch ( EEPM_Read() )
                 {
                     //!! ToDo - Fix the times to use RC-oscilator times, not CPU-clock times.
@@ -200,13 +236,16 @@ static void EEPROM_Write(void *context_, uint8_t ucAddr_, uint8_t ucValue_ )
                         break;
                     case EEPROM_MODE_WRITE:
                     {
-                        stCPU.pu8EEPROM[ EEAR_Read() ] &= EEDR_Read();
+                        // EEPROM works by setting individual bits -- once a bit is set, it must be
+                        // cleared before it can be reset.
+                        stCPU.pu8EEPROM[ EEAR_Read() ] |= EEDR_Read();
                         u32CountDown = 25000;
                     }
                         break;
                     case EEPROM_MODE_ERASE:
                     {
-                        stCPU.pu8EEPROM[ EEAR_Read() ] = 0xFF;
+                        // EEPROM is 0 when cleared
+                        stCPU.pu8EEPROM[ EEAR_Read() ] = 0x00;
                         u32CountDown = 25000;
                     }
                         break;
@@ -227,6 +266,8 @@ static void EEPROM_Clock(void *context_)
 
     if (u32CountDown)
     {
+        // DEBUG_PRINT( "EEPROM Clock %d\n", u32CountDown );
+
         u32CountDown--;
         if (!u32CountDown)
         {
@@ -236,17 +277,25 @@ static void EEPROM_Clock(void *context_)
                 case EEPROM_STATE_WRITE:
                 {
                     EEPE_Clear();
+                    EERE_Clear();
+                    EEMPE_Clear();
+
                     eState = EEPROM_STATE_IDLE;
                 }
                     break;
                 case EEPROM_STATE_READ:
                 {
+                    EEPE_Clear();
+                    EERE_Clear();
+                    EEMPE_Clear();
+
                     eState = EEPROM_STATE_IDLE;
                 }
                     break;
                 case EEPROM_STATE_WRITE_ENABLE:
                 {
                     EEMPE_Clear();
+                    EERE_Clear();
                     eState = EEPROM_STATE_IDLE;
                 }
                     break;

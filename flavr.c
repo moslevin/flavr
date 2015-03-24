@@ -42,6 +42,7 @@
 #include "mega_eint.h"
 #include "mega_timer16.h"
 #include "mega_timer8.h"
+#include "mega_eeprom.h"
 
 //---------------------------------------------------------------------------
 #include "avr_disasm.h"
@@ -177,6 +178,7 @@ void add_plugins(void)
     CPU_AddPeriph(&stTimer8);
     CPU_AddPeriph(&stTimer8a);
     CPU_AddPeriph(&stTimer8b);
+    CPU_AddPeriph(&stEEPROM);
 }
 
 //---------------------------------------------------------------------------
