@@ -43,12 +43,6 @@ typedef struct
     //! Pointer to the thread's stack
     uint16_t u16StackPtr;
 
-    //! Size of the stack (in bytes)
-    uint16_t u16StackSize;
-
-    //! Thread quantum (in milliseconds)
-    uint16_t u16Quantum;
-
     //! Thread ID
     uint8_t u8ThreadID;
 
@@ -58,11 +52,21 @@ typedef struct
     //! Current priority of the thread (priority inheritence)
     uint8_t u8CurPriority;
 
+    //! Size of the stack (in bytes)
+    uint16_t u16StackSize;
+
+    //! Threadlists
+    uint16_t u16CurrentThreadList;
+    uint16_t u16OwnerThreadList;
+
     //! The entry-point function called when the thread starts
     uint16_t u16EntryPoint;
 
     //! Pointer to the argument passed into the thread's entrypoint
     void *m_pvArg;
+
+    //! Thread quantum (in milliseconds)
+    uint16_t u16Quantum;
 
 } Mark3_Thread_t;
 
