@@ -4,8 +4,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
-
+#include <io.h>
+#include <fcntl.h>
 #include "avr_cpu.h"
+#include "options.h"
+#include "kernel_aware.h"
 
 //---------------------------------------------------------------------------
 typedef enum {
@@ -74,7 +77,7 @@ static bool GDB_Handler_SetThread( const char *pcCmd_, char *ppcResponse_ );
 static bool GDB_Handler_QuestionMark( const char *pcCmd_, char *ppcResponse_ );
 static bool GDB_Handler_V( const char *pcCmd_, char *ppcResponse_ );
 static bool GDB_Handler_Continue( const char *pcCmd_, char *ppcResponse_ );
-static bool GDB_Handler_BreakPoint( const char *pcCmd_, char *ppcResponse_ );
+static bool GDB_Handler_SetBreakPoint( const char *pcCmd_, char *ppcResponse_ );
 static bool GDB_Handler_ClearBreakPoint( const char *pcCmd_, char *ppcResponse_ );
 //---------------------------------------------------------------------------
 
@@ -105,7 +108,7 @@ static const GDBCommandMap_t astCommands[] =
     { GDB_COMMAND_T,        "T",    GDB_Handler_Unsupported },
     { GDB_COMMAND_X,        "X",    GDB_Handler_Unsupported },
     { GDB_COMMAND_x,        "x",    GDB_Handler_Unsupported },
-    { GDB_COMMAND_Z,        "Z",    GDB_Handler_BreakPoint },
+    { GDB_COMMAND_Z,        "Z",    GDB_Handler_SetBreakPoint },
     // Return data or error code
     { GDB_COMMAND_QMARK,    "?",    GDB_Handler_QuestionMark },
     { GDB_COMMAND_c,        "c",    GDB_Handler_Continue },  // Continue execution
@@ -114,30 +117,28 @@ static const GDBCommandMap_t astCommands[] =
     { GDB_COMMAND_m,        "m",    GDB_Handler_ReadMem }, // Read memory
     { GDB_COMMAND_p,        "p",    GDB_Handler_ReadReg}, // Read value of register
     { GDB_COMMAND_qxxxx,    "q",    GDB_Handler_Query },
-    { GDB_COMMAND_s,        "s",    GDB_Handler_Step },
+    { GDB_COMMAND_s,        "s",    GDB_Handler_Step }, // Step
     { GDB_COMMAND_S,        "S",    GDB_Handler_Unsupported },
     { GDB_COMMAND_v,        "v",    GDB_Handler_V },
     { GDB_COMMAND_z,        "z",    GDB_Handler_ClearBreakPoint },
-
 };
-
 
 //---------------------------------------------------------------------------
 static volatile bool bRetrigger = false;
 static volatile bool bIsInteractive = false;
+static volatile bool bStepping = false;
 static int break_count = 0;
 
-#include <io.h>
-#include <fcntl.h>
+#if _WIN32
 #include <WinSock2.h>
 #include <WS2tcpip.h>
-#include <stdio.h>
-#include <stdlib.h>
+
+static SOCKET  my_socket    = INVALID_SOCKET;
+static SOCKET  gdb_socket   = INVALID_SOCKET;
 
 #pragma comment(lib, "Ws2_32.lib")
 static WSADATA ws;
-static SOCKET  my_socket    = INVALID_SOCKET;
-static SOCKET  gdb_socket   = INVALID_SOCKET;
+
 //---------------------------------------------------------------------------
 static void GDB_ServerCreate(void)
 {
@@ -179,7 +180,7 @@ static void GDB_ServerCreate(void)
         }
 
         // Setup the TCP listening socket
-        if (SOCKET_ERROR == bind(my_socket, localaddr->ai_addr, (int)localaddr->ai_addrlen))
+        if (SOCKET_ERROR ==bind(my_socket, localaddr->ai_addr, (int)localaddr->ai_addrlen))
         {
             fprintf(stderr, "Error on socket bind - bailing\n");
             err = -1;
@@ -224,6 +225,17 @@ static void GDB_ServerCreate(void)
 
     fprintf(stderr, "[GDB Connected!]\n");
 }
+#else // POSIX Implementation
+static int  my_socket    = 0;
+static int  gdb_socket   = 0;
+
+//---------------------------------------------------------------------------
+static void GDB_ServerCreate(void)
+{
+
+}
+
+#endif
 
 //---------------------------------------------------------------------------
 static uint8_t wait_for_data( void )
@@ -239,7 +251,9 @@ static uint8_t wait_for_data( void )
     char ch;
     if ( 0 == recv(gdb_socket, &ch, 1, NULL )) {
         fprintf(stderr, "Socket disconnected - bailing\n");
-        exit(0);
+        bIsInteractive = true;
+        usleep(500000);
+        exit(-1);
     }
     return ch;
 }
@@ -253,48 +267,60 @@ static bool GDB_Execute_i( void )
     int idx = 0;
     char ch;
 
-    fprintf( stderr, "Begin\n" );
-    fflush( stderr );
+    // Wait until there's data on the socket to read
+    ch = wait_for_data();
 
-    ch = wait_for_data(); //(stdin);
+    // Search for the telltale "$" at the beginning of a packet
     while (ch != '$')
     {
+        // 0 indicates EOF -- bail on GDB termination
         if (ch == 0)
         {
-            fprintf(stderr, "[EOF]\n");
+            fprintf(stderr, "[EOF - Terminating]\n");
             exit(0);
         }
+        // 3 indicates CTRL^C -- break;
         if (ch == 3)
         {
-            fprintf(stderr, "[BREAK]\n");
+            fprintf(stderr, "[GDB - Signal Break]\n");
+            GDB_Set();
             return false;
         }
         ch = wait_for_data();
     }
+
+    // Found the header ,Read the remainder of the packet
     ch = wait_for_data();
     while (ch != '#')
     {
         szCmdBuf[idx++] = ch;
         ch = wait_for_data();
     }
+
+    // End of packet found, read the checksum.  ToDo -- validate it
     ch = wait_for_data();
     ch = wait_for_data();
 
+    // Null-terminate the packet
     szCmdBuf[idx] = 0;
+    GDB_SendAck();
 
-    fprintf(stderr, "[Sending ACK]\n");
-    send(gdb_socket, "+", 1, 0);
-
+    //!! Todo - defensive programming.
+    fprintf(stderr, "[RX]%s\n", szCmdBuf);
+    // Go through our list of commands, and dispatch a handler based on command string
     int i;
     for (i = 0; i < sizeof(astCommands)/sizeof(GDBCommandMap_t); i++)
     {
         if (astCommands[i].szToken[0] == szCmdBuf[0])
-        {
-            fprintf(stderr, "compare command %s with %s\n", astCommands[i].szToken, szCmdBuf );
+        {            
             szRespBuf[0] = 0;
             bool ret = astCommands[i].pfHandler( szCmdBuf, szRespBuf );
 
-            if (!ret) {
+            // if ret == false, it means that we're going to let the simulator run
+            // until there's data from GDB (typically on a break or EOF).
+            if (!ret)
+            {
+                // Otherwise, we have data to send back to GDB immediately.
                 char *resp = GDB_Packetize( szRespBuf );
                 send(gdb_socket, resp, strlen(resp), 0);
                 fprintf(stderr, "%s", resp);
@@ -304,7 +330,7 @@ static bool GDB_Execute_i( void )
             return ret;
         }
     }
-    fprintf(stderr, "unsupported/unimplemented command %s\n", szCmdBuf );
+
     return false;
 }
 
@@ -315,37 +341,6 @@ void GDB_Set( void )
 }
 
 //---------------------------------------------------------------------------
-#ifdef _WIN32
-// Hack to get ctrl-c redirection working on Windows
-#include <conio.h>
-#include <windows.h>
-
-static void *GDB_CatchIO(void *unused_)
-{
-    while(1)
-    {
-        if (false == bIsInteractive)
-        {
-            if (_kbhit())
-            {
-                if (3 == _getch())
-                {
-                    GDB_Set();
-                }
-            }
-        }
-        Sleep(100);
-    }
-}
-#else
-// Catch ctrl-c from GDB
-
-#include <sys/select.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <time.h>
-
 static void *GDB_CatchIO(void *unused_)
 {
     while(1)
@@ -354,34 +349,38 @@ static void *GDB_CatchIO(void *unused_)
         {
             fd_set read_fds;
             FD_ZERO(&read_fds);
-            FD_SET(0, &read_fds);
+            FD_SET(gdb_socket, &read_fds);
 
             int err = select( 1, &read_fds, NULL, NULL, NULL );
-            if (err > 0 && (false == bIsInteractive))
+            if (err > 0)
             {
                 char ch;
-                if (1 == read(0, &ch, 1))
+                if (1 == recv(gdb_socket, &ch, 1, NULL))
                 {
                     if (ch == 3) // Ctrl^C
                     {
                         GDB_Set();
                     }
                 }
+            } else {
+                return NULL;
             }
-        }
-        usleep(100000);
+        }        
     }
 }
 
-#endif
 //---------------------------------------------------------------------------
 static void GDB_InstallBreakHandler( void )
 {
     pthread_attr_t attr;
     pthread_attr_init(&attr);
 
+    struct sched_param param;
+    param.sched_priority = sched_get_priority_max(SCHED_RR) - 1;
+    pthread_attr_setschedparam(&attr, &param );
+
     pthread_t thread_id;
-   // pthread_create(&thread_id, &attr, GDB_CatchIO, NULL);
+    pthread_create(&thread_id, &attr, GDB_CatchIO, NULL);
 }
 
 //---------------------------------------------------------------------------
@@ -400,22 +399,22 @@ bool GDB_CheckAndExecute( void )
     }
     fprintf(stderr, "[GDB] Debugging @ Address [0x%X]\n", stCPU.u16PC );
 
-    if (break_count)
+    if (break_count || bStepping)
     {
         char szRespBuf[1024];
-        GDB_SendStatus(szRespBuf, 5);
+        GDB_SendStatus(szRespBuf, 0);
         char *resp = GDB_Packetize( szRespBuf );
         send(gdb_socket, resp, strlen(resp), 0);
         fprintf(stderr, "%s", resp);
         free(resp);
     }
 
+    bStepping = false;
     break_count++;
 
     // Keep attempting to parse commands until a valid one was encountered
     while (!GDB_Execute_i()) { /* Do Nothing */ }
 
-    // !! Install monitor
 }
 
 //---------------------------------------------------------------------------
@@ -612,35 +611,87 @@ static bool GDB_Handler_WriteRegs( const char *pcCmd_, char *ppcResponse_ )
     sprintf(ppcResponse_, "OK");
     return false;
 }
+//---------------------------------------------------------------------------
 
+extern char *KA_Get_Thread_Info_XML(uint8_t **thread_ids, uint16_t *thread_count);
 
 //---------------------------------------------------------------------------
 static bool GDB_Handler_Query( const char *pcCmd_, char *ppcResponse_ )
 {
     if (0 != strstr(pcCmd_, "Supported"))
     {
-        sprintf(ppcResponse_, ""); //qXfer:memory-map:read+");
+#if 0
+        if (Options_GetByName("--mark3"))
+        {
+            sprintf(ppcResponse_, "qXfer:memory-map:read+;threads:read+");
+        }
+        else
+        {
+            sprintf(ppcResponse_, "qXfer:memory-map:read+");
+        }
+#endif
     }
     else if (0 != strstr(pcCmd_, "Attached"))
     {
         sprintf(ppcResponse_, "1");
     }
-    else
+    else if (0 != strstr(pcCmd_, "fThreadInfo"))
     {
-        sprintf(ppcResponse_, "");
+        // Get a list of
+        uint8_t *ids = NULL;
+        uint16_t count = 0;
+        char *resp;
+        resp = KA_Get_Thread_Info_XML(&ids, &count);
+        free(resp);
+
+        int i;
+        char *out = ppcResponse_;
+
+        if (!count)
+        {
+            sprintf(ppcResponse_, "m0");
+            return false;
+        }
+
+        out += sprintf(out, "m%d", ids[0]);
+        for (i = 1; i < count; i++) {
+            out += sprintf(out, ",%d", ids[i]);
+        }
+        free(ids);
     }
+    else if (0 != strstr(pcCmd_, "sThreadInfo"))
+    {
+        // Assume we won't have a long enough threadlist to saturate
+        // multiple packets.
+        sprintf(ppcResponse_,"l");
+    }
+#if 0
+    else if (0 != strstr(pcCmd_, "Xfer:memory-map:read"))
+    {
+        sprintf(ppcResponse_,
+                    "l<memory-map>\n"
+                    " <memory type='ram' start='0x800000' length='%#x'/>\n"
+                    " <memory type='flash' start='0' length='%#x'>\n"
+                    "  <property name='blocksize'>0x80</property>\n"
+                    " </memory>\n"
+                    "</memory-map>",
+                    stCPU.u32RAMSize,
+                    stCPU.u32ROMSize );
+    }
+    else if (0 != strstr(pcCmd_, "Xfer:threads:read"))
+    {
+        char *resp = KA_Get_Thread_Info_XML(NULL,NULL);
+        sprintf(ppcResponse_, "%s", resp);
+        free(resp);
+    }
+#endif
     return false;
 }
 
 //---------------------------------------------------------------------------
 static bool GDB_Handler_QuestionMark( const char *pcCmd_, char *ppcResponse_ )
 {
-    sprintf(ppcResponse_, "T%02x20:%02x;21:%02x%02x;22:%02x%02x0000;",
-        5, stCPU.pstRAM->stRegisters.SREG.r,
-        stCPU.pstRAM->stRegisters.SPL.r,
-        stCPU.pstRAM->stRegisters.SPH.r,
-        stCPU.u16PC & 0xff, (stCPU.u16PC >> 8) & 0xff);
-
+    GDB_SendStatus(ppcResponse_, 5);
     return false;
 }
 
@@ -662,7 +713,8 @@ static bool GDB_Handler_Continue( const char *pcCmd_, char *ppcResponse_ )
 static bool GDB_Handler_Step( const char *pcCmd_, char *ppcResponse_ )
 {
     bRetrigger = true;
-    bIsInteractive = false;
+    bIsInteractive = true;
+    bStepping = true;
     return true;
 }
 
@@ -674,7 +726,7 @@ static bool GDB_Handler_SetThread( const char *pcCmd_, char *ppcResponse_ )
 }
 
 //---------------------------------------------------------------------------
-static bool GDB_Handler_BreakPoint( const char *pcCmd_, char *ppcResponse_ )
+static bool GDB_Handler_SetBreakPoint( const char *pcCmd_, char *ppcResponse_ )
 {
     uint16_t addr;
     char *addr_str;
@@ -693,6 +745,7 @@ static bool GDB_Handler_BreakPoint( const char *pcCmd_, char *ppcResponse_ )
     case 1:
         if (!BreakPoint_EnabledAtAddress( addr ))
         {
+            fprintf(stderr, "Inserting breakpoint @ %04X", addr);
             BreakPoint_Insert(addr);
             sprintf(ppcResponse_, "OK");
             return false;
@@ -741,10 +794,10 @@ static bool GDB_Handler_ClearBreakPoint( const char *pcCmd_, char *ppcResponse_ 
 static void GDB_SendStatus( const char *ppcResponse_, uint8_t signo_ )
 {
     sprintf(ppcResponse_, "T%02x20:%02x;21:%02x%02x;22:%02x%02x0000;",
-    signo_, stCPU.pstRAM->stRegisters.SREG.r,
-    stCPU.pstRAM->stRegisters.SPL.r,
-    stCPU.pstRAM->stRegisters.SPH.r,
-    stCPU.u16PC & 0xff, (stCPU.u16PC >> 8) & 0xff);
+        signo_, stCPU.pstRAM->stRegisters.SREG.r,
+        stCPU.pstRAM->stRegisters.SPL.r,
+        stCPU.pstRAM->stRegisters.SPH.r,
+        stCPU.u16PC & 0xff, (stCPU.u16PC >> 8) & 0xff);
 }
 
 //---------------------------------------------------------------------------
@@ -771,6 +824,7 @@ static char *GDB_Packetize( const char *ppcResponse_ )
 {
     char *dst = (char*)(malloc(1024));
     uint8_t u8Chk = GDB_BuildChecksum( ppcResponse_ );
+    // packet format: [$][data][#][2-byte checksum]
     sprintf( dst, "$%s#%02x", ppcResponse_, u8Chk );
     return dst;
 }
@@ -784,14 +838,18 @@ static bool GDB_WatchpointCallback( uint16_t u16Addr_, uint8_t u8Val_ )
     }
     return true;
 }
+//---------------------------------------------------------------------------
+void GDB_SendAck( void )
+{
+    send(gdb_socket, "+", 1, 0);
+}
 
 //---------------------------------------------------------------------------
 void GDB_Init( void )
 {   
     WriteCallout_Add( GDB_WatchpointCallback, 0 );
-    GDB_InstallBreakHandler();
     GDB_ServerCreate();
-    send(gdb_socket, "+", 1, 0);
+    GDB_InstallBreakHandler();
 }
 
 

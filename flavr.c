@@ -54,6 +54,7 @@
 #include "kernel_aware.h"
 #include "code_profile.h"
 #include "tlv_file.h"
+#include "gdb_rsp.h"
 
 //---------------------------------------------------------------------------
 typedef enum
@@ -63,7 +64,8 @@ typedef enum
     RAM_TOO_SMALL,
     ROM_TOO_BIG,
     INVALID_HEX_FILE,
-    INVALID_VARIANT
+    INVALID_VARIANT,
+    INVALID_DEBUG_OPTIONS
 } ErrorReason_t;
 
 //---------------------------------------------------------------------------
@@ -112,6 +114,8 @@ void error_out( ErrorReason_t eReason_ )
         case INVALID_VARIANT:
             printf( "Unknown variant not supported\n");
             break;
+        case INVALID_DEBUG_OPTIONS:
+            printf( "GDB and built-in interactive debugger are mutually exclusive\n");
         default:
             printf( "Some other reason\n" );
     }
@@ -126,6 +130,7 @@ void emulator_loop(void)
 {
     bool bUseTrace = false;
     bool bProfile = false;
+    bool bUseGDB = false;
 
     if ( Options_GetByName("--trace") && Options_GetByName("--debug") )
     {
@@ -137,16 +142,35 @@ void emulator_loop(void)
         bProfile = true;
     }
 
+    if ( Options_GetByName("--gdb"))
+    {
+        bUseGDB = true;
+    }
+
     while (1)
     {
         // Check to see if we've hit a breakpoint
         if (BreakPoint_EnabledAtAddress(stCPU.u16PC))
         {
-            Interactive_Set();
+            if (bUseGDB)
+            {
+                GDB_Set();
+            }
+            else
+            {
+                Interactive_Set();
+            }
         }
 
         // Check to see if we're in interactive debug mode, and thus need to wait for input
-        Interactive_CheckAndExecute();
+        if (bUseGDB)
+        {
+            GDB_CheckAndExecute();
+        }
+        else
+        {
+            Interactive_CheckAndExecute();
+        }
 
         // Store the current CPU state into the tracebuffer
         if (bUseTrace)
@@ -252,11 +276,23 @@ void emulator_init(void)
     CPU_Init(&stConfig);
 
     TraceBuffer_Init( &stTraceBuffer );
-    Interactive_Init( &stTraceBuffer );    
+
+    if (Options_GetByName("--debug"))
+    {
+        Interactive_Init( &stTraceBuffer );
+    }
+    if (Options_GetByName("--gdb"))
+    {
+        GDB_Init();
+    }
 
     // Only insert a breakpoint/enter interactive debugging mode if specified.
     // Otherwise, start with the emulator running.
-    if (Options_GetByName("--debug"))
+    if (Options_GetByName("--debug") && Options_GetByName("--gdb"))
+    {
+        error_out( INVALID_DEBUG_OPTIONS );
+    }
+    if (Options_GetByName("--debug") || Options_GetByName("--gdb"))
     {
         BreakPoint_Insert( 0 );
     }

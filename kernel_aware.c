@@ -60,24 +60,25 @@ static bool KA_Command( uint16_t u16Addr_, uint8_t u8Data_ )
 //---------------------------------------------------------------------------
 static bool KA_Set( uint16_t u16Addr_, uint8_t u8Data_ )
 {
-    Debug_Symbol_t *pstSymbol = 0;
-
-    stCPU.pstRAM->au8RAM[ u16Addr_ ] = 1;
+    fprintf(stderr, "ADDR: [%04X], Data: [%02X]\n", u16Addr_, u8Data_ );
+    stCPU.pstRAM->au8RAM[ u16Addr_ & 0xFFFF ] = 1;
     return false;
 }
 
 //---------------------------------------------------------------------------
-void KA_Graphics_Init( void )  __attribute__((weak));
+//void KA_Graphics_Init( void )  __attribute__((weak));
 void KA_Graphics_Init( void )
 {
-
+    fprintf(stderr,"GInit\n");
+    return;
 }
 
 //---------------------------------------------------------------------------
-void KA_Joystick_Init( void )  __attribute__((weak));
+//void KA_Joystick_Init( void )  __attribute__((weak));
 void KA_Joystick_Init( void )
 {
-
+    fprintf(stderr,"JInit\n");
+    return;
 }
 
 //---------------------------------------------------------------------------
@@ -110,13 +111,16 @@ void KernelAware_Init( void )
     pstSymbol = Symbol_Find_Obj_By_Name( "g_bIsKernelAware" );
     if (pstSymbol)
     {
+        fprintf( stderr, "Addr: %4X, Name: %s\n", pstSymbol->u32StartAddr, pstSymbol->szName );
         // Ensure that we actually have the information we need at a valid address
         uint16_t u16CurrPtr = (uint16_t)(pstSymbol->u32StartAddr);
 
         if (u16CurrPtr)
         {
             // Add a callout so that the kernel-aware flag is *always* set.
+            fprintf( stderr, "Adding writeout\n" );
             WriteCallout_Add( KA_Set , u16CurrPtr );
+            fprintf( stderr, "done\n" );
         }
     }
     else
