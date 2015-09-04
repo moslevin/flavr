@@ -57,7 +57,7 @@ void KA_EmitTrace( KernelAwareCommand_t eCmd_ )
     {
     case KA_COMMAND_TRACE_0:
         pstTLV->eTag = KA_COMMAND_TRACE_0;
-        pstTLV->u16Len = 6;
+        pstTLV->u16Len = 6;        
         break;
     case KA_COMMAND_TRACE_1:
         pstTLV->eTag = KA_COMMAND_TRACE_1;
@@ -70,6 +70,9 @@ void KA_EmitTrace( KernelAwareCommand_t eCmd_ )
     default:
         return;
     }
+    fprintf(stderr, "Trace: %04X, %04X, %04X, %04X, %04x\n", pstTrace->u16File, pstTrace->u16Line,
+                    pstTrace->u16Code, pstTrace->u16Arg1, pstTrace->u16Arg2 );
+
     memcpy( pstTLV->au8Data, pstTrace, pstTLV->u16Len );
     TLV_Write( pstTLV );
 }

@@ -155,6 +155,7 @@ static void Mark3KA_AddKnownThread( Mark3_Thread_t *pstThread_ )
 static Mark3_Thread_t *Mark3KA_GetCurrentThread(void)
 {
     Debug_Symbol_t *pstSymbol = 0;
+
     pstSymbol = Symbol_Find_Obj_By_Name( "g_pstCurrent" );
 
     // Use pstSymbol's address to get a pointer to the current thread.
@@ -350,4 +351,79 @@ void KA_Thread_Init( void )
     pstTLV->u16Len = sizeof(Mark3ContextSwitch_TLV_t);
 
     atexit( KA_PrintThreadInfo );
+}
+
+//---------------------------------------------------------------------------
+char *KA_Get_Thread_Info_XML(uint8_t **thread_ids, uint16_t *thread_count)
+{
+    char *ret = (char*)malloc(4096);
+    char *writer = ret;
+    uint8_t *new_ids;
+    fprintf(stderr, "1");
+    if (u16NumThreads && thread_ids)
+    {
+        new_ids = (uint8_t*)malloc(u16NumThreads);
+        *thread_ids = new_ids;
+    }
+
+    fprintf(stderr, "2");
+    writer += sprintf( writer,
+            "<threads>" );
+
+    if (!u16NumThreads) {
+        writer += sprintf( writer,
+        "  <thread id=\"0\" core=\"0\">"
+        "  System Thread - Priority N/A [Running] "
+        "  </thread>");
+    }
+
+    int i;
+    int count = 0;
+    for (i = 0; i < u16NumThreads; i++)
+    {
+        fprintf(stderr, "3 (%d of %d)", i, u16NumThreads);
+        fprintf(stderr, "%s", ret);
+        if (pstThreadInfo[i].bActive)
+        {
+            if (pstThreadInfo[i].u8ThreadID == 255)
+            {
+                fprintf(stderr, "a");
+                writer += sprintf(writer,
+                "  <thread id=\"255\" core=\"0\">"
+                "  Mark3 Thread - Priority 0 [IDLE]");
+            }
+            else if (pstThreadInfo[i].u8ThreadID == Mark3KA_GetCurrentThread()->u8ThreadID)
+            {
+                fprintf(stderr, "b");
+                writer += sprintf(writer,
+                "  <thread id=\"%d\" core=\"0\">"
+                "  Mark3 Thread - Priority %d [Running] " ,
+                pstThreadInfo[i].u8ThreadID,
+                pstThreadInfo[i].pstThread->u8CurPriority );
+            }
+            else
+            {
+                fprintf(stderr, "c");
+                writer += sprintf(writer,
+                "  <thread id=\"%d\" core=\"0\">"
+                "  Mark3 Thread - Priority %d" ,
+                pstThreadInfo[i].u8ThreadID,
+                pstThreadInfo[i].pstThread->u8CurPriority );
+            }
+        }
+        if (thread_ids)
+        {
+            new_ids[count++] = pstThreadInfo[i].u8ThreadID;
+        }
+        writer += sprintf( writer, "  </thread>");
+    }
+
+    fprintf(stderr, "4");
+    sprintf( writer, "</threads>" );
+    if (thread_count)
+    {
+        *thread_count = count;
+    }
+    fprintf(stderr, "5");
+    return ret;
 }

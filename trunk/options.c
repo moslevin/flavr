@@ -54,6 +54,7 @@ typedef enum
     OPTION_MARK3,
     OPTION_EXITRESET,
     OPTION_PROFILE,
+    OPTION_GDB,
 //-- New options go here ^^^
     OPTION_NUM      //!< Total count of command-line options supported
 } OptionIndex_t;
@@ -69,13 +70,14 @@ static Option_t astAttributes[OPTION_NUM] =
     {"--freq",      "Speed (in Hz) of the simulated CPU", NULL, false },
     {"--hexfile",   "Programming file (intel HEX binary). Mutually exclusive with --elffile ", NULL, false },
     {"--elffile",   "Programming file (ELF binary).  Mutually exclusive with --hexfile", NULL, false },
-    {"--debug",     "Run simulator in interactive debug mode", NULL, true },
+    {"--debug",     "Run simulator in interactive debug mode.  Mutually exclusive with --gdb", NULL, true },
     {"--silent",    "Start without the flavr-banner print", NULL, true },
     {"--disasm",    "Disassemble programming file to standard output", NULL, true },
     {"--trace",     "Enable tracebuffer support when used in conjunction with --debug", NULL, true },
     {"--mark3",     "Enable Mark3 kernel-aware plugin", NULL, true },
     {"--exitreset", "Exit simulator if a jump-to-zero operation is encountered", NULL, true },
     {"--profile",   "Run with code profile and code coverage enabled", NULL, true },
+    {"--gdb",       "Run simulator as a GDB remote (i.e. avr-gdb target remote | flavr <options>)", NULL, true },
 };
 
 //---------------------------------------------------------------------------

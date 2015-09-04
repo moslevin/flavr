@@ -35,7 +35,8 @@ SRC_LIST_EMULATOR=\
 	flavr.c \
 	variant.c \
     write_callout.c \
-    tlv_file.c
+	tlv_file.c \
+	gdb_rsp.c
 
 SRC_LIST_SDL=$(SRC_LIST_EMULATOR) ka_graphics.c ka_joystick.c
 
@@ -47,14 +48,20 @@ printlist:
 
 all: emulator doc
 
+emulator_win: $(SRC_LIST_EMULATOR:%.c=%.o)
+	$(CC) -g3 -O3 -o flavr $(SRC_LIST_EMULATOR:%.c=%.o) -lpthread -lws2_32
+
+emulator_sdl_win: $(SRC_LIST_SDL:%.c=%.o)
+	$(CC) -g3 -O3 -o flavr_sdl $(SRC_LIST_SDL:%.c=%.o) -lSDL -lpthread -lws2_32
+
 emulator: $(SRC_LIST_EMULATOR:%.c=%.o)
-	$(CC) -g0 -O3 -o flavr $(SRC_LIST_EMULATOR:%.c=%.o)
+	$(CC) -g3 -O3 -o flavr $(SRC_LIST_EMULATOR:%.c=%.o) -lpthread
 
 emulator_sdl: $(SRC_LIST_SDL:%.c=%.o)
-	$(CC) -g0 -O3 -o flavr_sdl $(SRC_LIST_SDL:%.c=%.o) -lSDL
+	$(CC) -g3 -O3 -o flavr_sdl $(SRC_LIST_SDL:%.c=%.o) -lSDL -lpthread
 
 %.o : %.c
-	$(CC) $< -c -g0 -O3
+	$(CC) $< -c -g3 -O3
 
 clean:
 	-rm *.o
