@@ -69,6 +69,7 @@ typedef struct
 
 //---------------------------------------------------------------------------
 extern Mark3_Context_t *KA_Get_Thread_Context(uint8_t id_);
+int KA_Get_Thread_ID(void);
 
 //---------------------------------------------------------------------------
 static void GDB_SendAck( void );
@@ -812,21 +813,37 @@ static bool GDB_Handler_Query( const char *pcCmd_, char *ppcResponse_ )
             sprintf(ppcResponse_, "m0");
             return false;
         }
-        fprintf(stderr,"!!! %d threads\n", count );
 
         out += sprintf(out, "m%x", ids[0] + 1);
-        fprintf(stderr,"!!! %d \n", ids[0]);
         for (i = 1; i < count; i++) {
-            fprintf(stderr,"!!! %d \n", ids[i]);
             out += sprintf(out, ",%x", ids[i] + 1);
         }
         free(ids);
+    }
+    else if (0 != strstr(pcCmd_, "ThreadExtraInfo"))
+    {
+        int id;
+        sscanf(&pcCmd_[1], ",%x", &id);
+
     }
     else if (0 != strstr(pcCmd_, "sThreadInfo"))
     {
         // Assume we won't have a long enough threadlist to saturate
         // multiple packets.
         sprintf(ppcResponse_,"l");
+    }
+    else if (0 == strcmp(pcCmd_, "qC"))
+    {
+        // Get the current running thread ID.
+        int id = KA_Get_Thread_ID();
+        if (id == 0)
+        {
+            sprintf(ppcResponse_, "QC0");
+        }
+        else
+        {
+            sprintf(ppcResponse_,"QC%x",id-1);
+        }
     }
 #endif
 #if 0
@@ -904,22 +921,19 @@ static bool GDB_Handler_SetThread( const char *pcCmd_, char *ppcResponse_ )
         if (id == 0)
         {
             mark3_thread = -1; // current thread.
-            return GDB_Handler_ReadRegs(pcCmd_, ppcResponse_);
         }
         else if (id == 256) // idle context... not a real thread
         {
             mark3_thread = -1;
-            return GDB_Handler_ReadRegs(pcCmd_, ppcResponse_);
         }
+
         Mark3_Context_t *context = KA_Get_Thread_Context(id - 1);
         if (!context)
         {
             mark3_thread = -1; // current thread.
-            return GDB_Handler_ReadRegs(pcCmd_, ppcResponse_);
         }
         mark3_thread = id - 1;
-        GDB_Handler_ReadRegs(pcCmd_, ppcResponse_);
-
+        sprintf( ppcResponse_, "OK" );
         free(context);
     }
 
