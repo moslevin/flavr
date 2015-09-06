@@ -153,7 +153,7 @@ static void Mark3KA_AddKnownThread( Mark3_Thread_t *pstThread_ )
 }
 
 //---------------------------------------------------------------------------
-static Mark3_Thread_t *Mark3KA_GetCurrentThread(void)
+Mark3_Thread_t *Mark3KA_GetCurrentThread(void)
 {
     Debug_Symbol_t *pstSymbol = 0;
 
@@ -458,4 +458,10 @@ Mark3_Context_t *KA_Get_Thread_Context(uint8_t id_)
         }
     }
     return NULL;
+}
+
+//---------------------------------------------------------------------------
+int KA_Get_Thread_ID(void)
+{
+    return Mark3KA_GetCurrentThread()->u8ThreadID;
 }
