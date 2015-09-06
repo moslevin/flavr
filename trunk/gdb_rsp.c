@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
-#include <io.h>
 #include <fcntl.h>
 #include "avr_cpu.h"
 #include "options.h"
@@ -114,7 +113,7 @@ static const GDBCommandMap_t astCommands[] =
     // ACK required (OK or E<02X>)
     { GDB_COMMAND_BANG,     "!",    GDB_Handler_Unsupported },
     { GDB_COMMAND_A,        "A",    GDB_Handler_Unsupported },
-    { GDB_COMMAND_D,        "D",    GDB_Handler_Unsupported },
+    { GDB_COMMAND_D,        "D",    GDB_Handler_Kill }, // Treat disconnect and kill the same...
     { GDB_COMMAND_G,        "G",    GDB_Handler_WriteRegs }, // Write General Registers
     { GDB_COMMAND_H,        "H",    GDB_Handler_SetThread },
     { GDB_COMMAND_M,        "M",    GDB_Handler_WriteMem }, // Write memory
@@ -146,6 +145,7 @@ static volatile int break_count = 0;
 static int mark3_thread = -1;
 
 #if _WIN32
+#include <io.h>
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 
@@ -248,13 +248,56 @@ static void GDB_ServerCreate(void)
     DEBUG_PRINT(stderr, "[GDB Connected!]\n");
 }
 #else // POSIX Implementation
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
 static int  my_socket    = 0;
 static int  gdb_socket   = 0;
 
 //---------------------------------------------------------------------------
 static void GDB_ServerCreate(void)
 {
+    fprintf(stderr, "[Initializing GDB socket]");
 
+    const char *portnum_s = Options_GetByName("--gdb");
+    if (!portnum_s)
+    {
+        portnum_s = "3333";
+    }
+    int portnum = atoi(portnum_s);
+
+    my_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (my_socket <= 0)
+    {
+        fprintf( stderr, "Error creating socket on port %s, bailing\n", portnum_s );
+        exit(-1);
+    }
+
+    struct sockaddr_in serv_addr = { 0 };
+    struct sockaddr_in cli_addr = { 0 };
+
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = INADDR_ANY;
+    serv_addr.sin_port = htons(portnum);
+
+    if (bind(my_socket, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) < 0)
+    {
+        fprintf(stderr, "Error binding socket -- bailing\n");
+        exit(-1);
+    }
+
+    listen(my_socket,1);
+
+    int clilen = sizeof(cli_addr);
+    gdb_socket = accept(my_socket, (struct sockaddr *)&cli_addr, &clilen);
+    if (gdb_socket < 0)
+    {
+         fprintf(stderr, "Error on accept -- bailing\n");
+         exit(-1);
+    }
+    fprintf( stderr, "GDB Socket: %d", gdb_socket );
+    printf( stderr, "[GDB Connected]" );
 }
 
 #endif
@@ -262,16 +305,18 @@ static void GDB_ServerCreate(void)
 //---------------------------------------------------------------------------
 static uint8_t wait_for_data( void )
 {
-    static bool bInit = false;
+    char ch;
+    int count;
 
     fd_set read_fds;
     FD_ZERO(&read_fds);
     FD_SET(gdb_socket, &read_fds);
-    select(1, &read_fds, NULL, NULL, NULL);
+    select(gdb_socket+1, &read_fds, NULL, NULL, NULL);
     FD_CLR(gdb_socket, &read_fds);
 
-    char ch;
-    if ( 0 == recv(gdb_socket, &ch, 1, 0 )) {
+    count = recv(gdb_socket, &ch, 1, 0 );
+    if ( 0 == count )
+    {
         DEBUG_PRINT(stderr, "Socket disconnected - bailing\n");
         bIsInteractive = true;
         usleep(500000);
@@ -291,17 +336,11 @@ static bool GDB_Execute_i( void )
 
     // Wait until there's data on the socket to read
     DEBUG_PRINT(stderr, "[Begin Packet]\n");
-    ch = wait_for_data();
 
+    ch = wait_for_data();
     // Search for the telltale "$" at the beginning of a packet
     while (ch != '$')
     {
-        // 0 indicates EOF -- bail on GDB termination
-        if (ch == 0)
-        {
-            fprintf(stderr, "[EOF - Terminating]\n");
-            exit(0);
-        }
         // 3 indicates CTRL^C -- break;
         if (ch == 3)
         {
@@ -377,7 +416,7 @@ static void *GDB_CatchIO(void *unused_)
             FD_ZERO(&read_fds);
             FD_SET(gdb_socket, &read_fds);
 
-            int err = select( 1, &read_fds, NULL, NULL, NULL );
+            int err = select( gdb_socket+1, &read_fds, NULL, NULL, NULL );
             if (err > 0)
             {
                 char ch;
@@ -387,6 +426,11 @@ static void *GDB_CatchIO(void *unused_)
                     {
                         fprintf(stderr, "[GDB - Signal Break]\n");
                         bIsInteractive = true;
+                    }
+                    else if (ch == 0)
+                    {
+                        fprintf(stderr, "[GDB - Signal EOF]\n");
+                        exit(0);
                     }
                 }
             } else {
