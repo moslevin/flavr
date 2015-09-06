@@ -23,6 +23,7 @@
 #include "write_callout.h"
 #include "interrupt_callout.h"
 #include "tlv_file.h"
+#include "ka_thread.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -381,8 +382,6 @@ char *KA_Get_Thread_Info_XML(uint8_t **thread_ids, uint16_t *thread_count)
     int count = 0;
     for (i = 0; i < u16NumThreads; i++)
     {
-        fprintf(stderr, "3 (%d of %d)", i, u16NumThreads);
-        fprintf(stderr, "%s", ret);
         if (pstThreadInfo[i].bActive)
         {
             if (pstThreadInfo[i].u8ThreadID == 255)
@@ -410,20 +409,53 @@ char *KA_Get_Thread_Info_XML(uint8_t **thread_ids, uint16_t *thread_count)
                 pstThreadInfo[i].u8ThreadID,
                 pstThreadInfo[i].pstThread->u8CurPriority );
             }
-        }
-        if (thread_ids)
-        {
-            new_ids[count++] = pstThreadInfo[i].u8ThreadID;
+            if (thread_ids)
+            {
+                new_ids[count++] = pstThreadInfo[i].u8ThreadID;
+            }
         }
         writer += sprintf( writer, "  </thread>");
     }
 
-    fprintf(stderr, "4");
     sprintf( writer, "</threads>" );
     if (thread_count)
     {
         *thread_count = count;
     }
-    fprintf(stderr, "5");
+    fprintf(stderr, "%s", ret);
     return ret;
+}
+
+//---------------------------------------------------------------------------
+Mark3_Context_t *KA_Get_Thread_Context(uint8_t id_)
+{
+    int i;
+    for (i = 0; i < u16NumThreads; i++)
+    {
+        if (pstThreadInfo[i].bActive)
+        {
+            if (pstThreadInfo[i].u8ThreadID == id_)
+            {
+                Mark3_Context_t *new_ctx = (Mark3_Context_t*)malloc(sizeof(Mark3_Context_t));
+                uint16_t context_addr = pstThreadInfo[i].pstThread->u16StackTopPtr;
+
+                new_ctx->SPH = stCPU.pstRAM->au8RAM[context_addr - 1];
+                new_ctx->SPL = stCPU.pstRAM->au8RAM[context_addr];
+
+                int j = 0;
+                for (i = 31; i >= 0; i--)
+                {
+                    new_ctx->r[i] = stCPU.pstRAM->au8RAM[context_addr + 1 + j];
+                    j++;
+                }
+                new_ctx->SREG = stCPU.pstRAM->au8RAM[context_addr + 33];
+                uint16_t PC = *(uint16_t*)(&stCPU.pstRAM->au8RAM[context_addr + 34]);
+                PC = ((PC & 0xFF00)>>8) | ((PC & 0x00FF) << 8);
+                new_ctx->PC = PC;
+
+                return new_ctx;
+            }
+        }
+    }
+    return NULL;
 }
