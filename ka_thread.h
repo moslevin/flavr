@@ -21,6 +21,17 @@
 #ifndef __KA_THREAD_H__
 #define __KA_THREAD_H__
 
+#include <stdint.h>
+
+typedef struct
+{
+    uint8_t SPH;
+    uint8_t SPL;
+    uint8_t r[32];
+    uint8_t SREG;
+    uint16_t PC;
+} Mark3_Context_t;
+
 //---------------------------------------------------------------------------
 void KA_Thread_Init( void );
 
