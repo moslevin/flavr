@@ -31,6 +31,12 @@
 #include <string.h>
 #include <time.h>
 
+#define THREAD_STATE_EXIT       0
+#define THREAD_STATE_READY      1
+#define THREAD_STATE_BLOCKED    2
+#define THREAD_STATE_STOP       3
+
+
 //---------------------------------------------------------------------------
 typedef struct
 {
@@ -52,6 +58,9 @@ typedef struct
 
     //! Current priority of the thread (priority inheritence)
     uint8_t u8CurPriority;
+
+    //! Thread's current state (ready. blocking, etc)
+    uint8_t u8ThreadState;
 
     //! Size of the stack (in bytes)
     uint16_t u16StackSize;
@@ -360,14 +369,13 @@ char *KA_Get_Thread_Info_XML(uint8_t **thread_ids, uint16_t *thread_count)
     char *ret = (char*)malloc(4096);
     char *writer = ret;
     uint8_t *new_ids;
-    fprintf(stderr, "1");
+
     if (u16NumThreads && thread_ids)
     {
         new_ids = (uint8_t*)malloc(u16NumThreads);
         *thread_ids = new_ids;
     }
 
-    fprintf(stderr, "2");
     writer += sprintf( writer,
             "<threads>" );
 
@@ -386,14 +394,12 @@ char *KA_Get_Thread_Info_XML(uint8_t **thread_ids, uint16_t *thread_count)
         {
             if (pstThreadInfo[i].u8ThreadID == 255)
             {
-                fprintf(stderr, "a");
                 writer += sprintf(writer,
                 "  <thread id=\"255\" core=\"0\">"
                 "  Mark3 Thread - Priority 0 [IDLE]");
             }
             else if (pstThreadInfo[i].u8ThreadID == Mark3KA_GetCurrentThread()->u8ThreadID)
             {
-                fprintf(stderr, "b");
                 writer += sprintf(writer,
                 "  <thread id=\"%d\" core=\"0\">"
                 "  Mark3 Thread - Priority %d [Running] " ,
@@ -402,7 +408,6 @@ char *KA_Get_Thread_Info_XML(uint8_t **thread_ids, uint16_t *thread_count)
             }
             else
             {
-                fprintf(stderr, "c");
                 writer += sprintf(writer,
                 "  <thread id=\"%d\" core=\"0\">"
                 "  Mark3 Thread - Priority %d" ,
@@ -422,7 +427,6 @@ char *KA_Get_Thread_Info_XML(uint8_t **thread_ids, uint16_t *thread_count)
     {
         *thread_count = count;
     }
-    fprintf(stderr, "%s", ret);
     return ret;
 }
 
@@ -464,4 +468,54 @@ Mark3_Context_t *KA_Get_Thread_Context(uint8_t id_)
 int KA_Get_Thread_ID(void)
 {
     return Mark3KA_GetCurrentThread()->u8ThreadID;
+}
+
+//---------------------------------------------------------------------------
+int KA_Get_Thread_Priority( int id_ )
+{
+    int i;
+    for (i = 0; i < u16NumThreads; i++)
+    {
+        if (pstThreadInfo[i].bActive)
+        {
+            if (pstThreadInfo[i].u8ThreadID == id_)
+            {
+                return pstThreadInfo[i].pstThread->u8CurPriority;
+            }
+        }
+    }
+    return -1;
+}
+
+//---------------------------------------------------------------------------
+const char *KA_Get_Thread_State( int id_ )
+{
+    int i;
+    for (i = 0; i < u16NumThreads; i++)
+    {
+        if (pstThreadInfo[i].bActive)
+        {
+            if (pstThreadInfo[i].u8ThreadID == id_)
+            {
+                switch (pstThreadInfo[i].pstThread->u8ThreadState)
+                {
+                case THREAD_STATE_BLOCKED:
+                    return "Blocked";
+                case THREAD_STATE_EXIT:
+                    return "Exit";
+                case THREAD_STATE_READY:
+                    if (id_ == Mark3KA_GetCurrentThread()->u8ThreadID)
+                    {
+                        return "Running";
+                    }
+                    return "Ready";
+                case THREAD_STATE_STOP:
+                    return "Stopped";
+                default:
+                    return "unknown";
+                }
+            }
+        }
+    }
+    return -1;
 }
