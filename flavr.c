@@ -277,26 +277,6 @@ void emulator_init(void)
 
     TraceBuffer_Init( &stTraceBuffer );
 
-    if (Options_GetByName("--debug"))
-    {
-        Interactive_Init( &stTraceBuffer );
-    }
-    if (Options_GetByName("--gdb"))
-    {
-        GDB_Init();
-    }
-
-    // Only insert a breakpoint/enter interactive debugging mode if specified.
-    // Otherwise, start with the emulator running.
-    if (Options_GetByName("--debug") && Options_GetByName("--gdb"))
-    {
-        error_out( INVALID_DEBUG_OPTIONS );
-    }
-    if (Options_GetByName("--debug") || Options_GetByName("--gdb"))
-    {
-        BreakPoint_Insert( 0 );
-    }
-
     if (Options_GetByName("--hexfile"))
     {
         if (!AVR_Load_HEX( Options_GetByName("--hexfile") ))
@@ -320,6 +300,26 @@ void emulator_init(void)
     {
         // terminates after disassembly is complete
         flavr_disasm();
+    }
+
+    if (Options_GetByName("--debug"))
+    {
+        Interactive_Init( &stTraceBuffer );
+    }
+    if (Options_GetByName("--gdb"))
+    {
+        GDB_Init();
+    }
+
+    // Only insert a breakpoint/enter interactive debugging mode if specified.
+    // Otherwise, start with the emulator running.
+    if (Options_GetByName("--debug") && Options_GetByName("--gdb"))
+    {
+        error_out( INVALID_DEBUG_OPTIONS );
+    }
+    if (Options_GetByName("--debug"))
+    {
+        BreakPoint_Insert( 0 );
     }
 
     add_plugins();

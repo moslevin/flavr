@@ -9,9 +9,10 @@
 #include "options.h"
 #include "kernel_aware.h"
 #include "ka_thread.h"
+#include "debug_sym.h"
 
 //---------------------------------------------------------------------------
-#define DEBUG
+//#define DEBUG
 #if !defined( DEBUG )
 # define DEBUG_PRINT(...)
 #else
@@ -297,7 +298,7 @@ static void GDB_ServerCreate(void)
          exit(-1);
     }
     fprintf( stderr, "GDB Socket: %d", gdb_socket );
-    printf( stderr, "[GDB Connected]" );
+    fprintf( stderr, "[GDB Connected]" );
 }
 
 #endif
@@ -864,17 +865,44 @@ static bool GDB_Handler_Query( const char *pcCmd_, char *ppcResponse_ )
         }
         free(ids);
     }
-    else if (0 != strstr(pcCmd_, "ThreadExtraInfo"))
-    {
-        int id;
-        sscanf(&pcCmd_[1], ",%x", &id);
-
-    }
     else if (0 != strstr(pcCmd_, "sThreadInfo"))
     {
         // Assume we won't have a long enough threadlist to saturate
         // multiple packets.
         sprintf(ppcResponse_,"l");
+    }
+    else if (0 != strstr(pcCmd_, "ThreadExtraInfo"))
+    {
+        int id;
+        char *searchstr = strstr(pcCmd_, "," );
+        searchstr++;
+        sscanf(searchstr, "%x", &id);
+
+        char unencoded[1024] = {0};
+        if (id == 0)
+        {
+            sprintf(unencoded, "Kernel not started [Running]");
+        }
+        else if (id == 256)
+        {
+            sprintf(unencoded, "Idle Thread [Ready]");
+        }
+        else
+        {
+            int priority = KA_Get_Thread_Priority(id - 1);
+            const char *state = KA_Get_Thread_State(id - 1);
+
+            sprintf(unencoded, "Mk3: Pri=%d [%s]", priority, state);
+
+        }
+        int k;
+
+        char *dst = ppcResponse_;
+        for (k = 0; k < strlen(unencoded); k++)
+        {
+            sprintf( dst, "%02x", unencoded[k] );
+            dst+=2;
+        }
     }
     else if (0 == strcmp(pcCmd_, "qC"))
     {
@@ -1138,6 +1166,22 @@ void GDB_SendAck( void )
 //---------------------------------------------------------------------------
 void GDB_Init( void )
 {   
+    bool watch_zero = true;
+    if (Options_GetByName("--mark3"))
+    {
+        Debug_Symbol_t *main_sym = Symbol_Find_Func_By_Name("main");
+        if (main_sym)
+        {
+            BreakPoint_Insert(main_sym->u32StartAddr);
+            watch_zero = false;
+        }
+    }
+
+    if (watch_zero)
+    {
+        BreakPoint_Insert(0);
+    }
+
     WriteCallout_Add( GDB_WatchpointCallback, 0 );
     GDB_ServerCreate();
     GDB_InstallBreakHandler();

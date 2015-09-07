@@ -35,4 +35,8 @@ typedef struct
 //---------------------------------------------------------------------------
 void KA_Thread_Init( void );
 
+int KA_Get_Thread_Priority(int id_);
+
+const char *KA_Get_Thread_State( int id_ );
+
 #endif
