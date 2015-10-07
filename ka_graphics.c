@@ -94,7 +94,7 @@ void KA_Graphics_Flip(void)
 //---------------------------------------------------------------------------
 bool KA_Graphics_Command( uint16_t u16Addr_, uint8_t u8Data_ )
 {
-    Debug_Symbol_t *pstSymbol = Symbol_Find_Obj_By_Name( "g_pstPoint" );
+    Debug_Symbol_t *pstSymbol = Symbol_Find_Obj_By_Name( "g_pclPoint" );
 
     switch( u8Data_ )
     {
@@ -121,7 +121,7 @@ bool KA_Graphics_Command( uint16_t u16Addr_, uint8_t u8Data_ )
 void KA_Graphics_Init(void)
 {
     Debug_Symbol_t *pstSymbol = 0;
-    pstSymbol = Symbol_Find_Obj_By_Name( "g_ucGfxCommand" );
+    pstSymbol = Symbol_Find_Obj_By_Name( "g_u8GfxCommand" );
 
     // Use pstSymbol's address to get a pointer to the current thread.
     if (!pstSymbol)

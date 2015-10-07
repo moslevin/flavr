@@ -65,6 +65,7 @@ static bool KA_Set( uint16_t u16Addr_, uint8_t u8Data_ )
     return false;
 }
 
+#if 0
 //---------------------------------------------------------------------------
 //void KA_Graphics_Init( void )  __attribute__((weak));
 void KA_Graphics_Init( void )
@@ -80,14 +81,14 @@ void KA_Joystick_Init( void )
     fprintf(stderr,"JInit\n");
     return;
 }
-
+#endif
 //---------------------------------------------------------------------------
 void KernelAware_Init( void )
 {
     Debug_Symbol_t *pstSymbol = 0;
 
     // Add a callout for profiling information (present in Mark3 Unit Tests)
-    pstSymbol = Symbol_Find_Obj_By_Name( "g_ucKACommand" );
+    pstSymbol = Symbol_Find_Obj_By_Name( "g_u8KACommand" );
     if (pstSymbol)
     {
         // Ensure that we actually have the information we need at a valid address

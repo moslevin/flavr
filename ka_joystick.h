@@ -21,13 +21,13 @@
 #ifndef __KA_JOYSTICK_H__
 #define __KA_JOYSTICK_H__
 
-
+#include "kernel_aware.h"
 /*!
  * \brief KA_Joystick_Init
  *
  * Initialize the kernel-aware joystick simulator module..
  *
  */
-void KA_Joystick_Init( void );
+//void KA_Joystick_Init( void );
 
 #endif // __KA_JOYSTICK_H__
