@@ -21,8 +21,9 @@
 #ifndef __KA_TRACE__
 #define __KA_TRACE__
 
+#include "kernel_aware.h"
 //---------------------------------------------------------------------------
-void KA_Graphics_Init( void );
+//void KA_Graphics_Init( void );
 
 #endif
 

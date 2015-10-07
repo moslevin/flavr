@@ -166,7 +166,7 @@ Mark3_Thread_t *Mark3KA_GetCurrentThread(void)
 {
     Debug_Symbol_t *pstSymbol = 0;
 
-    pstSymbol = Symbol_Find_Obj_By_Name( "g_pstCurrent" );
+    pstSymbol = Symbol_Find_Obj_By_Name( "g_pclCurrent" );
 
     // Use pstSymbol's address to get a pointer to the current thread.
     if (!pstSymbol)
@@ -337,7 +337,7 @@ void KA_PrintThreadInfo(void)
 void KA_Thread_Init( void )
 {
     Debug_Symbol_t *pstSymbol = 0;
-    pstSymbol = Symbol_Find_Obj_By_Name( "g_pstCurrent" );
+    pstSymbol = Symbol_Find_Obj_By_Name( "g_pclCurrent" );
 
     // Use pstSymbol's address to get a pointer to the current thread.
     if (!pstSymbol)

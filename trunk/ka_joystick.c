@@ -45,7 +45,7 @@ static uint8_t u8Val = 0;
 static bool KA_Scan_Joystick( uint16_t u16Addr_, uint8_t u8Data_ )
 {
     Debug_Symbol_t *pstSymbol = 0;
-    pstSymbol = Symbol_Find_Obj_By_Name( "g_ucFlavrJoy" );
+    pstSymbol = Symbol_Find_Obj_By_Name( "g_u8FlavrJoy" );
 
     if (!pstSymbol)
     {
@@ -126,7 +126,7 @@ static bool KA_Scan_Joystick( uint16_t u16Addr_, uint8_t u8Data_ )
 void KA_Joystick_Init( void )
 {
     Debug_Symbol_t *pstSymbol = 0;
-    pstSymbol = Symbol_Find_Obj_By_Name( "g_ucFlavrJoyUp" );
+    pstSymbol = Symbol_Find_Obj_By_Name( "g_u8FlavrJoyUp" );
 
     if (!pstSymbol)
     {
