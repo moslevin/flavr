@@ -49,16 +49,16 @@ printlist:
 all: emulator doc
 
 emulator_win: $(SRC_LIST_EMULATOR:%.c=%.o)
-	$(CC) -g3 -O3 -o flavr $(SRC_LIST_EMULATOR:%.c=%.o) -lpthread -lws2_32
+	$(CC) -g3 -O3 -o flavr $(SRC_LIST_EMULATOR:%.c=%.o) -DEMULATOR_CMD -lpthread -lws2_32
 
 emulator_sdl_win: $(SRC_LIST_SDL:%.c=%.o)
-	$(CC) -g3 -O3 -o flavr_sdl $(SRC_LIST_SDL:%.c=%.o) -lSDL -lpthread -lws2_32
+	$(CC) -g3 -O3 -o flavr_sdl $(SRC_LIST_SDL:%.c=%.o) -DEMULATOR_SDL -lSDL -lpthread -lws2_32
 
 emulator: $(SRC_LIST_EMULATOR:%.c=%.o)
-	$(CC) -g3 -O3 -o flavr $(SRC_LIST_EMULATOR:%.c=%.o) -lpthread
+	$(CC) -g3 -O3 -o flavr $(SRC_LIST_EMULATOR:%.c=%.o) -DEMULATOR_CMD -lpthread
 
 emulator_sdl: $(SRC_LIST_SDL:%.c=%.o)
-	$(CC) -g3 -O3 -o flavr_sdl $(SRC_LIST_SDL:%.c=%.o) -lSDL -lpthread
+	$(CC) -g3 -O3 -o flavr_sdl $(SRC_LIST_SDL:%.c=%.o) -DEMULATOR_SDL -lSDL -lpthread
 
 %.o : %.c
 	$(CC) $< -c -g3 -O3

@@ -65,23 +65,6 @@ static bool KA_Set( uint16_t u16Addr_, uint8_t u8Data_ )
     return false;
 }
 
-#if 0
-//---------------------------------------------------------------------------
-//void KA_Graphics_Init( void )  __attribute__((weak));
-void KA_Graphics_Init( void )
-{
-    fprintf(stderr,"GInit\n");
-    return;
-}
-
-//---------------------------------------------------------------------------
-//void KA_Joystick_Init( void )  __attribute__((weak));
-void KA_Joystick_Init( void )
-{
-    fprintf(stderr,"JInit\n");
-    return;
-}
-#endif
 //---------------------------------------------------------------------------
 void KernelAware_Init( void )
 {
@@ -134,6 +117,10 @@ void KernelAware_Init( void )
     KA_Thread_Init();
     KA_Profile_Init();
     KA_Trace_Init();
+
+#if defined(EMULATOR_SDL)
     KA_Graphics_Init();
     KA_Joystick_Init();
+#endif
+
 }
