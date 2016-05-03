@@ -118,9 +118,7 @@ void KernelAware_Init( void )
     KA_Profile_Init();
     KA_Trace_Init();
 
-#if defined(EMULATOR_SDL)
     KA_Graphics_Init();
     KA_Joystick_Init();
-#endif
 
 }

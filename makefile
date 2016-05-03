@@ -39,6 +39,7 @@ SRC_LIST_EMULATOR=\
 	gdb_rsp.c
 
 SRC_LIST_SDL=$(SRC_LIST_EMULATOR) ka_graphics.c ka_joystick.c
+SRC_LIST_NOSDL=$(SRC_LIST_EMULATOR) ka_stubs.c
 
 DOCFILE_TEX=./docs/latex/refman.tex
 DOCFILE_PDF=./docs/latex/refman.pdf
@@ -46,28 +47,26 @@ DOCFILE_PDF=./docs/latex/refman.pdf
 printlist:
 	echo $(SRC_LIST_DISASM)
 
-all: emulator doc
+all: emulator emulator_sdl doc
 
-emulator_win: $(SRC_LIST_EMULATOR:%.c=%.o)
-	$(CC) -g3 -O3 -o flavr $(SRC_LIST_EMULATOR:%.c=%.o) -DEMULATOR_CMD -lpthread -lws2_32
+install: emulator emulator_sdl
+	cp -f ./flavr /usr/sbin
+	cp -f ./flavr_sdl /usr/sbin
+
+emulator_win: $(SRC_LIST_NOSDL:%.c=%.o)
+	$(CC) -g3 -O3 -o flavr $(SRC_LIST_NOSDL:%.c=%.o) -lpthread -lws2_32
 
 emulator_sdl_win: $(SRC_LIST_SDL:%.c=%.o)
-	$(CC) -g3 -O3 -o flavr_sdl $(SRC_LIST_SDL:%.c=%.o) -DEMULATOR_SDL -lSDL -lpthread -lws2_32
+	$(CC) -g3 -O3 -o flavr_sdl $(SRC_LIST_SDL:%.c=%.o) -lSDL -lpthread -lws2_32
 
-emulator: $(SRC_LIST_EMULATOR:%.c=%.o)
-	$(CC) -g3 -O3 -o flavr $(SRC_LIST_EMULATOR:%.c=%.o) -DEMULATOR_CMD -lpthread
+emulator: $(SRC_LIST_NOSDL:%.c=%.o)
+	$(CC) -g3 -O3 -o flavr $(SRC_LIST_NOSDL:%.c=%.o) -lpthread
 
 emulator_sdl: $(SRC_LIST_SDL:%.c=%.o)
-	$(CC) -g3 -O3 -o flavr_sdl $(SRC_LIST_SDL:%.c=%.o) -DEMULATOR_SDL -lSDL -lpthread
+	$(CC) -g3 -O3 -o flavr_sdl $(SRC_LIST_SDL:%.c=%.o) -lSDL -lpthread
 
 %.o : %.c
 	$(CC) $< -c -g3 -O3
-
-clean:
-	-rm *.o
-	-rm flavr
-	-rm flavr.exe
-	-rm -r ./docs/*
 
 doc: docfile_tex docfile_pdf $(DOCFILE_TEX) $(DOCFILE_PDF) 
 	-cp $(DOCFILE_PDF) ./docs
@@ -78,5 +77,13 @@ docfile_pdf: $(DOCFILE_TEX)
 	-cd ./docs/latex && pdflatex refman.tex
 
 docfile_tex:
-	-doxygen doxyfile
-	
+	-doxygen doxyfile	
+
+clean:
+	-rm *.o
+	-rm flavr
+	-rm flavr.exe
+	-rm flavr_sdl
+	-rm flavr_sdl.exe
+	-rm -r ./docs/*
+
