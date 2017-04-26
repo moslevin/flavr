@@ -11,6 +11,9 @@
 #include "ka_thread.h"
 #include "debug_sym.h"
 
+#if USE_WINDOWS
+# include "Ws2tcpip.h"
+#endif
 //---------------------------------------------------------------------------
 //#define DEBUG
 #if !defined( DEBUG )
