@@ -1,8 +1,8 @@
 CC=gcc
-CFLAGS=-Os -g3
+CFLAGS=-g3 -Os
 
 LD=gcc
-LDFLAGS=-lpthread
+LDFLAGS=-lpthread -lWs2_32
 
 #----------------------------------------------------------------------------
 OS := $(shell uname)
@@ -11,6 +11,7 @@ else
   ifeq ($(OS), Darwin)
   else
     #presume windows
+    CFLAGS+=-mno-ms-bitfields -DWINVER=WindowsXP -DUSE_WINDOWS
     LDFLAGS+=-lws2_32
   endif
 endif
