@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-g3 -Os
 
 LD=gcc
-LDFLAGS=-lpthread -lWs2_32
+LDFLAGS=-lpthread
 
 #----------------------------------------------------------------------------
 OS := $(shell uname)
