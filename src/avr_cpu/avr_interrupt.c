@@ -9,7 +9,7 @@
  *   |_|   |____| /_/ \_\   \_/   |_|_\   |
  *                                        | "Yeah, it does Arduino..."
  * ---------------------------------------+----------------------------------
- * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
+ * (c) Copyright 2014-17, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
 /*!
@@ -76,7 +76,7 @@ void AVR_Interrupt( void )
     uint16_t u16SP = (((uint16_t)stCPU.pstRAM->stRegisters.SPH.r) << 8) |
                      (((uint16_t)stCPU.pstRAM->stRegisters.SPL.r));
 
-    uint16_t u16StoredPC = stCPU.u16PC;
+    uint16_t u16StoredPC = stCPU.u32PC;
 
     stCPU.pstRAM->au8RAM[ u16SP ]     = (uint8_t)(u16StoredPC & 0x00FF);
     stCPU.pstRAM->au8RAM[ u16SP - 1 ] = (uint8_t)(u16StoredPC >> 8);
@@ -92,7 +92,7 @@ void AVR_Interrupt( void )
     uint16_t u16NewPC = (uint16_t)(stCPU.u8IntPriority * 2);
 
     // Set the new PC
-    stCPU.u16PC = u16NewPC;
+    stCPU.u32PC = u16NewPC;
     stCPU.u16ExtraPC = 0;
 
     // Clear the "I" (global interrupt enabled) register in the SR

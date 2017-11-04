@@ -9,7 +9,7 @@
  *   |_|   |____| /_/ \_\   \_/   |_|_\   |
  *                                        | "Yeah, it does Arduino..."
  * ---------------------------------------+----------------------------------
- * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
+ * (c) Copyright 2014-17, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
 /*!
@@ -41,21 +41,59 @@ static void AVR_Abort(void)
 }
 
 //---------------------------------------------------------------------------
-static void Data_Write( uint16_t u16Addr_, uint8_t u8Val_ )
+static inline uint32_t Get_ZAddress(void)
+{
+    return (((uint32_t)stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z) |
+           (((uint32_t)stCPU.pstRAM->stRegisters.RAMPZ) << 16));
+}
+
+//---------------------------------------------------------------------------
+static inline uint32_t Get_ZAddressPostInc(void)
+{
+    uint32_t u32RC = (((uint32_t)stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z) |
+                     (((uint32_t)stCPU.pstRAM->stRegisters.RAMPZ) << 16));
+
+    stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z++;
+
+    return u32RC;
+}
+
+//---------------------------------------------------------------------------
+static inline uint32_t Get_ZAddressPreDec(void)
+{
+    stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z--;
+    return (((uint32_t)stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z) |
+           (((uint32_t)stCPU.pstRAM->stRegisters.RAMPZ) << 16));
+}
+
+//---------------------------------------------------------------------------
+static inline uint32_t Get_YAddress(void)
+{
+    return ((uint32_t)stCPU.pstRAM->stRegisters.CORE_REGISTERS.Y);
+}
+
+//---------------------------------------------------------------------------
+static inline uint32_t Get_XAddress(void)
+{
+    return ((uint32_t)stCPU.pstRAM->stRegisters.CORE_REGISTERS.X);
+}
+
+//---------------------------------------------------------------------------
+static void Data_Write( uint32_t u32Addr_, uint8_t u8Val_ )
 {
     // Writing to RAM can be a tricky deal, because the address space is shared
     // between RAM, the core registers, and a bunch of peripheral I/O registers.
-    DEBUG_PRINT("Write: 0x%04X=%02X\n", u16Addr_, u8Val_ );
-    if (!WriteCallout_Run( u16Addr_, u8Val_ ))
+    DEBUG_PRINT("Write: 0x%08X=%02X\n", u32Addr_, u8Val_ );
+    if (!WriteCallout_Run( u32Addr_, u8Val_ ))
     {
         return;
     }
 
     // Check to see if the write operation falls within the peripheral I/O range
-    if (u16Addr_ >= 32 && u16Addr_ <= 255)
+    if (u32Addr_ >= 32 && u32Addr_ <= 255)
     {
         // I/O range - check to see if there's a peripheral installed at this address
-        IOWriterList *pstIOWrite = stCPU.apstPeriphWriteTable[ u16Addr_ ];
+        IOWriterList *pstIOWrite = stCPU.apstPeriphWriteTable[ u32Addr_ ];
 
         // If there is a peripheral or peripherals
         if (pstIOWrite)
@@ -64,42 +102,42 @@ static void Data_Write( uint16_t u16Addr_, uint8_t u8Val_ )
             // call their write handler
             while (pstIOWrite)
             {
-                pstIOWrite->pfWriter( pstIOWrite->pvContext, (uint8_t)u16Addr_, u8Val_ );
+                pstIOWrite->pfWriter( pstIOWrite->pvContext, (uint8_t)u32Addr_, u8Val_ );
                 pstIOWrite = pstIOWrite->next;
             }
         }
         // Otherwise, there is no peripheral -- just assume we can treat this as normal RAM.
         else
         {
-            stCPU.pstRAM->au8RAM[ u16Addr_ ] = u8Val_;
+            stCPU.pstRAM->au8RAM[ u32Addr_ ] = u8Val_;
         }
     }
-    else if (u16Addr_ >= (stCPU.u32RAMSize + 256))
+    else if (u32Addr_ >= (stCPU.u32RAMSize + 256))
     {
-        fprintf( stderr, "[Write Abort] RAM Address 0x%04X is out of range!\n", u16Addr_ );
+        fprintf( stderr, "[Write Abort] RAM Address 0x%08X is out of range!\n", u32Addr_ );
         AVR_Abort();
     }
     // RAM address range - direct write-through.
     else
     {
-        stCPU.pstRAM->au8RAM[ u16Addr_ ] = u8Val_;
+        stCPU.pstRAM->au8RAM[ u32Addr_ ] = u8Val_;
     }
 
 }
 
 //---------------------------------------------------------------------------
-static uint8_t Data_Read( uint16_t u16Addr_)
+static uint8_t Data_Read( uint32_t u32Addr_)
 {
     // Writing to RAM can be a tricky deal, because the address space is shared
     // between RAM, the core registers, and a bunch of peripheral I/O registers.
 
     // Check to see if the write operation falls within the peripheral I/O range
-    DEBUG_PRINT( "Data Read: %04X\n", u16Addr_ );
-    if (u16Addr_ >= 32 && u16Addr_ <= 255)
+    DEBUG_PRINT( "Data Read: %08X\n", u32Addr_ );
+    if (u32Addr_ >= 32 && u32Addr_ <= 255)
     {
         // I/O range - check to see if there's a peripheral installed at this address
-        IOReaderList *pstIORead = stCPU.apstPeriphReadTable[ u16Addr_ ];
-        DEBUG_PRINT( "Peripheral Read: 0x%04X\n", u16Addr_ );
+        IOReaderList *pstIORead = stCPU.apstPeriphReadTable[ u32Addr_ ];
+        DEBUG_PRINT( "Peripheral Read: 0x%08X\n", u32Addr_ );
         // If there is a peripheral or peripherals
         if (pstIORead)
         {
@@ -109,7 +147,7 @@ static uint8_t Data_Read( uint16_t u16Addr_)
             uint8_t u8Val;
             while (pstIORead)
             {
-                pstIORead->pfReader( pstIORead->pvContext,  (uint8_t)u16Addr_, &u8Val);
+                pstIORead->pfReader( pstIORead->pvContext,  (uint8_t)u32Addr_, &u8Val);
                 pstIORead = pstIORead->next;
             }
             return u8Val;
@@ -118,18 +156,18 @@ static uint8_t Data_Read( uint16_t u16Addr_)
         else
         {
             DEBUG_PRINT(" No peripheral\n");
-            return stCPU.pstRAM->au8RAM[ u16Addr_ ];
+            return stCPU.pstRAM->au8RAM[ u32Addr_ ];
         }
     }
-    else if (u16Addr_ >= (stCPU.u32RAMSize + 256))
+    else if (u32Addr_ >= (stCPU.u32RAMSize + 256))
     {
-        fprintf( stderr, "[Read Abort] RAM Address 0x%04X is out of range!\n", u16Addr_ );
+        fprintf( stderr, "[Read Abort] RAM Address 0x%04X is out of range!\n", u32Addr_ );
         AVR_Abort();
     }
     // RAM address range - direct read
     else
     {
-        return stCPU.pstRAM->au8RAM[ u16Addr_ ];
+        return stCPU.pstRAM->au8RAM[ u32Addr_ ];
     }
 }
 
@@ -754,11 +792,11 @@ static void AVR_Opcode_DES( void )
 //---------------------------------------------------------------------------
 static inline Unconditional_Jump( uint16_t u16Addr_ )
 {
-    stCPU.u16PC = u16Addr_;
+    stCPU.u32PC = u16Addr_;
     stCPU.u16ExtraPC = 0;
 
     // Feature -- Terminate emulator if jump-to-zero encountered at runtime.
-    if (stCPU.u16PC == 0 && stCPU.bExitOnReset)
+    if (stCPU.u32PC == 0 && stCPU.bExitOnReset)
     {
         exit(0);
     }
@@ -770,7 +808,7 @@ static inline Relative_Jump( uint16_t u16Offset_ )
     // u16Offset_ Will always be 1 or 2, based on the size of the next opcode
     // in a program
 
-    stCPU.u16PC += u16Offset_;
+    stCPU.u32PC += u16Offset_;
     stCPU.u16ExtraPC = 0;
     stCPU.u16ExtraCycles += u16Offset_;
 }
@@ -778,7 +816,7 @@ static inline Relative_Jump( uint16_t u16Offset_ )
 //---------------------------------------------------------------------------
 static void AVR_Opcode_RJMP( void )
 {
-    int32_t s32NewPC = (int32_t)stCPU.u16PC + (int32_t)stCPU.k_s + 1;
+    int32_t s32NewPC = (int32_t)stCPU.u32PC + (int32_t)stCPU.k_s + 1;
 
     Unconditional_Jump(  (uint16_t)s32NewPC );
 }
@@ -786,7 +824,7 @@ static void AVR_Opcode_RJMP( void )
 //---------------------------------------------------------------------------
 static void AVR_Opcode_IJMP( void )
 {
-    Unconditional_Jump(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z );
+    Unconditional_Jump( Get_ZAddress() );
 }
 
 //---------------------------------------------------------------------------
@@ -805,53 +843,53 @@ static void AVR_Opcode_JMP( void )
 static void AVR_Opcode_RCALL( void )
 {
     // Push the next instruction address onto the stack
-    uint16_t u16SP = (((uint16_t)stCPU.pstRAM->stRegisters.SPH.r) << 8) |
+    uint32_t u32PC = (((uint16_t)stCPU.pstRAM->stRegisters.SPH.r) << 8) |
                      (((uint16_t)stCPU.pstRAM->stRegisters.SPL.r));
 
-    uint16_t u16StoredPC = stCPU.u16PC + 1;
+    uint32_t u32StoredPC = stCPU.u32PC + 1;
 
-    Data_Write(  u16SP, (uint8_t)(u16StoredPC & 0x00FF));
-    Data_Write(  u16SP - 1, (uint8_t)(u16StoredPC >> 8));
+    Data_Write(  u32PC, (uint8_t)(u32StoredPC & 0x00FF));
+    Data_Write(  u32PC - 1, (uint8_t)(u32StoredPC >> 8));
 
     // Stack is post-decremented
-    u16SP -= 2;
+    u32PC -= 2;
 
     // Set the new PC (relative call)
-    int32_t s32NewPC = (int32_t)stCPU.u16PC + (int32_t)stCPU.k_s + 1;
-    uint16_t u16NewPC = (uint16_t)s32NewPC;
+    int32_t s32NewPC = (int32_t)stCPU.u32PC + (int32_t)stCPU.k_s + 1;
+    uint32_t u32NewPC = (uint32_t)s32NewPC;
 
     // Store the new SP.
-    stCPU.pstRAM->stRegisters.SPH.r = (u16SP >> 8);
-    stCPU.pstRAM->stRegisters.SPL.r = (u16SP & 0x00FF);
+    stCPU.pstRAM->stRegisters.SPH.r = (u32PC >> 8);
+    stCPU.pstRAM->stRegisters.SPL.r = (u32PC & 0x00FF);
 
     // Set the new PC
-    Unconditional_Jump(  u16NewPC );
+    Unconditional_Jump(  u32NewPC );
 }
 
 //---------------------------------------------------------------------------
 static void AVR_Opcode_ICALL( void )
 {
     // Push the next instruction address onto the stack
-    uint16_t u16SP = (((uint16_t)stCPU.pstRAM->stRegisters.SPH.r) << 8) |
-                     (((uint16_t)stCPU.pstRAM->stRegisters.SPL.r));
+    uint32_t u32SP = (((uint32_t)stCPU.pstRAM->stRegisters.SPH.r) << 8) |
+                     (((uint32_t)stCPU.pstRAM->stRegisters.SPL.r));
 
-    uint16_t u16StoredPC = stCPU.u16PC + 1;
+    uint32_t u32StoredPC = stCPU.u32PC + 1;
 
-    Data_Write(  u16SP, (uint8_t)(u16StoredPC & 0x00FF));
-    Data_Write(  u16SP - 1, (uint8_t)(u16StoredPC >> 8));
+    Data_Write(  u32SP, (uint8_t)(u32StoredPC & 0x00FF));
+    Data_Write(  u32SP - 1, (uint8_t)(u32StoredPC >> 8));
 
     // Stack is post-decremented
-    u16SP -= 2;
+    u32SP -= 2;
 
     // Set the new PC
-    uint16_t u16NewPC = stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z;
+    uint32_t u32NewPC = Get_ZAddress();
 
     // Store the new SP.
-    stCPU.pstRAM->stRegisters.SPH.r = (u16SP >> 8);
-    stCPU.pstRAM->stRegisters.SPL.r = (u16SP & 0x00FF);
+    stCPU.pstRAM->stRegisters.SPH.r = (u32SP >> 8);
+    stCPU.pstRAM->stRegisters.SPL.r = (u32SP & 0x00FF);
 
     // Set the new PC
-    Unconditional_Jump(  u16NewPC );
+    Unconditional_Jump(  u32NewPC );
 }
 
 //---------------------------------------------------------------------------
@@ -864,60 +902,60 @@ static void AVR_Opcode_EICALL( void )
 static void AVR_Opcode_CALL( void )
 {
     // See ICALL for documentation
-    uint16_t u16SP = (((uint16_t)stCPU.pstRAM->stRegisters.SPH.r) << 8) |
-                     (((uint16_t)stCPU.pstRAM->stRegisters.SPL.r));
+    uint32_t u32SP = (((uint32_t)stCPU.pstRAM->stRegisters.SPH.r) << 8) |
+                     (((uint32_t)stCPU.pstRAM->stRegisters.SPL.r));
 
-    uint16_t u16StoredPC = stCPU.u16PC + 2;
+    uint32_t u32StoredPC = stCPU.u32PC + 2;
 
-    Data_Write(  u16SP, (uint8_t)(u16StoredPC & 0x00FF));
-    Data_Write(  u16SP - 1, (uint8_t)(u16StoredPC >> 8));
+    Data_Write(  u32SP, (uint8_t)(u32StoredPC & 0x00FF));
+    Data_Write(  u32SP - 1, (uint8_t)(u32StoredPC >> 8));
 
-    u16SP -= 2;
+    u32SP -= 2;
 
-    uint16_t u16NewPC = stCPU.k;
+    uint32_t u32NewPC = stCPU.k;
 
-    stCPU.pstRAM->stRegisters.SPH.r = (u16SP >> 8);
-    stCPU.pstRAM->stRegisters.SPL.r = (u16SP & 0x00FF);
+    stCPU.pstRAM->stRegisters.SPH.r = (u32SP >> 8);
+    stCPU.pstRAM->stRegisters.SPL.r = (u32SP & 0x00FF);
 
-    Unconditional_Jump(  u16NewPC );
+    Unconditional_Jump(  u32NewPC );
 }
 
 //---------------------------------------------------------------------------
 static void AVR_Opcode_RET( void )
 {
     // Pop the next instruction off of the stack, pre-incrementing
-    uint16_t u16SP = (((uint16_t)stCPU.pstRAM->stRegisters.SPH.r) << 8) |
-                     (((uint16_t)stCPU.pstRAM->stRegisters.SPL.r));
-    u16SP += 2;
+    uint32_t u32SP = (((uint32_t)stCPU.pstRAM->stRegisters.SPH.r) << 8) |
+                     (((uint32_t)stCPU.pstRAM->stRegisters.SPL.r));
+    u32SP += 2;
 
-    uint16_t u16High = Data_Read(  u16SP - 1 );
-    uint16_t u16Low = Data_Read(  u16SP );
-    uint16_t u16NewPC = (u16High << 8) | u16Low;
+    uint32_t u32High = Data_Read(  u32SP - 1 );
+    uint32_t u32Low = Data_Read(  u32SP );
+    uint32_t u32NewPC = (u32High << 8) | u32Low;
 
-    stCPU.pstRAM->stRegisters.SPH.r = (u16SP >> 8);
-    stCPU.pstRAM->stRegisters.SPL.r = (u16SP & 0x00FF);
+    stCPU.pstRAM->stRegisters.SPH.r = (u32SP >> 8);
+    stCPU.pstRAM->stRegisters.SPL.r = (u32SP & 0x00FF);
 
     // Set new PC based on address read from stack
-    Unconditional_Jump(  u16NewPC );
+    Unconditional_Jump(  u32NewPC );
 }
 
 //---------------------------------------------------------------------------
 static void AVR_Opcode_RETI( void )
 {
-    uint16_t u16SP = (((uint16_t)stCPU.pstRAM->stRegisters.SPH.r) << 8) |
-                     (((uint16_t)stCPU.pstRAM->stRegisters.SPL.r));
-    u16SP += 2;
+    uint32_t u32SP = (((uint32_t)stCPU.pstRAM->stRegisters.SPH.r) << 8) |
+                     (((uint32_t)stCPU.pstRAM->stRegisters.SPL.r));
+    u32SP += 2;
 
-    uint16_t u16High = Data_Read(  u16SP - 1 );
-    uint16_t u16Low = Data_Read(  u16SP );
-    uint16_t u16NewPC = (u16High << 8) | u16Low;
+    uint32_t u32High = Data_Read(  u32SP - 1 );
+    uint32_t u32Low = Data_Read(  u32SP );
+    uint32_t u32NewPC = (u32High << 8) | u32Low;
 
-    stCPU.pstRAM->stRegisters.SPH.r = (u16SP >> 8);
-    stCPU.pstRAM->stRegisters.SPL.r = (u16SP & 0x00FF);
+    stCPU.pstRAM->stRegisters.SPH.r = (u32SP >> 8);
+    stCPU.pstRAM->stRegisters.SPL.r = (u32SP & 0x00FF);
 
 //-- Enable interrupts
     stCPU.pstRAM->stRegisters.SREG.I = 1;
-    Unconditional_Jump( u16NewPC );
+    Unconditional_Jump( u32NewPC );
 
 //-- Run callout functions registered when we return from interrupt.
     InterruptCallout_Run( false, 0 );
@@ -928,7 +966,7 @@ static void AVR_Opcode_CPSE( void )
 {    
     if (*stCPU.Rr == *stCPU.Rd)
     {        
-        uint8_t u8NextOpSize = AVR_Opcode_Size( stCPU.pu16ROM[ stCPU.u16PC + 1 ] );
+        uint8_t u8NextOpSize = AVR_Opcode_Size( stCPU.pu16ROM[ stCPU.u32PC + 1 ] );
         Relative_Jump(  u8NextOpSize + 1 );
     }
 }
@@ -1029,7 +1067,7 @@ static void AVR_Opcode_SBRC( void )
     // Skip if Bit in IO register clear    
     if ((*stCPU.Rd & (1 << stCPU.b)) == 0)
     {
-        uint8_t u8NextOpSize = AVR_Opcode_Size( stCPU.pu16ROM[ stCPU.u16PC + 1 ] );
+        uint8_t u8NextOpSize = AVR_Opcode_Size( stCPU.pu16ROM[ stCPU.u32PC + 1 ] );
         Relative_Jump(  u8NextOpSize + 1 );
     }
 }
@@ -1040,7 +1078,7 @@ static void AVR_Opcode_SBRS( void )
     // Skip if Bit in IO register set
     if ((*stCPU.Rd & (1 << stCPU.b)) != 0)
     {        
-        uint8_t u8NextOpSize = AVR_Opcode_Size( stCPU.pu16ROM[ stCPU.u16PC + 1 ] );
+        uint8_t u8NextOpSize = AVR_Opcode_Size( stCPU.pu16ROM[ stCPU.u32PC + 1 ] );
         Relative_Jump(  u8NextOpSize + 1 );
     }
 }
@@ -1052,7 +1090,7 @@ static void AVR_Opcode_SBIC( void )
     uint8_t u8IOVal = Data_Read(  32 + stCPU.A );
     if ((u8IOVal & (1 << stCPU.b)) == 0)
     {
-        uint8_t u8NextOpSize = AVR_Opcode_Size( stCPU.pu16ROM[ stCPU.u16PC + 1 ] );
+        uint8_t u8NextOpSize = AVR_Opcode_Size( stCPU.pu16ROM[ stCPU.u32PC + 1 ] );
         Relative_Jump(  u8NextOpSize + 1 );
     }
 }
@@ -1064,7 +1102,7 @@ static void AVR_Opcode_SBIS( void )
     uint8_t u8IOVal = Data_Read(  32 + stCPU.A );
     if ((u8IOVal & (1 << stCPU.b)) != 0)
     {
-        uint8_t u8NextOpSize = AVR_Opcode_Size( stCPU.pu16ROM[ stCPU.u16PC + 1 ] );
+        uint8_t u8NextOpSize = AVR_Opcode_Size( stCPU.pu16ROM[ stCPU.u32PC + 1 ] );
         Relative_Jump(  u8NextOpSize + 1 );
     }
 }
@@ -1072,7 +1110,7 @@ static void AVR_Opcode_SBIS( void )
 //---------------------------------------------------------------------------
 static inline Conditional_Branch( void )
 {
-    stCPU.u16PC = (uint16_t)((int16_t)stCPU.u16PC + stCPU.k_s + 1);
+    stCPU.u32PC = (uint16_t)((int16_t)stCPU.u32PC + stCPU.k_s + 1);
     stCPU.u16ExtraPC = 0;
     stCPU.u16ExtraCycles++;
 }
@@ -1334,14 +1372,14 @@ static void AVR_Opcode_LDD_Y( void )
 static void AVR_Opcode_LD_Z_Indirect( void )
 {
     *stCPU.Rd =
-        Data_Read(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z );
+        Data_Read(Get_ZAddress());
 }
 
 //---------------------------------------------------------------------------
 static void AVR_Opcode_LD_Z_Indirect_Postinc( void )
 {
     *stCPU.Rd =
-        Data_Read(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z++ );
+        Data_Read( Get_ZAddressPostInc() );
 
 }
 
@@ -1349,14 +1387,14 @@ static void AVR_Opcode_LD_Z_Indirect_Postinc( void )
 static void AVR_Opcode_LD_Z_Indirect_Predec( void )
 {
     *stCPU.Rd =
-        Data_Read(  --stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z );
+        Data_Read( Get_ZAddressPreDec() );
 }
 
 //---------------------------------------------------------------------------
 static void AVR_Opcode_LDD_Z( void )
 {
     *stCPU.Rd =
-        Data_Read(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z + stCPU.q );
+        Data_Read( Get_ZAddress() + stCPU.q );
 }
 
 //---------------------------------------------------------------------------
@@ -1410,38 +1448,38 @@ static void AVR_Opcode_STD_Y( void )
 //---------------------------------------------------------------------------
 static void AVR_Opcode_ST_Z_Indirect( void )
 {
-    Data_Write(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z, *stCPU.Rd );
+    Data_Write( Get_ZAddress(), *stCPU.Rd );
 }
 
 //---------------------------------------------------------------------------
 static void AVR_Opcode_ST_Z_Indirect_Postinc( void )
 {
-    Data_Write(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z++ , *stCPU.Rd );
+    Data_Write( Get_ZAddressPostInc() , *stCPU.Rd );
 }
 
 //---------------------------------------------------------------------------
 static void AVR_Opcode_ST_Z_Indirect_Predec( void )
 {
-    Data_Write(  --stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z , *stCPU.Rd );
+    Data_Write( Get_ZAddressPreDec() , *stCPU.Rd );
 }
 
 //---------------------------------------------------------------------------
 static void AVR_Opcode_STD_Z( void )
 {    
-    Data_Write(  stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z + stCPU.q, *stCPU.Rd );
+    Data_Write( Get_ZAddress() + stCPU.q, *stCPU.Rd );
 }
 
 //---------------------------------------------------------------------------
 static void AVR_Opcode_LPM( void )
 {
     uint8_t u8Temp;
-    if (stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z & 0x0001)
+    if (Get_ZAddress() & 0x0001)
     {
-        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] >> 8);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddress() >> 1 ] >> 8);
     }
     else
     {
-        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] & 0x00FF);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddress() >> 1 ] & 0x00FF);
     }
 
     stCPU.pstRAM->stRegisters.CORE_REGISTERS.r0 = u8Temp;
@@ -1451,13 +1489,13 @@ static void AVR_Opcode_LPM( void )
 static void AVR_Opcode_LPM_Z( void )
 {
     uint8_t u8Temp;
-    if (stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z & 0x0001)
+    if (Get_ZAddress() & 0x0001)
     {
-        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] >> 8);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddress() >> 1 ] >> 8);
     }
     else
     {
-        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] & 0x00FF);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddress() >> 1 ] & 0x00FF);
     }
 
     *stCPU.Rd = u8Temp;
@@ -1467,31 +1505,29 @@ static void AVR_Opcode_LPM_Z( void )
 static void AVR_Opcode_LPM_Z_Postinc( void )
 {
     uint8_t u8Temp;
-    if (stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z & 0x0001)
+    if (Get_ZAddress() & 0x0001)
     {
-        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] >> 8);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddressPostInc() >> 1 ] >> 8);
     }
     else
     {
-        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] & 0x00FF);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddressPostInc() >> 1 ] & 0x00FF);
     }
 
     *stCPU.Rd = u8Temp;
-    stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z++;
 }
 
 //---------------------------------------------------------------------------
 static void AVR_Opcode_ELPM( void )
 {
-    //!! ToDo - Add in RAMPZ register.
     uint8_t u8Temp;
-    if (stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z & 0x0001)
+    if (Get_ZAddress() & 0x0001)
     {
-        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] >> 8);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddress() >> 1 ] >> 8);
     }
     else
     {
-        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] & 0x00FF);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddress() >> 1 ] & 0x00FF);
     }
 
     stCPU.pstRAM->stRegisters.CORE_REGISTERS.r0 = u8Temp;
@@ -1501,13 +1537,13 @@ static void AVR_Opcode_ELPM( void )
 static void AVR_Opcode_ELPM_Z( void )
 {
     uint8_t u8Temp;
-    if (stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z & 0x0001)
+    if (Get_ZAddress() & 0x0001)
     {
-        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] >> 8);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddress() >> 1 ] >> 8);
     }
     else
     {
-        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] & 0x00FF);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddress() >> 1 ] & 0x00FF);
     }
 
     *stCPU.Rd = u8Temp;
@@ -1517,18 +1553,17 @@ static void AVR_Opcode_ELPM_Z( void )
 static void AVR_Opcode_ELPM_Z_Postinc( void )
 {
     uint8_t u8Temp;
-    if (stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z & 0x0001)
+    if (Get_ZAddressPostInc() & 0x0001)
     {
-        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] >> 8);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddressPostInc() >> 1 ] >> 8);
     }
     else
     {
-        u8Temp = (uint8_t)(stCPU.pu16ROM[ stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z >> 1 ] & 0x00FF);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddressPostInc() >> 1 ] & 0x00FF);
     }
 
     *stCPU.Rd = u8Temp;
 
-    stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z++;
 }
 
 //---------------------------------------------------------------------------
@@ -1558,34 +1593,34 @@ static void AVR_Opcode_OUT( void )
 //---------------------------------------------------------------------------
 static void AVR_Opcode_PUSH( void )
 {    
-    uint16_t u16SP = (stCPU.pstRAM->stRegisters.SPL.r) |
-                     ((uint16_t)(stCPU.pstRAM->stRegisters.SPH.r) << 8);
+    uint32_t u32SP = (stCPU.pstRAM->stRegisters.SPL.r) |
+                     ((uint32_t)(stCPU.pstRAM->stRegisters.SPH.r) << 8);
 
     // Store contents from SP to destination register
-    Data_Write(  u16SP, *stCPU.Rd );
+    Data_Write(  u32SP, *stCPU.Rd );
 
     // Postdecrement the SP
-    u16SP--;
+    u32SP--;
 
     // Update the SP registers
-    stCPU.pstRAM->stRegisters.SPH.r = (uint8_t)(u16SP >> 8);
-    stCPU.pstRAM->stRegisters.SPL.r = (uint8_t)(u16SP & 0x00FF);
+    stCPU.pstRAM->stRegisters.SPH.r = (uint8_t)(u32SP >> 8);
+    stCPU.pstRAM->stRegisters.SPL.r = (uint8_t)(u32SP & 0x00FF);
 }
 
 //---------------------------------------------------------------------------
 static void AVR_Opcode_POP( void )
 {
     // Preincrement the SP
-    uint16_t u16SP = (stCPU.pstRAM->stRegisters.SPL.r) |
+    uint32_t u32SP = (stCPU.pstRAM->stRegisters.SPL.r) |
                      ((uint16_t)(stCPU.pstRAM->stRegisters.SPH.r) << 8);
-    u16SP++;
+    u32SP++;
 
     // Load contents from SP to destination register
-    *stCPU.Rd = Data_Read(  u16SP );
+    *stCPU.Rd = Data_Read(  u32SP );
 
     // Update the SP registers
-    stCPU.pstRAM->stRegisters.SPH.r = (uint8_t)(u16SP >> 8);
-    stCPU.pstRAM->stRegisters.SPL.r = (uint8_t)(u16SP & 0x00FF);
+    stCPU.pstRAM->stRegisters.SPH.r = (uint8_t)(u32SP >> 8);
+    stCPU.pstRAM->stRegisters.SPL.r = (uint8_t)(u32SP & 0x00FF);
 }
 
 //---------------------------------------------------------------------------
@@ -1593,13 +1628,13 @@ static void AVR_Opcode_XCH( void )
 {
     uint8_t u8Z;
     uint8_t u8Temp;
-    uint16_t u16Addr = stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z;
+    uint32_t u32Addr = Get_ZAddress();
 
-    u8Z = Data_Read(  u16Addr );
+    u8Z = Data_Read(  u32Addr );
     u8Temp = *stCPU.Rd;
 
     *stCPU.Rd = u8Z;
-    Data_Write(  u16Addr, u8Temp );
+    Data_Write(  u32Addr, u8Temp );
 }
 
 //---------------------------------------------------------------------------
@@ -1608,13 +1643,13 @@ static void AVR_Opcode_LAS( void )
     uint8_t u8Z;
     uint8_t u8Temp;
 
-    uint16_t u16Addr = stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z;
+    uint32_t u32Addr = Get_ZAddress();
 
-    u8Z = Data_Read(  u16Addr );
+    u8Z = Data_Read(  u32Addr );
     u8Temp = *stCPU.Rd | u8Z;
 
     *stCPU.Rd = u8Z;    
-    Data_Write(  u16Addr, u8Temp );
+    Data_Write(  u32Addr, u8Temp );
 }
 
 //---------------------------------------------------------------------------
@@ -1623,13 +1658,13 @@ static void AVR_Opcode_LAC( void )
     uint8_t u8Z;
     uint8_t u8Temp;
 
-    uint16_t u16Addr = stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z;
+    uint32_t u32Addr = Get_ZAddress();
 
-    u8Z = Data_Read(  u16Addr );
+    u8Z = Data_Read(  u32Addr );
     u8Temp = *stCPU.Rd & ~(u8Z);
     *stCPU.Rd = u8Z;
 
-    Data_Write(  u16Addr, u8Temp );
+    Data_Write(  u32Addr, u8Temp );
 }
 
 //---------------------------------------------------------------------------
@@ -1638,13 +1673,13 @@ static void AVR_Opcode_LAT( void )
     uint8_t u8Z;
     uint8_t u8Temp;
 
-    uint16_t u16Addr = stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z;
+    uint32_t u32Addr = Get_ZAddress();
 
-    u8Z = Data_Read(  u16Addr );
+    u8Z = Data_Read(  u32Addr );
     u8Temp = *stCPU.Rd ^ u8Z;
     *stCPU.Rd = u8Z;
 
-    Data_Write(  u16Addr, u8Temp );
+    Data_Write(  u32Addr, u8Temp );
 }
 
 //---------------------------------------------------------------------------

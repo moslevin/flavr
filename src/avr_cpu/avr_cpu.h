@@ -9,7 +9,7 @@
  *   |_|   |____| /_/ \_\   \_/   |_|_\   |
  *                                        | "Yeah, it does Arduino..."
  * ---------------------------------------+----------------------------------
- * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
+ * (c) Copyright 2014-17, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
 /*!
@@ -81,7 +81,7 @@ typedef struct
 
     //---------------------------------------------------------------------------
     // Internal CPU Registers (not exposed via IO space)
-    uint16_t     u16PC;         // Program counter is not memory mapped, unlike all others
+    uint32_t     u32PC;         // Program counter is not memory mapped, unlike all others
 
     //---------------------------------------------------------------------------
     // Emulator variables

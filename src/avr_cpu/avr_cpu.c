@@ -9,7 +9,7 @@
  *   |_|   |____| /_/ \_\   \_/   |_|_\   |
  *                                        | "Yeah, it does Arduino..."
  * ---------------------------------------+----------------------------------
- * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
+ * (c) Copyright 2014-17, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
 /*!
@@ -86,12 +86,12 @@ static void CPU_Execute( uint16_t OP_ )
 //---------------------------------------------------------------------------
 uint16_t CPU_Fetch( void )
 {
-    uint16_t PC = stCPU.u16PC;
+    uint16_t PC = stCPU.u32PC;
     if (PC >= 16384)
     {
         return 0xFFFF;
     }
-    return stCPU.pu16ROM[ stCPU.u16PC ];
+    return stCPU.pu16ROM[ stCPU.u32PC ];
 }
 
 //---------------------------------------------------------------------------
@@ -147,7 +147,7 @@ void CPU_RunCycle( void )
 
         // Update the PC based on the size of the instruction + whatever
         // modifications occurred during the execution cycle.
-        stCPU.u16PC += stCPU.u16ExtraPC;
+        stCPU.u32PC += stCPU.u16ExtraPC;
 
         // Add CPU clock cycles to the global cycle counter based on
         // the minimum instruction time, plus whatever modifiers are applied

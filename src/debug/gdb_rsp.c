@@ -472,7 +472,7 @@ bool GDB_CheckAndExecute( void )
         bIsInteractive = true;
         bRetrigger = false;
     }
-    DEBUG_PRINT(stderr, "[GDB] Debugging @ Address [0x%X]\n", stCPU.u16PC << 1 );
+    DEBUG_PRINT(stderr, "[GDB] Debugging @ Address [0x%X]\n", stCPU.u32PC << 1 );
 
     DEBUG_PRINT(stderr, "BreakCount: %d, Stepping: %d\n", break_count, bStepping);
     if (break_count || bStepping)
@@ -613,7 +613,7 @@ static bool GDB_Handler_ReadReg( const char *pcCmd_, char *ppcResponse_ )
                                  stCPU.pstRAM->stRegisters.SREG.r,
                                  stCPU.pstRAM->stRegisters.SPH.r,
                                  stCPU.pstRAM->stRegisters.SPL.r,
-                                 stCPU.u16PC );
+                                 stCPU.u32PC );
 }
 
 
@@ -652,7 +652,7 @@ static bool GDB_Handler_ReadRegs( const char *pcCmd_, char *ppcResponse_ )
                                  stCPU.pstRAM->stRegisters.SREG.r,
                                  stCPU.pstRAM->stRegisters.SPH.r,
                                  stCPU.pstRAM->stRegisters.SPL.r,
-                                 stCPU.u16PC );
+                                 stCPU.u32PC );
     }
     else
     {
@@ -786,7 +786,7 @@ static bool GDB_Handler_WriteReg( const char *pcCmd_, char *ppcResponse_ )
         uint8_t u8l, u8h;
         READ_HEX_BYTE(data, &u8l );
         READ_HEX_BYTE(data, &u8h );
-        stCPU.u16PC = ( (((uint16_t)u8h) << 8) | (uint16_t)u8l );
+        stCPU.u32PC = ( (((uint16_t)u8h) << 8) | (uint16_t)u8l );
     }
 
     sprintf(ppcResponse_, "OK");
@@ -813,7 +813,7 @@ static bool GDB_Handler_WriteRegs( const char *pcCmd_, char *ppcResponse_ )
 
     READ_HEX_BYTE(src, &u8l );
     READ_HEX_BYTE(src, &u8h );
-    stCPU.u16PC = ( (((uint16_t)u8h) << 8) | (uint16_t)u8l );
+    stCPU.u32PC = ( (((uint16_t)u8h) << 8) | (uint16_t)u8l );
 
     sprintf(ppcResponse_, "OK");
     return false;
@@ -1114,7 +1114,7 @@ static bool GDB_Handler_PokeThread( const char *pcCmd_, char *ppcResponse_ )
 //---------------------------------------------------------------------------
 static void GDB_SendStatus( char *ppcResponse_, uint8_t signo_ )
 {
-    uint16_t PC = stCPU.u16PC << 1;
+    uint16_t PC = stCPU.u32PC << 1;
     sprintf(ppcResponse_, "T%02x20:%02x;21:%02x%02x;22:%02x%02x0000;",
         signo_, stCPU.pstRAM->stRegisters.SREG.r,
         stCPU.pstRAM->stRegisters.SPL.r,

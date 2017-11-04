@@ -9,7 +9,7 @@
  *   |_|   |____| /_/ \_\   \_/   |_|_\   |
  *                                        | "Yeah, it does Arduino..."
  * ---------------------------------------+----------------------------------
- * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
+ * (c) Copyright 2014-17, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
 /*!
@@ -1630,7 +1630,7 @@ static void AVR_Disasm_XCH( char *szOutput_ )
 //---------------------------------------------------------------------------
 static void AVR_Disasm_Unimplemented( char *szOutput_ )
 {
-    sprintf( szOutput_, ".db 0x%04X ; Data (not an opcode)\n", stCPU.pu16ROM[ stCPU.u16PC ] );
+    sprintf( szOutput_, ".db 0x%04X ; Data (not an opcode)\n", stCPU.pu16ROM[ stCPU.u32PC ] );
 }
 
 //---------------------------------------------------------------------------

@@ -9,7 +9,7 @@
  *   |_|   |____| /_/ \_\   \_/   |_|_\   |
  *                                        | "Yeah, it does Arduino..."
  * ---------------------------------------+----------------------------------
- * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
+ * (c) Copyright 2014-17, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
 /*!
@@ -42,7 +42,7 @@ void print_core_regs( void )
         PRINT_FUNC( "[R%02d] = 0x%02X\n", i, stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[i] );
     }
     PRINT_FUNC("[SP]  = 0x%02X%02X\n", (uint8_t)stCPU.pstRAM->stRegisters.SPH.r, (uint8_t)stCPU.pstRAM->stRegisters.SPL.r );
-    PRINT_FUNC("[PC]  = 0x%04X\n", (uint16_t)stCPU.u16PC );
+    PRINT_FUNC("[PC]  = 0x%04X\n", (uint16_t)stCPU.u32PC );
     PRINT_FUNC("[SREG]= 0x%02X   [", stCPU.pstRAM->stRegisters.SREG.r );
 
     if (1 == stCPU.pstRAM->stRegisters.SREG.I)

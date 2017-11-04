@@ -9,7 +9,7 @@
  *   |_|   |____| /_/ \_\   \_/   |_|_\   |
  *                                        | "Yeah, it does Arduino..."
  * ---------------------------------------+----------------------------------
- * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
+ * (c) Copyright 2014-17, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
 /*!
@@ -86,7 +86,7 @@ printf(
        "*   |_|   |____| /_/ \\_\\   \\_/   |_|_\\   |\n"
        "*                                        | \"From the makers of Mark3!\"\n"
        "* ---------------------------------------+----------------------------------\n"
-       "* (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved\n"
+       "* (c) Copyright 2014-17, Funkenstein Software Consulting, All rights reserved\n"
        "*     See license.txt for details\n"
       );
 }
@@ -150,7 +150,7 @@ void emulator_loop(void)
     while (1)
     {
         // Check to see if we've hit a breakpoint
-        if (BreakPoint_EnabledAtAddress(stCPU.u16PC))
+        if (BreakPoint_EnabledAtAddress(stCPU.u32PC))
         {
             if (bUseGDB)
             {
@@ -181,7 +181,7 @@ void emulator_loop(void)
         // Run code profiling logic
         if (bProfile)
         {
-            Profile_Hit(stCPU.u16PC);
+            Profile_Hit(stCPU.u32PC);
         }
 
         // Execute a machine cycle
@@ -211,18 +211,18 @@ void flavr_disasm(void)
     uint32_t u32Size;
 
     u32Size = stCPU.u32ROMSize / sizeof(uint16_t);
-    stCPU.u16PC = 0;
+    stCPU.u32PC = 0;
 
-    while (stCPU.u16PC < u32Size)
+    while (stCPU.u32PC < u32Size)
     {
-        uint16_t OP = stCPU.pu16ROM[stCPU.u16PC];
+        uint16_t OP = stCPU.pu16ROM[stCPU.u32PC];
         char szBuf[256];
 
-        printf("0x%04X: [0x%04X] ", stCPU.u16PC, OP);
+        printf("0x%04X: [0x%04X] ", stCPU.u32PC, OP);
         AVR_Decode(OP);
         AVR_Disasm_Function(OP)(szBuf);
         printf( "%s", szBuf );
-        stCPU.u16PC += AVR_Opcode_Size(OP);
+        stCPU.u32PC += AVR_Opcode_Size(OP);
     }
     exit(0);
 }

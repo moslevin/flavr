@@ -9,7 +9,7 @@
  *   |_|   |____| /_/ \_\   \_/   |_|_\   |
  *                                        | "Yeah, it does Arduino..."
  * ---------------------------------------+----------------------------------
- * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
+ * (c) Copyright 2014-17, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
 /*!
@@ -45,11 +45,11 @@ void TraceBuffer_StoreFromCPU( TraceBuffer_t *pstTraceBuffer_  )
     // Manually copy over whatever elements we need to
     pstTraceElement->u64Counter    = stCPU.u64InstructionCount;
     pstTraceElement->u64CycleCount = stCPU.u64CycleCount;
-    pstTraceElement->u16PC         = stCPU.u16PC;
+    pstTraceElement->u32PC         = stCPU.u32PC;
     pstTraceElement->u16SP         = ((uint16_t)(stCPU.pstRAM->stRegisters.SPH.r) << 8) |
                                       (uint16_t)(stCPU.pstRAM->stRegisters.SPL.r);
 
-    pstTraceElement->u16OpCode     = stCPU.pu16ROM[ stCPU.u16PC ];
+    pstTraceElement->u16OpCode     = stCPU.pu16ROM[ stCPU.u32PC ];
     pstTraceElement->u8SR          = stCPU.pstRAM->stRegisters.SREG.r;
 
     // Memcpy the core registers in one chunk
@@ -75,11 +75,11 @@ void TraceBuffer_LoadElement( TraceBuffer_t *pstTraceBuffer_, TraceElement_t *ps
 void TraceBuffer_PrintElement( TraceElement_t *pstElement_, TracePrintFormat_t eFormat_  )
 {
     printf( "[%08d] 0x%04X:0x%04X: ",
-            pstElement_->u64Counter, pstElement_->u16PC, pstElement_->u16OpCode );
+            pstElement_->u64Counter, pstElement_->u32PC, pstElement_->u16OpCode );
     if (eFormat_ & TRACE_PRINT_DISASSEMBLY)
     {
-        uint16_t u16TempPC = stCPU.u16PC;
-        stCPU.u16PC = pstElement_->u16PC;
+        uint16_t u16TempPC = stCPU.u32PC;
+        stCPU.u32PC = pstElement_->u32PC;
 
         AVR_Disasm pfOp = AVR_Disasm_Function( pstElement_->u16OpCode );
 
@@ -88,7 +88,7 @@ void TraceBuffer_PrintElement( TraceElement_t *pstElement_, TracePrintFormat_t e
         pfOp( szBuf );
         printf( "%s", szBuf );
 
-        stCPU.u16PC = u16TempPC;
+        stCPU.u32PC = u16TempPC;
     }
 
     if (eFormat_ & TRACE_PRINT_COMPACT)
@@ -110,7 +110,7 @@ void TraceBuffer_PrintElement( TraceElement_t *pstElement_, TracePrintFormat_t e
             printf( "[R%02d] = 0x%02X\n", i, pstElement_->stCoreRegs.r[i] );
         }
         printf("[SP]  = 0x%04X\n", pstElement_->u16SP );
-        printf("[PC]  = 0x%04X\n", (uint16_t)pstElement_->u16PC );
+        printf("[PC]  = 0x%04X\n", (uint16_t)pstElement_->u32PC );
         printf("[SREG]= 0x%02X", pstElement_->u8SR );
         printf( "\n" );
     }

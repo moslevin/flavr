@@ -9,7 +9,7 @@
  *   |_|   |____| /_/ \_\   \_/   |_|_\   |
  *                                        | "Yeah, it does Arduino..."
  * ---------------------------------------+----------------------------------
- * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
+ * (c) Copyright 2014-17, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
 /*!
@@ -37,7 +37,7 @@ typedef struct
     uint64_t    u64Counter;         //!< Instruction counter
     uint64_t    u64CycleCount;      //!< CPU Cycle counter
     uint16_t    u16OpCode;          //!< opcode @ trace sample
-    uint16_t    u16PC;              //!< program counter @ trace sample
+    uint16_t    u32PC;              //!< program counter @ trace sample
     uint16_t    u16SP;              //!< stack pointer @ trace sample
     uint8_t     u8SR;               //!< status register @ trace sample
 

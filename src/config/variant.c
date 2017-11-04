@@ -9,7 +9,7 @@
  *   |_|   |____| /_/ \_\   \_/   |_|_\   |
  *                                        | "Yeah, it does Arduino..."
  * ---------------------------------------+----------------------------------
- * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
+ * (c) Copyright 2014-17, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
 /*!
@@ -26,6 +26,7 @@
 #include "variant.h"
 
 //---------------------------------------------------------------------------
+// ToDo -- actually use these descriptors...
 #define ADD_CAPABILITY                  0xFE, 0xEF
 
 #define IO_REGISTER_RANGE               0xFD, 0xDF
@@ -51,6 +52,10 @@
 //---------------------------------------------------------------------------
 static AVR_Variant_t astVariants[] =
 {
+    { "atmega1284p", 16 KB,  128 KB, 4 KB,   NULL },
+    { "atmega1284",  16 KB,  128 KB, 4 KB,   NULL },
+    { "atmega644p",  4 KB,   64 KB, 2 KB,    NULL },
+    { "atmega644",   4 KB,   64 KB, 2 KB,    NULL },
     { "atmega328p",  2 KB,   32 KB, 1 KB,    NULL },
     { "atmega328",   2 KB,   32 KB, 1 KB,    NULL },
     { "atmega168pa", 1 KB,   16 KB, 0.5 KB,  NULL },

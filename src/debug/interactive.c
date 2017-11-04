@@ -9,7 +9,7 @@
  *   |_|   |____| /_/ \_\   \_/   |_|_\   |
  *                                        | "Yeah, it does Arduino..."
  * ---------------------------------------+----------------------------------
- * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
+ * (c) Copyright 2014-17, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
 /*!
@@ -351,7 +351,7 @@ void Interactive_CheckAndExecute( void )
         bIsInteractive = true;
         bRetrigger = false;
     }
-    printf( "Debugging @ Address [0x%X]\n", stCPU.u16PC );
+    printf( "Debugging @ Address [0x%X]\n", stCPU.u32PC );
 
     // Keep attempting to parse commands until a valid one was encountered
     while (!Interactive_Execute_i()) { /* Do Nothing */ }
@@ -646,9 +646,9 @@ static bool Interactive_Help( char *szCommand_ )
 static bool Interactive_Disasm( char *szCommand_ )
 {
     char szBuf[256];
-    uint16_t OP = stCPU.pu16ROM[stCPU.u16PC];
+    uint16_t OP = stCPU.pu16ROM[stCPU.u32PC];
 
-    printf("0x%04X: [0x%04X] ", stCPU.u16PC, OP);
+    printf("0x%04X: [0x%04X] ", stCPU.u32PC, OP);
     AVR_Decode(OP);
     AVR_Disasm_Function(OP)(szBuf);
     printf( "%s", szBuf );

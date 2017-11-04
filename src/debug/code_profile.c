@@ -9,7 +9,7 @@
  *   |_|   |____| /_/ \_\   \_/   |_|_\   |
  *                                        | "Yeah, it does Arduino..."
  * ---------------------------------------+----------------------------------
- * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
+ * (c) Copyright 2014-17, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
 /*!
@@ -184,7 +184,7 @@ void Profile_PrintCoverageDissassembly(void)
         while (j <= (int)pstSym->u32EndAddr)
         {
             uint16_t OP = stCPU.pu16ROM[j];
-            stCPU.u16PC = (uint16_t)j;
+            stCPU.u32PC = (uint16_t)j;
 
             if (pstProfile[j].u64TotalHit)
             {
@@ -194,7 +194,7 @@ void Profile_PrintCoverageDissassembly(void)
             {
                 printf( "[ ]" );
             }
-            printf(" 0x%04X: [0x%04X] ", stCPU.u16PC, OP);
+            printf(" 0x%04X: [0x%04X] ", stCPU.u32PC, OP);
 
             AVR_Decode(OP);
 
@@ -202,7 +202,7 @@ void Profile_PrintCoverageDissassembly(void)
             AVR_Disasm_Function(OP)(szBuf);
             printf( "%s", szBuf );
 
-            Profile_AddressCoverage( szBuf, stCPU.u16PC, pstProfile[j].u64TotalHit );
+            Profile_AddressCoverage( szBuf, stCPU.u32PC, pstProfile[j].u64TotalHit );
 
             j += AVR_Opcode_Size(OP);
         }

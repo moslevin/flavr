@@ -9,7 +9,7 @@
  *   |_|   |____| /_/ \_\   \_/   |_|_\   |
  *                                        | "Yeah, it does Arduino..."
  * ---------------------------------------+----------------------------------
- * (c) Copyright 2014-15, Funkenstein Software Consulting, All rights reserved
+ * (c) Copyright 2014-17, Funkenstein Software Consulting, All rights reserved
  *     See license.txt for details
  ****************************************************************************/
 /*!
@@ -93,7 +93,7 @@ static void AVR_Decoder_LDS_STS( uint16_t OP_)
     uint8_t Rd = (OP_ & 0x01F0) >> 4;
 
     stCPU.Rd = &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r[Rd]);
-    stCPU.K = stCPU.pu16ROM[ stCPU.u16PC + 1 ];
+    stCPU.K = stCPU.pu16ROM[ stCPU.u32PC + 1 ];
 }
 //---------------------------------------------------------------------------
 static void AVR_Decoder_Register_Single( uint16_t OP_)
@@ -135,7 +135,7 @@ static void AVR_Decoder_DES_round_4( uint16_t OP_)
 //---------------------------------------------------------------------------
 static void AVR_Decoder_JMP_CALL_22( uint16_t OP_)
 {
-    uint16_t op = stCPU.pu16ROM[ stCPU.u16PC + 1 ];
+    uint16_t op = stCPU.pu16ROM[ stCPU.u32PC + 1 ];
     uint32_t k = op;
     k |= (((OP_ & 0x0001) | (OP_ & 0x01F0) >> 3) << 16);
 
