@@ -1553,7 +1553,7 @@ static void AVR_Opcode_ELPM_Z( void )
 static void AVR_Opcode_ELPM_Z_Postinc( void )
 {
     uint8_t u8Temp;
-    if (Get_ZAddressPostInc() & 0x0001)
+    if (Get_ZAddress() & 0x0001)
     {
         u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddressPostInc() >> 1 ] >> 8);
     }
