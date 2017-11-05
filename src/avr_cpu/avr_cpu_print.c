@@ -182,14 +182,14 @@ void print_ram( uint16_t u16Start_, uint16_t u16Span_ )
 }
 
 //---------------------------------------------------------------------------
-void print_rom( uint16_t u16Start_, uint16_t u16Span_ )
+void print_rom( uint32_t u32Start_, uint16_t u16Span_ )
 {
     uint16_t i, j;
 
     while (u16Span_)
     {
         // Print the current memory address
-        PRINT_FUNC( "[0x%04X]", u16Start_ );
+        PRINT_FUNC( "[0x%04X]", u32Start_ );
         if (u16Span_ < ROM_DISPLAY_SPAN)
         {
             j = u16Span_;
@@ -203,7 +203,7 @@ void print_rom( uint16_t u16Start_, uint16_t u16Span_ )
         PRINT_FUNC( "|" );
         for (i = 0; i < j; i++)
         {
-            uint16_t u16Val = stCPU.pu16ROM[u16Start_ + i];
+            uint16_t u16Val = stCPU.pu16ROM[u32Start_ + i];
             uint8_t u8High = u16Val >> 8;
             uint8_t u8Low = u16Val & 0x00FF;
 
@@ -229,7 +229,7 @@ void print_rom( uint16_t u16Start_, uint16_t u16Span_ )
         PRINT_FUNC( "|" );
         for (i = 0; i < j; i++)
         {
-            PRINT_FUNC( " %04X", stCPU.pu16ROM[u16Start_ + i]);
+            PRINT_FUNC( " %04X", stCPU.pu16ROM[u32Start_ + i]);
         }
 
         if (u16Span_ < ROM_DISPLAY_SPAN)
@@ -240,7 +240,7 @@ void print_rom( uint16_t u16Start_, uint16_t u16Span_ )
         {
             u16Span_ -= ROM_DISPLAY_SPAN;
         }
-        u16Start_ += ROM_DISPLAY_SPAN;
+        u32Start_ += ROM_DISPLAY_SPAN;
         PRINT_FUNC( "\n" );
     }
 }

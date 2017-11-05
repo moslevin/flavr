@@ -168,13 +168,14 @@ static void UART_Init(void *context_ )
     DEBUG_PRINT("UART Init\n");
     stCPU.pstRAM->stRegisters.UCSR0A.UDRE0 = 1;
 
-    CPU_RegisterInterruptCallback( TXC0_Callback, 0x14); // TX Complete
+    CPU_RegisterInterruptCallback(TXC0_Callback, stCPU.pstVectorMap->USART0_TX); // TX Complete
 }
 
 //---------------------------------------------------------------------------
 static void UART_Read(void *context_, uint8_t ucAddr_, uint8_t *pucValue_ )
 {
     DEBUG_PRINT( "UART Read: 0x%02x == 0x%02X\n", ucAddr_, stCPU.pstRAM->au8RAM[ ucAddr_ ]);
+    DEBUG_PRINT("ADDR=%08X\n", stCPU.u32PC);
     *pucValue_ = stCPU.pstRAM->au8RAM[ ucAddr_ ];
     switch (ucAddr_)
     {
@@ -200,6 +201,7 @@ static void UART_WriteBaudReg()
 static void UART_WriteDataReg()
 {
     DEBUG_PRINT("UART Write UDR...\n");
+    DEBUG_PRINT("ADDR=%08X\n", stCPU.u32PC);
     if (UART_IsTxEnabled())
     {
         DEBUG_PRINT("Enabled...\n");
@@ -225,7 +227,7 @@ static void UART_WriteDataReg()
             if (UART_IsDREIntEnabled())
             {
                 DEBUG_PRINT("DRE Interrupt\n");
-                AVR_InterruptCandidate( 0x13 );
+                AVR_InterruptCandidate( stCPU.pstVectorMap->USART0_UDRE );
             }
         }        
         else
@@ -254,7 +256,6 @@ static void UART_WriteUCSR0A( uint8_t u8Value_)
     u8Reg &= ~(0xBC);
 
     stCPU.pstRAM->stRegisters.UCSR0A.r |= u8Reg;
-
 }
 
 //---------------------------------------------------------------------------
@@ -266,12 +267,12 @@ static void UART_UpdateInterruptFlags(void)
         if (UART_IsTxComplete())
         {
             DEBUG_PRINT("Enable TXC Interrupt\n");
-            AVR_InterruptCandidate( 0x14 );
+            AVR_InterruptCandidate( stCPU.pstVectorMap->USART0_TX );
         }
         else
         {
             DEBUG_PRINT("Clear TXC Interrupt\n");
-            AVR_ClearCandidate( 0x14 );
+            AVR_ClearCandidate( stCPU.pstVectorMap->USART0_TX );
         }
     }
     if (UART_IsDREIntEnabled())
@@ -279,12 +280,12 @@ static void UART_UpdateInterruptFlags(void)
         if( UART_IsEmpty())
         {
             DEBUG_PRINT("Enable DRE Interrupt\n");
-            AVR_InterruptCandidate( 0x13 );
+            AVR_InterruptCandidate( stCPU.pstVectorMap->USART0_UDRE );
         }
         else
         {
             DEBUG_PRINT("Clear DRE Interrupt\n");
-            AVR_ClearCandidate( 0x13 );
+            AVR_ClearCandidate( stCPU.pstVectorMap->USART0_UDRE );
         }
     }
     if (UART_IsRxIntEnabled())
@@ -292,12 +293,12 @@ static void UART_UpdateInterruptFlags(void)
         if (UART_IsRxComplete())
         {
             DEBUG_PRINT("Enable RXC Interrupt\n");
-            AVR_InterruptCandidate( 0x12 );
+            AVR_InterruptCandidate( stCPU.pstVectorMap->USART0_RX );
         }
         else
         {
             DEBUG_PRINT("Clear RXC Interrupt\n");
-            AVR_ClearCandidate( 0x12 );
+            AVR_ClearCandidate( stCPU.pstVectorMap->USART0_RX );
         }
     }
 }
@@ -321,6 +322,7 @@ static void UART_WriteUCSR0C( uint8_t u8Value_)
 static void UART_Write(void *context_, uint8_t ucAddr_, uint8_t ucValue_ )
 {    
     DEBUG_PRINT("UART Write: %2X=%2X\n", ucAddr_, ucValue_ );
+    DEBUG_PRINT("ADDR=%08X\n", stCPU.u32PC);
     switch (ucAddr_)
     {
     case 0xC0:  //UCSR0A
@@ -377,7 +379,7 @@ static void UART_TxClock(void *context_ )
                 if (UART_IsDREIntEnabled())
                 {
                     DEBUG_PRINT("DRE Interrupt\n");
-                    AVR_InterruptCandidate( 0x13 );
+                    AVR_InterruptCandidate( stCPU.pstVectorMap->USART0_UDRE );
                 }
             }
             // Nothing pending in the TXB?  Flag the TSR as empty, and
@@ -392,7 +394,7 @@ static void UART_TxClock(void *context_ )
                 if (UART_IsTxIntEnabled())
                 {
                     DEBUG_PRINT("TXC Interrupt\n");
-                    AVR_InterruptCandidate( 0x14 );
+                    AVR_InterruptCandidate( stCPU.pstVectorMap->USART0_TX );
                 }
             }
         }
@@ -419,7 +421,7 @@ static void UART_RxClock(void *context_ )
             if (UART_IsRxIntEnabled())
             {
                 DEBUG_PRINT("RXC Interrupt\n");
-                AVR_InterruptCandidate( 0x12 );
+                AVR_InterruptCandidate( stCPU.pstVectorMap->USART0_RX );
             }
         }
     }

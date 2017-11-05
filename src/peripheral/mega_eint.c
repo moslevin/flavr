@@ -26,7 +26,11 @@
 #include "avr_periphregs.h"
 #include "avr_interrupt.h"
 
+#if 1
 #define DEBUG_PRINT(...)
+#else
+#define DEBUG_PRINT printf
+#endif
 
 //---------------------------------------------------------------------------
 typedef enum
@@ -37,12 +41,14 @@ typedef enum
     INT_SENSE_RISE      //!< Rising edge triggers interrupt
 } InterruptSense_t;
 
-
 //---------------------------------------------------------------------------
 static InterruptSense_t eINT0Sense;
 static InterruptSense_t eINT1Sense;
+static InterruptSense_t eINT2Sense;
+
 static uint8_t ucLastINT0;
 static uint8_t ucLastINT1;
+static uint8_t ucLastINT2;
 
 //---------------------------------------------------------------------------
 static void EINT_AckInt(  uint8_t ucVector_);
@@ -50,14 +56,19 @@ static void EINT_AckInt(  uint8_t ucVector_);
 //---------------------------------------------------------------------------
 static void EINT_Init(void *context_ )
 {
+    DEBUG_PRINT("EINT INIT\n");
     eINT0Sense = INT_SENSE_LOW;
     eINT1Sense = INT_SENSE_LOW;
+    eINT2Sense = INT_SENSE_LOW;
+
     ucLastINT0 = 0;
     ucLastINT1 = 0;
+    ucLastINT2 = 0;
 
     // Register interrupt callback functions
-    CPU_RegisterInterruptCallback(EINT_AckInt, 0x01);
-    CPU_RegisterInterruptCallback(EINT_AckInt, 0x02);
+    CPU_RegisterInterruptCallback(EINT_AckInt, stCPU.pstVectorMap->INT0);
+    CPU_RegisterInterruptCallback(EINT_AckInt, stCPU.pstVectorMap->INT1);
+    CPU_RegisterInterruptCallback(EINT_AckInt, stCPU.pstVectorMap->INT2);
 }
 
 //---------------------------------------------------------------------------
@@ -70,7 +81,7 @@ static void EINT_Read(void *context_, uint8_t ucAddr_, uint8_t *pucValue_ )
 static void EICRA_Write( uint8_t ucValue_ )
 {
     DEBUG_PRINT("EICRA Clock\n");
-    ucValue_ &= 0x0F;    // Only the bottom 2 bits are valid.
+    ucValue_ &= 0x3F;    // Only the bottom 6 bits are valid.
     stCPU.pstRAM->stRegisters.EICRA.r = ucValue_;
 
     // Change local interrupt sense value.
@@ -119,13 +130,37 @@ static void EICRA_Write( uint8_t ucValue_ )
     {
         eINT1Sense = INT_SENSE_FALL;
     }
-    DEBUG_PRINT ("IntSense0,1: %d, %d\n", eINT0Sense, eINT1Sense);
-    DEBUG_PRINT ("EICRA: %d, ISC00 : %d, ISC01 : %d, ISC10: %d, ISC11: %d\n",
+
+    if ((stCPU.pstRAM->stRegisters.EICRA.ISC20 == 0) &&
+        (stCPU.pstRAM->stRegisters.EICRA.ISC21 == 0))
+    {
+        eINT2Sense = INT_SENSE_LOW;
+    }
+    else if ((stCPU.pstRAM->stRegisters.EICRA.ISC20 == 1) &&
+             (stCPU.pstRAM->stRegisters.EICRA.ISC21 == 0))
+    {
+        eINT2Sense = INT_SENSE_CHANGE;
+    }
+    else if ((stCPU.pstRAM->stRegisters.EICRA.ISC20 == 0) &&
+             (stCPU.pstRAM->stRegisters.EICRA.ISC21 == 1))
+    {
+        eINT2Sense = INT_SENSE_RISE;
+    }
+    else if ((stCPU.pstRAM->stRegisters.EICRA.ISC20 == 1) &&
+             (stCPU.pstRAM->stRegisters.EICRA.ISC21 == 1))
+    {
+        eINT2Sense = INT_SENSE_FALL;
+    }
+
+    DEBUG_PRINT ("IntSense0,1,2: %d, %d, %d\n", eINT0Sense, eINT1Sense, eINT2Sense);
+    DEBUG_PRINT ("EICRA: %d, ISC00 : %d, ISC01 : %d, ISC10: %d, ISC11: %d, ISC20: %d, ISC21: %d\n",
                 stCPU.pstRAM->stRegisters.EICRA.r,
                 stCPU.pstRAM->stRegisters.EICRA.ISC00,
                 stCPU.pstRAM->stRegisters.EICRA.ISC01,
-                stCPU.pstRAM->stRegisters.EICRA.ISC10,
-                stCPU.pstRAM->stRegisters.EICRA.ISC11
+                stCPU.pstRAM->stRegisters.EICRA.ISC10,                 
+                stCPU.pstRAM->stRegisters.EICRA.ISC11,
+                stCPU.pstRAM->stRegisters.EICRA.ISC20,
+                stCPU.pstRAM->stRegisters.EICRA.ISC21
             );
 }
 
@@ -133,7 +168,7 @@ static void EICRA_Write( uint8_t ucValue_ )
 static void EIFR_Write( uint8_t ucValue_ )
 {
     DEBUG_PRINT("EIFR Clock\n");
-    ucValue_ &= 0x03;   // Only the bottom-2 bits are set
+    ucValue_ &= 0x07;   // Only the bottom-3 bits are set
     stCPU.pstRAM->stRegisters.EIFR.r = ucValue_;
 }
 
@@ -141,7 +176,7 @@ static void EIFR_Write( uint8_t ucValue_ )
 static void EIMSK_Write( uint8_t ucValue_ )
 {
     DEBUG_PRINT("EIMSK Write\n");
-    ucValue_ &= 0x03;   // Only the bottom-2 bits are set
+    ucValue_ &= 0x07;   // Only the bottom-3 bits are set
     stCPU.pstRAM->stRegisters.EIMSK.r = ucValue_;    
 }
 
@@ -173,6 +208,7 @@ static void EINT_Clock(void *context_ )
     // condition has occurred based on the interrupt sense mode.
     bool bSetINT0 = false;
     bool bSetINT1 = false;
+    bool bSetINT2 = false;
 
     //!! ToDo - Consider adding support for external stimulus (which would
     //!! Invoke inputs on PIND as opposed to PORTD)...  This will only work
@@ -242,39 +278,79 @@ static void EINT_Clock(void *context_ )
             break;
         }
     }
-
+    if (stCPU.pstRAM->stRegisters.EIMSK.INT2 == 1)
+    {
+        switch (eINT2Sense)
+        {
+        case INT_SENSE_LOW:
+            if (stCPU.pstRAM->stRegisters.PORTB.PORT2 == 0)
+            {
+                bSetINT2 = true;
+            }
+            break;
+        case INT_SENSE_CHANGE:
+            if (stCPU.pstRAM->stRegisters.PORTB.PORT2 != ucLastINT2)
+            {
+                bSetINT2 = true;
+            }
+            break;
+        case INT_SENSE_FALL:
+            if ((stCPU.pstRAM->stRegisters.PORTB.PORT2 == 0) && (ucLastINT2 == 1))
+            {
+                bSetINT2 = true;
+            }
+            break;
+        case INT_SENSE_RISE:
+            if ((stCPU.pstRAM->stRegisters.PORTB.PORT2 == 1) && (ucLastINT2 == 0))
+            {
+                bSetINT2 = true;
+            }
+            break;
+        }
+    }
     // Trigger interrupts where necessary
     if (bSetINT0)
     {
         stCPU.pstRAM->stRegisters.EIFR.INTF0 = 1;
-        AVR_InterruptCandidate(0x01);
+        AVR_InterruptCandidate(stCPU.pstVectorMap->INT0);
     }
     if (bSetINT1)
     {
         stCPU.pstRAM->stRegisters.EIFR.INTF1 = 1;
-        AVR_InterruptCandidate(0x02);
-
+        AVR_InterruptCandidate(stCPU.pstVectorMap->INT1);
     }
+    if (bSetINT2)
+    {
+        stCPU.pstRAM->stRegisters.EIFR.INTF2 = 1;
+        AVR_InterruptCandidate(stCPU.pstVectorMap->INT2);
+    }
+
     // Update locally-cached copy of previous INT0/INT1 pin status.
     ucLastINT0 = stCPU.pstRAM->stRegisters.PORTD.PORT2;
     ucLastINT1 = stCPU.pstRAM->stRegisters.PORTD.PORT3;
+    ucLastINT2 = stCPU.pstRAM->stRegisters.PORTB.PORT2;
 }
 
 //---------------------------------------------------------------------------
 static void EINT_AckInt(  uint8_t ucVector_)
 {
+    DEBUG_PRINT("EINT ACK INT\n");
     // We automatically clear the INTx flag as soon as the interrupt
     // is acknowledged.
-    switch (ucVector_)
+    if (ucVector_ == stCPU.pstVectorMap->INT0)
     {
-    case 0x01:
         DEBUG_PRINT("INT0!\n");
         stCPU.pstRAM->stRegisters.EIFR.INTF0 = 0;
-        break;
-    case 0x02:
+    }
+    else if (ucVector_ == stCPU.pstVectorMap->INT1)
+    {
         DEBUG_PRINT("INT1!\n");
         stCPU.pstRAM->stRegisters.EIFR.INTF1 = 0;
-        break;
+    }
+    else if (ucVector_ == stCPU.pstVectorMap->INT2)
+    {
+        DEBUG_PRINT("INT2!\n");
+        stCPU.pstRAM->stRegisters.EIFR.INTF2 = 0;
     }
 }
 

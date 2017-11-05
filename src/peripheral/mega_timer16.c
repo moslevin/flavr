@@ -26,7 +26,11 @@
 #include "avr_periphregs.h"
 #include "avr_interrupt.h"
 
+#if 1
 #define DEBUG_PRINT(...)
+#else
+#define DEBUG_PRINT printf
+#endif
 
 //---------------------------------------------------------------------------
 //!! This implementation only tracks the basic timer/capture/compare
@@ -206,10 +210,10 @@ static void Timer16_Init(void *context_ )
 {
     DEBUG_PRINT(stderr, "Timer16 Init\n");    
 
-    CPU_RegisterInterruptCallback( OV1_Ack, 0x0D);
-    CPU_RegisterInterruptCallback( IC1_Ack, 0x0A);
-    CPU_RegisterInterruptCallback( COMP1A_Ack, 0x0B);
-    CPU_RegisterInterruptCallback( COMP1B_Ack, 0x0C);
+    CPU_RegisterInterruptCallback( OV1_Ack, stCPU.pstVectorMap->TIMER1_OVF);
+    CPU_RegisterInterruptCallback( IC1_Ack, stCPU.pstVectorMap->TIMER1_CAPT);
+    CPU_RegisterInterruptCallback( COMP1A_Ack, stCPU.pstVectorMap->TIMER1_COMPA);
+    CPU_RegisterInterruptCallback( COMP1B_Ack, stCPU.pstVectorMap->TIMER1_COMPB);
 }
 
 //---------------------------------------------------------------------------
@@ -343,11 +347,11 @@ static void Timer16_IntFlagUpdate(void)
         if (stCPU.pstRAM->stRegisters.TIFR1.TOV1 == 1)
         {
             DEBUG_PRINT(" TOV1 Interrupt Candidate\n" );
-            AVR_InterruptCandidate(0x0D);
+            AVR_InterruptCandidate(stCPU.pstVectorMap->TIMER1_OVF);
         }
         else
         {
-            AVR_ClearCandidate(0x0D);
+            AVR_ClearCandidate(stCPU.pstVectorMap->TIMER1_OVF);
         }
     }
 
@@ -356,11 +360,11 @@ static void Timer16_IntFlagUpdate(void)
         if (stCPU.pstRAM->stRegisters.TIFR1.OCF1A == 1)
         {
             DEBUG_PRINT(" OCF1A Interrupt Candidate\n" );
-            AVR_InterruptCandidate(0x0B);
+            AVR_InterruptCandidate(stCPU.pstVectorMap->TIMER1_COMPA);
         }
         else
         {
-            AVR_ClearCandidate(0x0B);
+            AVR_ClearCandidate(stCPU.pstVectorMap->TIMER1_COMPA);
         }
     }
 
@@ -369,11 +373,11 @@ static void Timer16_IntFlagUpdate(void)
         if (stCPU.pstRAM->stRegisters.TIFR1.OCF1B == 1)
         {
             DEBUG_PRINT(" OCF1B Interrupt Candidate\n" );
-            AVR_InterruptCandidate(0x0C);
+            AVR_InterruptCandidate(stCPU.pstVectorMap->TIMER1_COMPB);
         }
         else
         {
-            AVR_ClearCandidate(0x0C);
+            AVR_ClearCandidate(stCPU.pstVectorMap->TIMER1_COMPB);
         }
     }
 
@@ -382,11 +386,11 @@ static void Timer16_IntFlagUpdate(void)
         if (stCPU.pstRAM->stRegisters.TIFR1.ICF1 == 1)
         {
             DEBUG_PRINT(" ICF1 Interrupt Candidate\n" );
-            AVR_InterruptCandidate(0x0A);
+            AVR_InterruptCandidate(stCPU.pstVectorMap->TIMER1_CAPT);
         }
         else
         {
-            AVR_ClearCandidate(0x0A);
+            AVR_ClearCandidate(stCPU.pstVectorMap->TIMER1_CAPT);
         }
     }
 }

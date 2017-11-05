@@ -32,6 +32,7 @@
 #include "avr_coreregs.h"
 #include "avr_registerfile.h"
 #include "avr_io.h"
+#include "variant.h"
 
 #include "watchpoint.h"
 #include "breakpoint.h"
@@ -135,6 +136,10 @@ typedef struct
     //---------------------------------------------------------------------------
     bool        bExitOnReset;   // Flag indicating behavior when we jump to 0.  true == exit emulator
     bool        bProfile;       // Flag indicating that CPU is running with active code profiling
+
+    //---------------------------------------------------------------------------
+    const AVR_Vector_Map_t  *pstVectorMap;   // part-specific interrupt vector map
+    const AVR_Feature_Map_t *pstFeatureMap;  // part-specific feature map
 } AVR_CPU;
 
 
@@ -149,6 +154,9 @@ typedef struct
     uint32_t u32RAMSize;
     uint32_t u32EESize;
     bool     bExitOnReset;
+    const AVR_Vector_Map_t  *pstVectorMap;   // part-specific interrupt vector map
+    const AVR_Feature_Map_t *pstFeatureMap;  // part-specific feature map
+
 } AVR_CPU_Config_t;
 
 //---------------------------------------------------------------------------

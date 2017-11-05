@@ -73,9 +73,9 @@ void print_ram( uint16_t u16Start_, uint16_t u16Span_ );
  *
  * Display a block of ROM to the console
  *
- * \param u16Start_ Start address
+ * \param u32Start_ Start address
  * \param u16Span_  Number of instruction words (16-bit) to display
  */
-void print_rom( uint16_t u16Start_, uint16_t u16Span_ );
+void print_rom( uint32_t u32Start_, uint16_t u16Span_ );
 
 #endif

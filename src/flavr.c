@@ -253,6 +253,8 @@ void emulator_init(void)
     stConfig.u32EESize  = pstVariant->u32EESize;
     stConfig.u32RAMSize = pstVariant->u32RAMSize;
     stConfig.u32ROMSize = pstVariant->u32ROMSize;
+    stConfig.pstFeatureMap = pstVariant->pstFeatures;
+    stConfig.pstVectorMap = pstVariant->pstVectors;
 
     if (stConfig.u32EESize >= 32768)
     {

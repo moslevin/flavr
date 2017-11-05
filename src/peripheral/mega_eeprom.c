@@ -29,9 +29,9 @@
 #include <string.h>
 
 #if 1
-    #define DEBUG_PRINT(...)
+#define DEBUG_PRINT(...)
 #else
-    #define DEBUG_PRINT     printf
+#define DEBUG_PRINT printf
 #endif
 
 //---------------------------------------------------------------------------

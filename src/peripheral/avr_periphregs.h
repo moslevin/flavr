@@ -521,7 +521,9 @@ typedef struct  __attribute__ ((__packed__))
             unsigned int ISC01    : 1;
             unsigned int ISC10    : 1;
             unsigned int ISC11    : 1;
-            unsigned int reserved : 4;
+            unsigned int ISC20    : 1;
+            unsigned int ISC21    : 1;
+            unsigned int reserved : 2;
         };
     };
 } AVR_EICRA;
@@ -853,7 +855,8 @@ typedef struct  __attribute__ ((__packed__))
         {
             unsigned int INTF0    : 1;
             unsigned int INTF1    : 1;
-            unsigned int reserved : 6;
+            unsigned int INTF2    : 1;
+            unsigned int reserved : 5;
         };
     };
 } AVR_EIFR;
@@ -870,7 +873,8 @@ typedef struct  __attribute__ ((__packed__))
         {
             unsigned int INT0    : 1;
             unsigned int INT1    : 1;
-            unsigned int reserved : 6;
+            unsigned int INT2    : 1;
+            unsigned int reserved : 5;
         };
     };
 } AVR_EIMSK;

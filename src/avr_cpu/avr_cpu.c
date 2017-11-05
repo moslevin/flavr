@@ -252,6 +252,10 @@ void CPU_Init( AVR_CPU_Config_t *pstConfig_ )
     // Reset the interrupt priority register
     stCPU.u8IntPriority = 255;
 
+    // Copy in part-specific interrupt vector and feature tables
+    stCPU.pstVectorMap = pstConfig_->pstVectorMap;
+    stCPU.pstFeatureMap = pstConfig_->pstFeatureMap;
+
 #if FEATURE_USE_JUMPTABLES
     CPU_BuildCycleTable();
     CPU_BuildSizeTable();

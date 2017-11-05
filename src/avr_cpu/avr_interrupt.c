@@ -46,6 +46,10 @@ static void AVR_NextInterrupt(void)
 //---------------------------------------------------------------------------
 void AVR_InterruptCandidate( uint8_t u8Vector_ )
 {
+    if (u8Vector_ == VECTOR_NOT_SUPPORTED) {
+        return;
+    }
+
     // Interrupts are prioritized by index -- lower == higher priority.
     // Candidate is the lowest
     if (u8Vector_ < stCPU.u8IntPriority)
@@ -58,6 +62,10 @@ void AVR_InterruptCandidate( uint8_t u8Vector_ )
 //---------------------------------------------------------------------------
 void AVR_ClearCandidate( uint8_t u8Vector_ )
 {
+    if (u8Vector_ == VECTOR_NOT_SUPPORTED) {
+        return;
+    }
+
     stCPU.u32IntFlags &= ~(1 << u8Vector_ );
     AVR_NextInterrupt();
 }

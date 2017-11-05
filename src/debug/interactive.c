@@ -490,13 +490,13 @@ static bool Interactive_Break( char *szCommand_ )
         return false;
     }
 
-    if (BreakPoint_EnabledAtAddress( (uint16_t)uiAddr))
+    if (BreakPoint_EnabledAtAddress( (uint32_t)uiAddr))
     {
-        BreakPoint_Delete( (uint16_t)uiAddr);
+        BreakPoint_Delete( (uint32_t)uiAddr);
     }
     else
     {
-        BreakPoint_Insert( (uint16_t)uiAddr);
+        BreakPoint_Insert( (uint32_t)uiAddr);
     }
 
     return false;
@@ -550,7 +550,7 @@ static bool Interactive_ROM( char *szCommand_ )
         return false;
     }
 
-    print_rom( (uint16_t)uiAddr, (uint16_t)uiLen );
+    print_rom( (uint32_t)uiAddr, (uint16_t)uiLen );
 
     return false;
 }
@@ -695,12 +695,12 @@ static bool Interactive_BreakFunc( char *szCommand_ )
 
     if (BreakPoint_EnabledAtAddress(pstSym->u32StartAddr))
     {
-        printf( "Removing breakpoint @ 0x%04X\n", pstSym->u32StartAddr );
+        printf( "Removing breakpoint @ 0x%08X\n", pstSym->u32StartAddr );
         BreakPoint_Delete( pstSym->u32StartAddr );
     }
     else
     {
-        printf( "Inserting breakpoint @ 0x%04X\n", pstSym->u32StartAddr );
+        printf( "Inserting breakpoint @ 0x%08X\n", pstSym->u32StartAddr );
         BreakPoint_Insert( pstSym->u32StartAddr );
     }
 

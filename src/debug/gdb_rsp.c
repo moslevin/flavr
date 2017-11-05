@@ -1027,7 +1027,7 @@ static bool GDB_Handler_SetBreakPoint( const char *pcCmd_, char *ppcResponse_ )
 
     addr_end = strstr(addr_str,",");
     *addr_end = 0;
-    sscanf(addr_str, "%4x", &addr);
+    sscanf(addr_str, "%8x", &addr);
     addr >>= 1;
     switch (pcCmd_[1] == '0')
     {
@@ -1035,7 +1035,7 @@ static bool GDB_Handler_SetBreakPoint( const char *pcCmd_, char *ppcResponse_ )
     case 1:
         if (!BreakPoint_EnabledAtAddress( addr ))
         {
-            DEBUG_PRINT(stderr, "Inserting breakpoint @ %04X", addr);
+            DEBUG_PRINT(stderr, "Inserting breakpoint @ %08X", addr);
             BreakPoint_Insert(addr);
             sprintf(ppcResponse_, "OK");
             return false;

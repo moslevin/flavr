@@ -26,10 +26,10 @@
 #include "breakpoint.h"
 
 //---------------------------------------------------------------------------
-void BreakPoint_Insert( uint16_t u16Addr_ )
+void BreakPoint_Insert( uint32_t u32Addr_ )
 {
     // Don't add multiple breakpoints at the same address
-    if (BreakPoint_EnabledAtAddress(  u16Addr_ ))
+    if (BreakPoint_EnabledAtAddress( u32Addr_ ))
     {
         return;
     }
@@ -41,7 +41,7 @@ void BreakPoint_Insert( uint16_t u16Addr_ )
     pstNewBreak->next = stCPU.pstBreakPoints;
     pstNewBreak->prev = NULL;
 
-    pstNewBreak->u16Addr = u16Addr_;
+    pstNewBreak->u32Addr = u32Addr_;
 
     if (stCPU.pstBreakPoints)
     {
@@ -52,13 +52,13 @@ void BreakPoint_Insert( uint16_t u16Addr_ )
 }
 
 //---------------------------------------------------------------------------
-void BreakPoint_Delete( uint16_t u16Addr_ )
+void BreakPoint_Delete( uint32_t u32Addr_ )
 {
     BreakPoint_t *pstTemp = stCPU.pstBreakPoints;
 
     while (pstTemp)
     {
-        if (pstTemp->u16Addr == u16Addr_)
+        if (pstTemp->u32Addr == u32Addr_)
         {
             // Remove node -- reconnect surrounding elements
             BreakPoint_t *pstNext = pstTemp->next;
@@ -92,13 +92,13 @@ void BreakPoint_Delete( uint16_t u16Addr_ )
 }
 
 //---------------------------------------------------------------------------
-bool BreakPoint_EnabledAtAddress( uint16_t u16Addr_ )
+bool BreakPoint_EnabledAtAddress( uint32_t u32Addr_ )
 {
     BreakPoint_t *pstTemp = stCPU.pstBreakPoints;
 
     while (pstTemp)
     {
-        if (pstTemp->u16Addr == u16Addr_)
+        if (pstTemp->u32Addr == u32Addr_)
         {
             return true;
         }
