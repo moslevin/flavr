@@ -81,7 +81,6 @@ static void EINT_Read(void *context_, uint8_t ucAddr_, uint8_t *pucValue_ )
 static void EICRA_Write( uint8_t ucValue_ )
 {
     DEBUG_PRINT("EICRA Clock\n");
-    ucValue_ &= 0x3F;    // Only the bottom 6 bits are valid.
     stCPU.pstRAM->stRegisters.EICRA.r = ucValue_;
 
     // Change local interrupt sense value.
@@ -123,12 +122,12 @@ static void EICRA_Write( uint8_t ucValue_ )
     else if ((stCPU.pstRAM->stRegisters.EICRA.ISC10 == 0) &&
              (stCPU.pstRAM->stRegisters.EICRA.ISC11 == 1))
     {
-        eINT1Sense = INT_SENSE_RISE;
+        eINT1Sense = INT_SENSE_FALL;
     }
     else if ((stCPU.pstRAM->stRegisters.EICRA.ISC10 == 1) &&
              (stCPU.pstRAM->stRegisters.EICRA.ISC11 == 1))
     {
-        eINT1Sense = INT_SENSE_FALL;
+        eINT1Sense = INT_SENSE_RISE;
     }
 
     if ((stCPU.pstRAM->stRegisters.EICRA.ISC20 == 0) &&
@@ -144,12 +143,12 @@ static void EICRA_Write( uint8_t ucValue_ )
     else if ((stCPU.pstRAM->stRegisters.EICRA.ISC20 == 0) &&
              (stCPU.pstRAM->stRegisters.EICRA.ISC21 == 1))
     {
-        eINT2Sense = INT_SENSE_RISE;
+        eINT2Sense = INT_SENSE_FALL;
     }
     else if ((stCPU.pstRAM->stRegisters.EICRA.ISC20 == 1) &&
              (stCPU.pstRAM->stRegisters.EICRA.ISC21 == 1))
     {
-        eINT2Sense = INT_SENSE_FALL;
+        eINT2Sense = INT_SENSE_RISE;
     }
 
     DEBUG_PRINT ("IntSense0,1,2: %d, %d, %d\n", eINT0Sense, eINT1Sense, eINT2Sense);
@@ -168,7 +167,6 @@ static void EICRA_Write( uint8_t ucValue_ )
 static void EIFR_Write( uint8_t ucValue_ )
 {
     DEBUG_PRINT("EIFR Clock\n");
-    ucValue_ &= 0x07;   // Only the bottom-3 bits are set
     stCPU.pstRAM->stRegisters.EIFR.r = ucValue_;
 }
 
@@ -176,8 +174,7 @@ static void EIFR_Write( uint8_t ucValue_ )
 static void EIMSK_Write( uint8_t ucValue_ )
 {
     DEBUG_PRINT("EIMSK Write\n");
-    ucValue_ &= 0x07;   // Only the bottom-3 bits are set
-    stCPU.pstRAM->stRegisters.EIMSK.r = ucValue_;    
+    stCPU.pstRAM->stRegisters.EIMSK.r = ucValue_;
 }
 
 //---------------------------------------------------------------------------
@@ -255,24 +252,28 @@ static void EINT_Clock(void *context_ )
         case INT_SENSE_LOW:
             if (stCPU.pstRAM->stRegisters.PORTD.PORT3 == 0)
             {
+                DEBUG_PRINT(" SET INT1\n");
                 bSetINT1 = true;
             }
             break;
         case INT_SENSE_CHANGE:
             if (stCPU.pstRAM->stRegisters.PORTD.PORT3 != ucLastINT1)
             {
+                DEBUG_PRINT(" SET INT1\n");
                 bSetINT1 = true;
             }
             break;
         case INT_SENSE_FALL:
             if ((stCPU.pstRAM->stRegisters.PORTD.PORT3 == 0) && (ucLastINT1 == 1))
             {
+                DEBUG_PRINT(" SET INT1\n");
                 bSetINT1 = true;
             }
             break;
         case INT_SENSE_RISE:
             if ((stCPU.pstRAM->stRegisters.PORTD.PORT3 == 1) && (ucLastINT1 == 0))
             {
+                DEBUG_PRINT(" SET INT1\n");
                 bSetINT1 = true;
             }
             break;
@@ -285,24 +286,28 @@ static void EINT_Clock(void *context_ )
         case INT_SENSE_LOW:
             if (stCPU.pstRAM->stRegisters.PORTB.PORT2 == 0)
             {
+                DEBUG_PRINT(" SET INT2\n");
                 bSetINT2 = true;
             }
             break;
         case INT_SENSE_CHANGE:
             if (stCPU.pstRAM->stRegisters.PORTB.PORT2 != ucLastINT2)
             {
+                DEBUG_PRINT(" SET INT2\n");
                 bSetINT2 = true;
             }
             break;
         case INT_SENSE_FALL:
             if ((stCPU.pstRAM->stRegisters.PORTB.PORT2 == 0) && (ucLastINT2 == 1))
             {
+                DEBUG_PRINT(" SET INT2\n");
                 bSetINT2 = true;
             }
             break;
         case INT_SENSE_RISE:
             if ((stCPU.pstRAM->stRegisters.PORTB.PORT2 == 1) && (ucLastINT2 == 0))
             {
+                DEBUG_PRINT(" SET INT2\n");
                 bSetINT2 = true;
             }
             break;

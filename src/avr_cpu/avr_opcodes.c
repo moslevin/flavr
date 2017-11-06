@@ -43,12 +43,35 @@ static void AVR_Abort(void)
 //---------------------------------------------------------------------------
 static inline uint32_t Get_ZAddress(void)
 {
+    return (uint32_t)stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z;
+}
+
+//---------------------------------------------------------------------------
+static inline uint32_t Get_ZAddressPostInc(void)
+{
+    uint32_t u32RC = (uint32_t)stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z;
+    stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z++;
+
+    return u32RC;
+}
+
+//---------------------------------------------------------------------------
+static inline uint32_t Get_ZAddressPreDec(void)
+{
+    stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z--;
+    return stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z;
+}
+
+
+//---------------------------------------------------------------------------
+static inline uint32_t Get_ZAddressWithRAMP(void)
+{
     return (((uint32_t)stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z) |
            (((uint32_t)stCPU.pstRAM->stRegisters.RAMPZ) << 16));
 }
 
 //---------------------------------------------------------------------------
-static inline uint32_t Get_ZAddressPostInc(void)
+static inline uint32_t Get_ZAddressPostIncWithRAMP(void)
 {
     uint32_t u32RC = (((uint32_t)stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z) |
                      (((uint32_t)stCPU.pstRAM->stRegisters.RAMPZ) << 16));
@@ -59,12 +82,13 @@ static inline uint32_t Get_ZAddressPostInc(void)
 }
 
 //---------------------------------------------------------------------------
-static inline uint32_t Get_ZAddressPreDec(void)
+static inline uint32_t Get_ZAddressPreDecWithRAMP(void)
 {
     stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z--;
     return (((uint32_t)stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z) |
            (((uint32_t)stCPU.pstRAM->stRegisters.RAMPZ) << 16));
 }
+
 
 //---------------------------------------------------------------------------
 static inline uint32_t Get_YAddress(void)
@@ -1521,13 +1545,13 @@ static void AVR_Opcode_LPM_Z_Postinc( void )
 static void AVR_Opcode_ELPM( void )
 {
     uint8_t u8Temp;
-    if (Get_ZAddress() & 0x0001)
+    if (Get_ZAddressWithRAMP() & 0x0001)
     {
-        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddress() >> 1 ] >> 8);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddressWithRAMP() >> 1 ] >> 8);
     }
     else
     {
-        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddress() >> 1 ] & 0x00FF);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddressWithRAMP() >> 1 ] & 0x00FF);
     }
 
     stCPU.pstRAM->stRegisters.CORE_REGISTERS.r0 = u8Temp;
@@ -1537,13 +1561,13 @@ static void AVR_Opcode_ELPM( void )
 static void AVR_Opcode_ELPM_Z( void )
 {
     uint8_t u8Temp;
-    if (Get_ZAddress() & 0x0001)
+    if (Get_ZAddressWithRAMP() & 0x0001)
     {
-        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddress() >> 1 ] >> 8);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddressWithRAMP() >> 1 ] >> 8);
     }
     else
     {
-        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddress() >> 1 ] & 0x00FF);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddressWithRAMP() >> 1 ] & 0x00FF);
     }
 
     *stCPU.Rd = u8Temp;
@@ -1553,13 +1577,13 @@ static void AVR_Opcode_ELPM_Z( void )
 static void AVR_Opcode_ELPM_Z_Postinc( void )
 {
     uint8_t u8Temp;
-    if (Get_ZAddress() & 0x0001)
+    if (Get_ZAddressWithRAMP() & 0x0001)
     {
-        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddressPostInc() >> 1 ] >> 8);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddressPostIncWithRAMP() >> 1 ] >> 8);
     }
     else
     {
-        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddressPostInc() >> 1 ] & 0x00FF);
+        u8Temp = (uint8_t)(stCPU.pu16ROM[ Get_ZAddressPostIncWithRAMP() >> 1 ] & 0x00FF);
     }
 
     *stCPU.Rd = u8Temp;
