@@ -37,6 +37,7 @@
 #include "avr_peripheral.h"
 #include "avr_periphregs.h"
 #include "avr_interrupt.h"
+#include "options.h"
 
 #if 1
 #define DEBUG_PRINT(...)
@@ -44,6 +45,181 @@
 #define DEBUG_PRINT printf
 #endif
 
+//---------------------------------------------------------------------------
+static bool    use_uart_socket = false;
+
+#if _WIN32
+#include <io.h>
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+
+static SOCKET  listener_socket = INVALID_SOCKET;
+static SOCKET  uart_socket     = INVALID_SOCKET;
+
+#pragma comment(lib, "Ws2_32.lib")
+static WSADATA ws;
+
+//---------------------------------------------------------------------------
+static void UART_BeginServer(void)
+{
+    int err;
+
+    struct addrinfo *localaddr = 0;
+    struct addrinfo hints = { 0 };
+
+    do
+    {
+        // Initialize winsock prior to use.
+        err = WSAStartup(MAKEWORD(2,2), &ws);
+        if (0 != err)
+        {
+            DEBUG_PRINT(stderr, "Error initializing winsock - bailing\n");
+            break;
+        }
+
+        // Figure out what address to use for our server, specifying we want TCP/IP
+        hints.ai_family = AF_INET;
+        hints.ai_protocol = IPPROTO_TCP;
+        hints.ai_socktype = SOCK_STREAM;
+        hints.ai_flags = AI_PASSIVE;
+
+        const char *portnum = Options_GetByName("--uart");
+        if (!portnum)
+        {
+            portnum = "4444";
+        }
+
+        err = getaddrinfo(NULL, portnum, &hints, &localaddr);
+        if (0 != err)
+        {
+            DEBUG_PRINT(stderr, "Error getting address info - bailing\n");
+            break;
+        }
+
+        // Create a socket to listen for UART connections
+        listener_socket = socket(localaddr->ai_family, localaddr->ai_socktype, localaddr->ai_protocol);
+        if (INVALID_SOCKET == listener_socket)
+        {
+            DEBUG_PRINT(stderr, "Error creating socket - bailing\n" );
+            err = -1;
+            break;
+        }
+
+        // Setup the TCP listening socket
+        if (SOCKET_ERROR == bind(listener_socket, localaddr->ai_addr, (int)localaddr->ai_addrlen))
+        {
+            DEBUG_PRINT(stderr, "Error on socket bind - bailing\n");
+            err = -1;
+            break;
+        }
+
+        if (SOCKET_ERROR == listen(listener_socket, SOMAXCONN))
+        {
+            DEBUG_PRINT(stderr, "Error on socket listen - bailing\n");
+            err = -1;
+            break;
+        }
+
+        printf("[Waiting for incoming conneciton on port %s]\n", portnum);
+        uart_socket = accept(listener_socket, NULL, NULL);
+        if (INVALID_SOCKET == uart_socket)
+        {
+            DEBUG_PRINT(stderr, "Error on socket accept - bailing\n");
+            err = -1;
+            break;
+        }
+
+        unsigned long mode = 1;
+        int rc = ioctlsocket(uart_socket, FIONBIO, &mode);
+        if (NO_ERROR != rc) {
+            DEBUG_PRINT(stderr, "Error setting non-blocking\n");
+            err = -1;
+            break;
+        }
+
+    } while(0);
+
+    if (localaddr)
+    {
+        freeaddrinfo(localaddr);
+    }
+
+    if (0 != err)
+    {
+        if (INVALID_SOCKET != listener_socket)
+        {
+            closesocket(listener_socket);
+        }
+        if (INVALID_SOCKET != uart_socket)
+        {
+            closesocket(uart_socket);
+        }
+        WSACleanup();
+        exit(-1);
+    }
+
+    printf("[UART Connected!]\n");
+}
+#else
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
+static int  listener_socket = 0;
+static int  uart_socket     = 0;
+
+//---------------------------------------------------------------------------
+static void GDB_ServerCreate(void)
+{
+    fprintf(stderr, "[Initializing UART socket]");
+
+    const char *port_string = Options_GetByName("--uart");
+    if (!port_string)
+    {
+        port_string = "4444";
+    }
+    int portnum = atoi(port_string);
+
+    listener_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (listener_socket <= 0)
+    {
+        fprintf( stderr, "Error creating socket on port %s, bailing\n", port_string );
+        exit(-1);
+    }
+
+    struct sockaddr_in serv_addr = { 0 };
+    struct sockaddr_in cli_addr = { 0 };
+
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = INADDR_ANY;
+    serv_addr.sin_port = htons(portnum);
+
+    if (bind(listener_socket, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) < 0)
+    {
+        fprintf(stderr, "Error binding socket -- bailing\n");
+        exit(-1);
+    }
+
+    listen(listener_socket,1);
+
+    int clilen = sizeof(cli_addr);
+    uart_socket = accept(listener_socket, (struct sockaddr *)&cli_addr, &clilen);
+    printf("[Waiting for incoming conneciton on port %d]\n", portnum);
+    if (uart_socket < 0)
+    {
+         fprintf(stderr, "Error on accept -- bailing\n");
+         exit(-1);
+    }
+
+    int flags;
+    flags = fcntl(uart_socket, F_GETFL, 0);
+    fcntl(uart_socket, F_SETFL, flags | O_NONBLOCK);
+
+    printf( "[UART Connected!]" );
+}
+
+#endif
 //---------------------------------------------------------------------------
 static bool bUDR_Empty = true;
 static bool bTSR_Empty = true;
@@ -60,13 +236,25 @@ static uint32_t u32RxTicksRemaining = 0;
 //---------------------------------------------------------------------------
 static void Echo_Tx()
 {
-    printf("%c", TSR);
+    if (use_uart_socket) {
+        if (send(uart_socket, &TSR, 1, 0) <= 0) {
+            exit(-1);
+        }
+    } else {
+        printf("%c", TSR);
+    }
 }
 
 //---------------------------------------------------------------------------
 static void Echo_Rx()
 {
-    printf("%c", RSR);
+    if (use_uart_socket) {
+        if (send(uart_socket, &RSR, 1, 0) <= 0) {
+            exit(-1);
+        }
+    } else {
+        printf("%c", RSR);
+    }
 }
 
 //---------------------------------------------------------------------------
@@ -169,6 +357,11 @@ static void UART_Init(void *context_ )
     stCPU.pstRAM->stRegisters.UCSR0A.UDRE0 = 1;
 
     CPU_RegisterInterruptCallback(TXC0_Callback, stCPU.pstVectorMap->USART0_TX); // TX Complete
+
+    if (Options_GetByName("--uart")) {
+        use_uart_socket = true;
+        UART_BeginServer();
+    }
 }
 
 //---------------------------------------------------------------------------
@@ -404,24 +597,34 @@ static void UART_TxClock(void *context_ )
 //---------------------------------------------------------------------------
 static void UART_RxClock(void *context_ )
 {
-    if (UART_IsRxEnabled() && u32RxTicksRemaining)
+    if (UART_IsRxEnabled())
     {
-        u32RxTicksRemaining--;
-        if (!u32RxTicksRemaining)
-        {
-            // Local echo of the freshly "shifted in" data to the terminal
-            Echo_Rx();
-
-            // Move data from receive shift register into the receive buffer
-            RXB = RSR;
-            RSR = 0;
-
-            // Set the RX Complete flag
-            UART_RxComplete();
-            if (UART_IsRxIntEnabled())
+        if (u32RxTicksRemaining) {
+            u32RxTicksRemaining--;
+            if (!u32RxTicksRemaining)
             {
-                DEBUG_PRINT("RXC Interrupt\n");
-                AVR_InterruptCandidate( stCPU.pstVectorMap->USART0_RX );
+                // Move data from receive shift register into the receive buffer
+                RXB = RSR;
+                RSR = 0;
+
+                stCPU.pstRAM->stRegisters.UDR0 = RXB;
+
+                // Set the RX Complete flag
+                UART_RxComplete();
+                if (UART_IsRxIntEnabled())
+                {
+                    DEBUG_PRINT("RXC Interrupt\n");
+                    AVR_InterruptCandidate( stCPU.pstVectorMap->USART0_RX );
+                }
+            }
+        } else {
+            if (use_uart_socket) {
+                uint8_t rx_byte;
+                int bytes_read = recv(uart_socket, &rx_byte, 1, 0);
+                if (bytes_read == 1) {
+                    RSR = rx_byte;
+                    u32RxTicksRemaining = u32BaudTicks;
+                }
             }
         }
     }

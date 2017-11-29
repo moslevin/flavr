@@ -55,6 +55,7 @@ typedef enum
     OPTION_MARK3,
     OPTION_EXITRESET,
     OPTION_PROFILE,
+    OPTION_UART,
 //-- New options go here ^^^
     OPTION_NUM      //!< Total count of command-line options supported
 } OptionIndex_t;
@@ -78,6 +79,7 @@ static Option_t astAttributes[OPTION_NUM] =
     {"--mark3",     "Enable Mark3 kernel-aware plugin", NULL, true },
     {"--exitreset", "Exit simulator if a jump-to-zero operation is encountered", NULL, true },
     {"--profile",   "Run with code profile and code coverage enabled", NULL, true },
+    {"--uart",      "Run UART over the specified TCP port", NULL, false },
 };
 
 //---------------------------------------------------------------------------
