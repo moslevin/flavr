@@ -69,7 +69,7 @@
 #define ELF_SECTION_TYPE_NOBITS     ((uint32_t)8)
 
 //---------------------------------------------------------------------------
-typedef struct
+typedef struct __attribute__((packed))
 {
     // (Explicit line breaks to show 32-bit alignment)
     //---- 0x00
@@ -119,7 +119,7 @@ typedef struct
 } ElfHeader_t;
 
 //---------------------------------------------------------------------------
-typedef struct
+typedef struct __attribute__((packed))
 {
     uint32_t    u32Type;
     uint32_t    u32Offset;
@@ -132,7 +132,7 @@ typedef struct
 } ElfProgramHeader_t;
 
 //---------------------------------------------------------------------------
-typedef struct
+typedef struct __attribute__((packed))
 {
     uint32_t    u32Name;
     uint32_t    u32Type;
@@ -147,7 +147,7 @@ typedef struct
 } ElfSectionHeader_t;
 
 //---------------------------------------------------------------------------
-typedef struct
+typedef struct __attribute__((packed))
 {
     uint32_t    u32Name;
     uint32_t    u32Value;

@@ -170,7 +170,7 @@ static int  listener_socket = 0;
 static int  uart_socket     = 0;
 
 //---------------------------------------------------------------------------
-static void GDB_ServerCreate(void)
+static void UART_BeginServer(void)
 {
     fprintf(stderr, "[Initializing UART socket]");
 

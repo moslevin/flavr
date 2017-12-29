@@ -129,7 +129,7 @@ int ELF_LoadFromFile( uint8_t **ppau8Buffer_, const char *szPath_ )
     size_t bytes_read = 0;
     while (bytes_read < file_size)
     {
-        size_t iter_read = fread( bufptr, 1, 4096, my_file );
+        size_t iter_read = fread( bufptr, 1, 1, my_file );
         if( iter_read == 0 )
         {
             DEBUG_PRINT( "%d read total\n", bytes_read );

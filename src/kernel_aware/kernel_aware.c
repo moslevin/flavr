@@ -85,7 +85,7 @@ void KernelAware_Init( void )
     }
     else
     {
-        printf( "Unable to find g_ucKACommand\n" );
+        printf( "Unable to find g_u8KACommand\n" );
     }
 
 
