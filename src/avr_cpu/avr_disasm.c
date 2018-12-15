@@ -32,7 +32,7 @@
 #include "avr_loader.h"
 
 //---------------------------------------------------------------------------
-inline int8_t Signed_From_Unsigned_6( uint8_t u8Signed_ )
+static int8_t Signed_From_Unsigned_6( uint8_t u8Signed_ )
 {
     int8_t i8Ret = 0;
     if( u8Signed_ & 0x20 )
@@ -48,24 +48,24 @@ inline int8_t Signed_From_Unsigned_6( uint8_t u8Signed_ )
 }
 
 //---------------------------------------------------------------------------
-inline uint8_t Register_From_Rd( void )
+static uint8_t Register_From_Rd( void )
 {
     return stCPU.Rd - &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r0);
 }
  //---------------------------------------------------------------------------
-inline uint8_t Register_From_Rr( void )
+static uint8_t Register_From_Rr( void )
 {
     return stCPU.Rr - &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r0);
 }
 
 //---------------------------------------------------------------------------
-inline uint8_t Register_From_Rd16( void )
+static uint8_t Register_From_Rd16( void )
 {
     return (uint8_t*)(stCPU.Rd16) - &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r0);
 }
 
 //---------------------------------------------------------------------------
-inline uint8_t Register_From_Rr16( void )
+static uint8_t Register_From_Rr16( void )
 {
     return (uint8_t*)(stCPU.Rr16) - &(stCPU.pstRAM->stRegisters.CORE_REGISTERS.r0);
 }

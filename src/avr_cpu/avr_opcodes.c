@@ -41,13 +41,13 @@ static void AVR_Abort(void)
 }
 
 //---------------------------------------------------------------------------
-static inline uint32_t Get_ZAddress(void)
+static uint32_t Get_ZAddress(void)
 {
     return (uint32_t)stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z;
 }
 
 //---------------------------------------------------------------------------
-static inline uint32_t Get_ZAddressPostInc(void)
+static uint32_t Get_ZAddressPostInc(void)
 {
     uint32_t u32RC = (uint32_t)stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z;
     stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z++;
@@ -56,7 +56,7 @@ static inline uint32_t Get_ZAddressPostInc(void)
 }
 
 //---------------------------------------------------------------------------
-static inline uint32_t Get_ZAddressPreDec(void)
+static uint32_t Get_ZAddressPreDec(void)
 {
     stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z--;
     return stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z;
@@ -64,14 +64,14 @@ static inline uint32_t Get_ZAddressPreDec(void)
 
 
 //---------------------------------------------------------------------------
-static inline uint32_t Get_ZAddressWithRAMP(void)
+static uint32_t Get_ZAddressWithRAMP(void)
 {
     return (((uint32_t)stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z) |
            (((uint32_t)stCPU.pstRAM->stRegisters.RAMPZ) << 16));
 }
 
 //---------------------------------------------------------------------------
-static inline uint32_t Get_ZAddressPostIncWithRAMP(void)
+static uint32_t Get_ZAddressPostIncWithRAMP(void)
 {
     uint32_t u32RC = (((uint32_t)stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z) |
                      (((uint32_t)stCPU.pstRAM->stRegisters.RAMPZ) << 16));
@@ -82,7 +82,7 @@ static inline uint32_t Get_ZAddressPostIncWithRAMP(void)
 }
 
 //---------------------------------------------------------------------------
-static inline uint32_t Get_ZAddressPreDecWithRAMP(void)
+static uint32_t Get_ZAddressPreDecWithRAMP(void)
 {
     stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z--;
     return (((uint32_t)stCPU.pstRAM->stRegisters.CORE_REGISTERS.Z) |
@@ -91,13 +91,13 @@ static inline uint32_t Get_ZAddressPreDecWithRAMP(void)
 
 
 //---------------------------------------------------------------------------
-static inline uint32_t Get_YAddress(void)
+static uint32_t Get_YAddress(void)
 {
     return ((uint32_t)stCPU.pstRAM->stRegisters.CORE_REGISTERS.Y);
 }
 
 //---------------------------------------------------------------------------
-static inline uint32_t Get_XAddress(void)
+static uint32_t Get_XAddress(void)
 {
     return ((uint32_t)stCPU.pstRAM->stRegisters.CORE_REGISTERS.X);
 }
@@ -202,7 +202,7 @@ static void AVR_Opcode_NOP( void )
 }
 
 //---------------------------------------------------------------------------
-inline void ADD_Half_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
+static void ADD_Half_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 {
     stCPU.pstRAM->stRegisters.SREG.H =
             ( ((Rd_ & Rr_)    & 0x08 )
@@ -211,7 +211,7 @@ inline void ADD_Half_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 }
 
 //---------------------------------------------------------------------------
-inline void ADD_Full_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
+static void ADD_Full_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 {
     stCPU.pstRAM->stRegisters.SREG.C =
             ( ((Rd_ & Rr_)    & 0x80 )
@@ -220,7 +220,7 @@ inline void ADD_Full_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 }
 
 //---------------------------------------------------------------------------
-inline void ADD_Overflow_Flag( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
+static void ADD_Overflow_Flag( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 {
     stCPU.pstRAM->stRegisters.SREG.V =
              ( ((Rd_ & Rr_ & ~Result_)  & 0x80 )
@@ -228,7 +228,7 @@ inline void ADD_Overflow_Flag( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 }
 
 //---------------------------------------------------------------------------
-inline void Signed_Flag( void )
+static void Signed_Flag( void )
 {
     unsigned int N = stCPU.pstRAM->stRegisters.SREG.N;
     unsigned int V = stCPU.pstRAM->stRegisters.SREG.V;
@@ -237,19 +237,19 @@ inline void Signed_Flag( void )
 }
 
 //---------------------------------------------------------------------------
-inline void R8_Zero_Flag( uint8_t R_ )
+static void R8_Zero_Flag( uint8_t R_ )
 {
     stCPU.pstRAM->stRegisters.SREG.Z = (R_ == 0);
 }
 
 //---------------------------------------------------------------------------
-inline void R8_CPC_Zero_Flag( uint8_t R_ )
+static void R8_CPC_Zero_Flag( uint8_t R_ )
 {
     stCPU.pstRAM->stRegisters.SREG.Z = (stCPU.pstRAM->stRegisters.SREG.Z && (R_ == 0));
 }
 
 //---------------------------------------------------------------------------
-inline void R8_Negative_Flag( uint8_t R_ )
+static void R8_Negative_Flag( uint8_t R_ )
 {
     stCPU.pstRAM->stRegisters.SREG.N = ((R_ & 0x80) == 0x80);
 }
@@ -294,28 +294,28 @@ static void AVR_Opcode_ADC( void )
 }
 
 //---------------------------------------------------------------------------
-inline void R16_Negative_Flag( uint16_t Result_ )
+static void R16_Negative_Flag( uint16_t Result_ )
 {
     stCPU.pstRAM->stRegisters.SREG.N =
             ((Result_ & 0x8000) != 0);
 }
 
 //---------------------------------------------------------------------------
-inline void R16_Zero_Flag( uint16_t Result_ )
+static void R16_Zero_Flag( uint16_t Result_ )
 {
     stCPU.pstRAM->stRegisters.SREG.Z =
             (Result_ == 0);
 }
 
 //---------------------------------------------------------------------------
-inline void ADIW_Overflow_Flag( uint16_t Rd_, uint16_t Result_ )
+static void ADIW_Overflow_Flag( uint16_t Rd_, uint16_t Result_ )
 {
     stCPU.pstRAM->stRegisters.SREG.V =
             (((Rd_ & 0x8000) == 0) && ((Result_ & 0x8000) == 0x8000));
 }
 
 //---------------------------------------------------------------------------
-inline void ADIW_Carry_Flag( uint16_t Rd_, uint16_t Result_ )
+static void ADIW_Carry_Flag( uint16_t Rd_, uint16_t Result_ )
 {
     stCPU.pstRAM->stRegisters.SREG.C =
             (((Rd_ & 0x8000) == 0x8000) && ((Result_ & 0x8000) == 0));
@@ -340,14 +340,14 @@ static void AVR_Opcode_ADIW( void )
 }
 
 //---------------------------------------------------------------------------
-inline void SUB_Overflow_Flag( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
+static void SUB_Overflow_Flag( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 {
     stCPU.pstRAM->stRegisters.SREG.V =
              ( ((Rd_ & ~Rr_ & ~Result_) & 0x80 )
              | ((~Rd_ & Rr_ & Result_) & 0x80 ) ) != 0;
 }
 //---------------------------------------------------------------------------
-inline void SUB_Half_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
+static void SUB_Half_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 {
     stCPU.pstRAM->stRegisters.SREG.H =
              ( ((~Rd_ & Rr_) & 0x08 )
@@ -355,7 +355,7 @@ inline void SUB_Half_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
              | ((Result_ & ~Rd_) & 0x08 ) ) == 0x08;
 }
 //---------------------------------------------------------------------------
-inline void SUB_Full_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
+static void SUB_Full_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 {
     stCPU.pstRAM->stRegisters.SREG.C =
              ( ((~Rd_ & Rr_) & 0x80 )
@@ -445,7 +445,7 @@ static void AVR_Opcode_SBCI( void )
 
 
 //---------------------------------------------------------------------------
-inline void SBIW_Overflow_Flag( uint16_t Rd_, uint16_t Result_)
+static void SBIW_Overflow_Flag( uint16_t Rd_, uint16_t Result_)
 {
     stCPU.pstRAM->stRegisters.SREG.V =
              ((Rd_ & 0x8000 ) == 0x8000) && ((Result_ & 0x8000) == 0);
@@ -453,7 +453,7 @@ inline void SBIW_Overflow_Flag( uint16_t Rd_, uint16_t Result_)
 }
 
 //---------------------------------------------------------------------------
-inline void SBIW_Full_Carry( uint16_t Rd_, uint16_t Result_)
+static void SBIW_Full_Carry( uint16_t Rd_, uint16_t Result_)
 {
     stCPU.pstRAM->stRegisters.SREG.C =
              ((Rd_ & 0x8000 ) == 0) && ((Result_ & 0x8000) == 0x8000);
@@ -575,13 +575,13 @@ static void AVR_Opcode_COM( void )
 }
 
 //---------------------------------------------------------------------------
-inline void NEG_Overflow_Flag( uint8_t u8Result_ )
+static void NEG_Overflow_Flag( uint8_t u8Result_ )
 {
     stCPU.pstRAM->stRegisters.SREG.V = (u8Result_ == 0x80);
 }
 
 //---------------------------------------------------------------------------
-inline void NEG_Carry_Flag( uint8_t u8Result_ )
+static void NEG_Carry_Flag( uint8_t u8Result_ )
 {
     stCPU.pstRAM->stRegisters.SREG.C = (u8Result_ != 0x00);
 }
@@ -636,7 +636,7 @@ static void AVR_Opcode_CBR( void )
 }
 
 //---------------------------------------------------------------------------
-inline void INC_Overflow_Flag( uint8_t u8Result_ )
+static void INC_Overflow_Flag( uint8_t u8Result_ )
 {
     stCPU.pstRAM->stRegisters.SREG.V = (u8Result_ == 0x80);
 }
@@ -656,7 +656,7 @@ static void AVR_Opcode_INC( void )
     Signed_Flag();
 }
 //---------------------------------------------------------------------------
-inline void DEC_Overflow_Flag( uint8_t u8Result_ )
+static void DEC_Overflow_Flag( uint8_t u8Result_ )
 {
     stCPU.pstRAM->stRegisters.SREG.V = (u8Result_ == 0x7F);
 }
@@ -682,13 +682,13 @@ static void AVR_Opcode_SER( void )
 }
 
 //---------------------------------------------------------------------------
-inline void Mul_Carry_Flag( uint16_t R_ )
+static void Mul_Carry_Flag( uint16_t R_ )
 {
     stCPU.pstRAM->stRegisters.SREG.C = ((R_  & 0x8000) == 0x8000);
 }
 
 //---------------------------------------------------------------------------
-inline void Mul_Zero_Flag( uint16_t R_ )
+static void Mul_Zero_Flag( uint16_t R_ )
 {
     stCPU.pstRAM->stRegisters.SREG.Z = (R_ == 0);
 }
@@ -814,7 +814,7 @@ static void AVR_Opcode_DES( void )
 }
 
 //---------------------------------------------------------------------------
-static inline Unconditional_Jump( uint16_t u16Addr_ )
+static void Unconditional_Jump( uint16_t u16Addr_ )
 {
     stCPU.u32PC = u16Addr_;
     stCPU.u16ExtraPC = 0;
@@ -827,7 +827,7 @@ static inline Unconditional_Jump( uint16_t u16Addr_ )
 }
 
 //---------------------------------------------------------------------------
-static inline Relative_Jump( uint16_t u16Offset_ )
+static void Relative_Jump( uint16_t u16Offset_ )
 {
     // u16Offset_ Will always be 1 or 2, based on the size of the next opcode
     // in a program
@@ -996,7 +996,7 @@ static void AVR_Opcode_CPSE( void )
 }
 
 //---------------------------------------------------------------------------
-inline void CP_Half_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
+static void CP_Half_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 {
     stCPU.pstRAM->stRegisters.SREG.H =
             ( ((~Rd_ & Rr_)    & 0x08 )
@@ -1005,7 +1005,7 @@ inline void CP_Half_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 }
 
 //---------------------------------------------------------------------------
-inline void CP_Full_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
+static void CP_Full_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 {
     stCPU.pstRAM->stRegisters.SREG.C =
             ( ((~Rd_ & Rr_)    & 0x80 )
@@ -1014,7 +1014,7 @@ inline void CP_Full_Carry( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 }
 
 //---------------------------------------------------------------------------
-inline void CP_Overflow_Flag( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
+static void CP_Overflow_Flag( uint8_t Rd_, uint8_t Rr_, uint8_t Result_)
 {
     stCPU.pstRAM->stRegisters.SREG.V =
              ( ((Rd_ & ~Rr_ & ~Result_)  & 0x80 )
@@ -1132,7 +1132,7 @@ static void AVR_Opcode_SBIS( void )
 }
 
 //---------------------------------------------------------------------------
-static inline Conditional_Branch( void )
+static void Conditional_Branch( void )
 {
     stCPU.u32PC = (uint16_t)((int16_t)stCPU.u32PC + stCPU.k_s + 1);
     stCPU.u16ExtraPC = 0;
@@ -1707,19 +1707,19 @@ static void AVR_Opcode_LAT( void )
 }
 
 //---------------------------------------------------------------------------
-inline void LSL_HalfCarry_Flag( uint8_t R_ )
+static void LSL_HalfCarry_Flag( uint8_t R_ )
 {
     stCPU.pstRAM->stRegisters.SREG.H = ((R_ & 0x08) == 0x08);
 }
 
 //---------------------------------------------------------------------------
-inline void Left_Carry_Flag( uint8_t R_  )
+static void Left_Carry_Flag( uint8_t R_  )
 {
     stCPU.pstRAM->stRegisters.SREG.C = ((R_ & 0x80) == 0x80);
 }
 
 //---------------------------------------------------------------------------
-inline void Rotate_Overflow_Flag()
+static void Rotate_Overflow_Flag()
 {
     stCPU.pstRAM->stRegisters.SREG.V = ( stCPU.pstRAM->stRegisters.SREG.N ^ stCPU.pstRAM->stRegisters.SREG.C );
 }
@@ -1745,7 +1745,7 @@ static void AVR_Opcode_LSL( void )
 }
 
 //---------------------------------------------------------------------------
-inline void Right_Carry_Flag( uint8_t R_  )
+static void Right_Carry_Flag( uint8_t R_  )
 {
     stCPU.pstRAM->stRegisters.SREG.C = ((R_ & 0x01) == 0x01);
 }

@@ -467,7 +467,7 @@ bool GDB_CheckAndExecute( void )
     {
         if (false == bRetrigger)
         {
-            return;
+            return false;
         }
         bIsInteractive = true;
         bRetrigger = false;
@@ -494,6 +494,7 @@ bool GDB_CheckAndExecute( void )
     DEBUG_PRINT(stderr, "[Exit Break]\n");
     DEBUG_PRINT(stderr, " IsInteractive: %d, Retrigger %d\n", bIsInteractive, bRetrigger);
     mark3_thread = -1;
+    return true;
 }
 
 //---------------------------------------------------------------------------
