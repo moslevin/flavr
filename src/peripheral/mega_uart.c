@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "avr_cpu.h"
 #include "avr_peripheral.h"
 #include "avr_periphregs.h"
@@ -200,6 +201,8 @@ static void UART_BeginServer(void)
         fprintf(stderr, "Error binding socket -- bailing\n");
         exit(-1);
     }
+    int enable = 1;
+    setsockopt(listener_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
 
     listen(listener_socket,1);
 
@@ -211,6 +214,7 @@ static void UART_BeginServer(void)
          fprintf(stderr, "Error on accept -- bailing\n");
          exit(-1);
     }
+    sleep(1);
 
     int flags;
     flags = fcntl(uart_socket, F_GETFL, 0);
@@ -619,11 +623,16 @@ static void UART_RxClock(void *context_ )
             }
         } else {
             if (use_uart_socket) {
-                uint8_t rx_byte;
-                int bytes_read = recv(uart_socket, &rx_byte, 1, 0);
-                if (bytes_read == 1) {
-                    RSR = rx_byte;
-                    u32RxTicksRemaining = u32BaudTicks;
+                static int interval = 0;
+                interval++;
+                if (interval == 200) { // poll for input every X cycles
+                    interval = 0;
+                    uint8_t rx_byte;
+                    int bytes_read = recv(uart_socket, &rx_byte, 1, 0);
+                    if (bytes_read == 1) {
+                        RSR = rx_byte;
+                        u32RxTicksRemaining = u32BaudTicks;
+                    }
                 }
             }
         }
