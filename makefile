@@ -56,6 +56,7 @@ DEBUG_SRC_=         \
 
 KERNEL_AWARE_SRC_=  \
     ka_interrupt.c  \
+    ka_file.c       \
     ka_profile.c    \
     ka_thread.c     \
     ka_trace.c      \

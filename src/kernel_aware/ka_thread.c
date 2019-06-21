@@ -62,6 +62,12 @@ typedef struct
     //! Thread's current state (ready. blocking, etc)
     uint8_t u8ThreadState;
 
+    //! Pointer to thread's extended context (TLS)
+    uint16_t u16ExtendedContext;
+
+    //! Thread name
+    uint16_t u16ThreadName;
+
     //! Size of the stack (in bytes)
     uint16_t u16StackSize;
 
@@ -77,6 +83,12 @@ typedef struct
 
     //! Thread quantum (in milliseconds)
     uint16_t u16Quantum;
+
+    //! Event flag mask
+    uint16_t u16EventFlagMask;
+
+    //! Event Flag mode
+    uint8_t u8EventFlagMode;
 
 } Mark3_Thread_t;
 

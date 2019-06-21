@@ -29,6 +29,7 @@
 #include "ka_trace.h"
 #include "ka_graphics.h"
 #include "ka_joystick.h"
+#include "ka_file.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -50,6 +51,12 @@ static bool KA_Command( uint16_t u16Addr_, uint8_t u8Data_ )
     case KA_COMMAND_TRACE_1:
     case KA_COMMAND_TRACE_2:        KA_EmitTrace(u8Data_);          break;
     case KA_COMMAND_PRINT:          KA_Print();                     break;
+    case KA_COMMAND_OPEN:           KA_Command_Open(); break;
+    case KA_COMMAND_CLOSE:          KA_Command_Close(); break;
+    case KA_COMMAND_READ:           KA_Command_Read(); break;
+    case KA_COMMAND_WRITE:          KA_Command_Write(); break;
+    case KA_COMMAND_BLOCKING:       KA_Command_Blocking(); break;
+
     default:
         break;
 

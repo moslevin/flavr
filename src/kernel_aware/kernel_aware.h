@@ -30,17 +30,22 @@
 //---------------------------------------------------------------------------
 typedef enum
 {
-    KA_COMMAND_IDLE = 0,
-    KA_COMMAND_PROFILE_INIT,
-    KA_COMMAND_PROFILE_START,
-    KA_COMMAND_PROFILE_STOP,
-    KA_COMMAND_PROFILE_REPORT,
-    KA_COMMAND_EXIT_SIMULATOR,
-    KA_COMMAND_TRACE_0,
-    KA_COMMAND_TRACE_1,
-    KA_COMMAND_TRACE_2,
-    KA_COMMAND_PRINT
-} KernelAwareCommand_t;
+    KA_COMMAND_IDLE = 0,       //!< Null command, does nothing.
+    KA_COMMAND_PROFILE_INIT,   //!< Initialize a new profiling session
+    KA_COMMAND_PROFILE_START,  //!< Begin a profiling sample
+    KA_COMMAND_PROFILE_STOP,   //!< End a profiling sample
+    KA_COMMAND_PROFILE_REPORT, //!< Report current profiling session
+    KA_COMMAND_EXIT_SIMULATOR, //!< Terminate the host simulator
+    KA_COMMAND_TRACE_0,        //!< 0-argument kernel trace
+    KA_COMMAND_TRACE_1,        //!< 1-argument kernel trace
+    KA_COMMAND_TRACE_2,        //!< 2-argument kernel trace
+    KA_COMMAND_PRINT,          //!< Print an arbitrary string of data
+    KA_COMMAND_OPEN,           //!< Open a path on the host device filesystem
+    KA_COMMAND_CLOSE,          //!< Close a previously opened file on the host
+    KA_COMMAND_READ,           //!< Read data from an open file in the host
+    KA_COMMAND_WRITE,          //!< Write data to a file on the host
+    KA_COMMAND_BLOCKING,       //!< Set blocking/non-blocking mode for an open host file
+ } KernelAwareCommand_t;
 
 //---------------------------------------------------------------------------
 /*!
