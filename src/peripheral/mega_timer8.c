@@ -380,7 +380,7 @@ static void Timer8_Clock(void *context_ )
             break;
         case WGM_CTC_OCR:
         {
-            DEBUG_PRINT(" Update CTC\n");
+            DEBUG_PRINT(" Update CTC, TCNT = %d\n", TCNT0_Read());
             TCNT0_Increment();
             if (TCNT0_Read() == 0)
             {
@@ -394,6 +394,16 @@ static void Timer8_Clock(void *context_ )
                     bCTCA = true;
                     TCNT0_Clear();
                 }
+            }
+        }
+            break;
+        case WGM_FAST_PWM_FF:
+        {
+            DEBUG_PRINT(" Update CTC FASTPW TCNT = %d\n", TCNT0_Read());
+            TCNT0_Increment();
+            if (TCNT0_Read() == 0xFF)
+            {
+                bOVF = true;
             }
         }
             break;
